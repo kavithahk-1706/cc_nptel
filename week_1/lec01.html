@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 01 — Cloud Computing Overview | Cloud Computing</title>
+  <link rel="stylesheet" href="./../styles.css">
+</head>
+<body>
+<div class="container">
+
+  <!-- 1. nav -->
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec0.html" class="nav-lec disabled">← prev</a>
+      <a href="lec2.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <!-- 2. lec-header -->
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 01</span>
+    <span class="med-badge">med priority</span>
+    <h1>Cloud Computing — Overview</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>An introductory lecture that establishes the broad definition of computing, surveys the full course roadmap, and traces the evolution of computing paradigms — from centralised mainframes through distributed, grid, cluster, and utility computing — that set the stage for cloud. It closes with a detailed look at distributed computing: its definition, examples, node types, properties, and the motivations behind it. Mostly conceptual and definitional; very light on math or implementation detail.</p>
+  </div>
+
+  <!-- 3. content sections -->
+
+  <!-- SECTION 1: What is Computing -->
+  <div class="section">
+    <div class="section-label">1 · What is Computing</div>
+
+
+    <p>As defined by the <strong>ACM Computing Curricula (2005)</strong>, computing refers to any <em>goal-oriented activity</em> that requires, benefits from, or creates computing machinery. This spans:</p>
+    <div class="tag-row">
+      <span class="tag tag-good">Hardware &amp; software systems</span>
+      <span class="tag tag-good">Intelligent systems / AI</span>
+      <span class="tag tag-good">Communication systems</span>
+      <span class="tag tag-good">Information gathering &amp; processing</span>
+    </div>
+    <p>The definition is intentionally wide — it covers end users ranging from high-end researchers and professionals all the way to students and everyday citizens.</p>
+  </div>
+
+  <!-- SECTION 2: Course Roadmap -->
+  <div class="section">
+    <div class="section-label">2 · Course Roadmap</div>
+
+
+    <p>The course is structured into the following major topic blocks, covered in roughly this order:</p>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">module 1</div>
+        <div class="proto-card-title">Introduction to Cloud Computing</div>
+        <div class="proto-card-desc">NIST model, properties, characteristics, advantages, disadvantages, role of open standards.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">module 2</div>
+        <div class="proto-card-title">Cloud Architecture &amp; Service Models</div>
+        <div class="proto-card-desc">Cloud computing stack, service-oriented architecture, IaaS / PaaS / SaaS / XaaS, deployment models.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">module 3</div>
+        <div class="proto-card-title">Service Management &amp; SLA</div>
+        <div class="proto-card-desc">Service level agreements, availability guarantees, QoS, downtime policies, provider–consumer agreements.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">module 4</div>
+        <div class="proto-card-title">Cloudonomics</div>
+        <div class="proto-card-desc">Economic models for cloud: when is buying vs. hiring compute resources actually cost-effective?</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">module 5</div>
+        <div class="proto-card-title">Resource Management</div>
+        <div class="proto-card-desc">Managing CPU, RAM, storage, and network at the provider end; optimal resource pooling without over- or under-provisioning.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">module 6</div>
+        <div class="proto-card-title">Data Management</div>
+        <div class="proto-card-desc">Scalable data storage in cloud, cloud databases vs. traditional DBMS, storage-as-a-service (e.g. Dropbox), large-scale data processing.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">module 7</div>
+        <div class="proto-card-title">Security</div>
+        <div class="proto-card-desc">Infrastructure security, data security, identity &amp; access management, access control, trust, reputation, risk.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">module 8</div>
+        <div class="proto-card-title">Case Studies &amp; Future Trends</div>
+        <div class="proto-card-desc">Commercial &amp; open-source cloud demos, cloud simulators, fog computing, and emerging research directions.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Key Concepts Introduced -->
+  <div class="section">
+    <div class="section-label">3 · Key Concepts Briefly Introduced</div>
+
+    <h3>Service Level Agreement (SLA)</h3>
+    <p>A formal agreement between a <strong>cloud service provider (CSP)</strong> and a consumer that specifies guaranteed minimum service levels. Key parameters include:</p>
+    <div class="tag-row">
+      <span class="tag tag-good">Availability (e.g. 99.9%)</span>
+      <span class="tag tag-good">Downtime tolerance</span>
+      <span class="tag tag-good">Quality of Service (QoS)</span>
+      <span class="tag tag-good">Resource pooling commitments</span>
+    </div>
+    <div class="callout yellow">
+      <strong>Example:</strong> During an exam period, availability must be near 100% with redundant services; during a practice session, 90% may be acceptable. The SLA specifies this contractually, and the provider charges accordingly.
+    </div>
+
+    <h3>Cloudonomics</h3>
+    <div class="callout yellow">
+      <strong>Analogy (from lecture):</strong> If you commute 220 km daily, buying a car is economical. If you commute 50–100 km once a month, hiring is better. Similarly, whether purchasing or renting cloud compute resources is cost-effective depends on your usage pattern. Cloud is <em>not always</em> the cheaper option.
+    </div>
+
+    <h3>Resource Management (Provider Side)</h3>
+    <p>The CSP must manage <strong>CPU, RAM, disk storage, and network connectivity</strong> to avoid two failure modes:</p>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Under-provisioning</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Problem</span>Cannot serve demand; SLA breached</div>
+          <div class="compare-row"><span class="label">Analogy</span>Stationery shop runs out of notebooks before semester ends</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Over-provisioning</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Problem</span>Resources idle; incurs unnecessary cost</div>
+          <div class="compare-row"><span class="label">Analogy</span>Shop stocked so full that goods spill outside</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Data Management</h3>
+
+
+    <p>Data in cloud must be handled for <strong>storage, scalability, and service delivery</strong>. Conventional DBMS approaches may not scale. Example services like <strong>Dropbox</strong> illustrate storage-as-a-service.</p>
+    <div class="callout pink"><strong>Critical point:</strong> Unlike applications, <em>data cannot be reinstalled</em>. A lost report or dataset is permanently gone unless recovery mechanisms exist — making data security and backup a top concern.</div>
+
+    <h3>Security</h3>
+    <p>When your compute and storage live on someone else's infrastructure, three interlinked concerns arise — described as a <strong>triangle</strong>:</p>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Trust</div>
+        <div class="concept-desc">How much do you trust a given CSP over another? How is trustworthiness evaluated and quantified?</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Reputation</div>
+        <div class="concept-desc">A provider's track record of reliability, security, and SLA adherence factors into selection and risk modelling.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Risk</div>
+        <div class="concept-desc">Risk of data loss, application failure, or loss of end-customers (who you are serving using that cloud).</div>
+      </div>
+    </div>
+    <p>Also relevant: <strong>identity &amp; access management (IAM)</strong>, role-based access control (RBAC), and infrastructure-level security.</p>
+  </div>
+
+  <!-- SECTION 4: Evolution of Computing Paradigms -->
+  <div class="section">
+    <div class="section-label">4 · Evolution of Computing Paradigms</div>
+
+
+    <p>Cloud computing did not appear from nowhere — it is an <strong>evolution</strong> of several prior paradigms, each addressing different needs with their own trade-offs:</p>
+
+    <div class="stack">
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Cloud Computing</span>
+        <span class="layer-desc">on-demand, pay-per-use, internet-scale</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">Utility Computing</span>
+        <span class="layer-desc">computing as a metered utility service</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Grid Computing</span>
+        <span class="layer-desc">federated resources across organisations</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">Cluster Computing</span>
+        <span class="layer-desc">tightly coupled nodes, high performance</span>
+      </div>
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Distributed Computing</span>
+        <span class="layer-desc">the foundational paradigm — "mother of all these"</span>
+      </div>
+    </div>
+
+    <div class="callout"><strong>Note:</strong> These paradigms did not arrive strictly sequentially — they represent different <em>dimensions</em> of computing need that co-evolved. Each has advantages and limitations; collectively they enabled cloud computing.</div>
+
+    <h3>Centralised Computing (Predecessor)</h3>
+    <span class="ts">▶ 17:07</span>
+    <div class="callout yellow">Worth watching: Slide illustrating the mainframe/terminal architecture of centralised computing.</div>
+    <p>Before distributed systems, computing followed a <strong>centralised model</strong>: mainframe computers with multiple dumb terminals. Jobs were submitted to the mainframe, executed centrally, and results returned to the terminal. This is logically a <strong>uni-processor / single-processing-node</strong> model. Still used where centralised control is required.</p>
+  </div>
+
+  <!-- SECTION 5: Distributed Computing -->
+  <div class="section">
+    <div class="section-label">5 · Distributed Computing</div>
+
+    <span class="ts">▶ 18:43</span>
+    <div class="callout yellow">Worth watching: Slide with the formal definition of distributed systems.</div>
+
+    <p><strong>Distributed computing</strong> is a field of computer science studying systems where multiple autonomous entities collaborate to solve computational problems. Two complementary definitions given:</p>
+
+    <div class="callout"><strong>Definition 1 (System view):</strong> A set of several <em>autonomous computational entities</em>, each with its own local memory, communicating via <strong>message passing</strong> over a backbone communication network.</div>
+
+    <div class="callout"><strong>Definition 2 (OS view):</strong> Multiple processors, each with its own local memory, communicating through high-speed buses or telephone lines.</div>
+
+    <p>The <strong>key enabler</strong> for distributed computing is seamless network connectivity between collaborating systems. The geographical span can range from a single lab to global boundaries.</p>
+
+    <h3>Examples of Distributed Systems</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">The Internet</span>
+      <span class="tag tag-good">ATM / banking networks</span>
+      <span class="tag tag-good">Intranet workgroups</span>
+      <span class="tag tag-good">Ubiquitous networked devices (IoT)</span>
+      <span class="tag tag-good">Vehicular ad hoc networks (VANETs)</span>
+    </div>
+    <div class="callout">VANETs are a concrete modern example: smart vehicles with on-board communication units form spontaneous ad hoc networks when in proximity, executing safety, entertainment, or infotainment functions.</div>
+
+    <h3>Types of Nodes in a Distributed System</h3>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Workstations</div>
+        <div class="concept-desc">End-user machines used to perform computing tasks. The consumer end of the distributed system.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Server Systems</div>
+        <div class="concept-desc">Machines that provide resources and services to other nodes. The provider side of the system.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Personal Assistance Devices</div>
+        <div class="concept-desc">Handheld/mobile devices connected via wireless communication networks. Any communication paradigm may be used.</div>
+      </div>
+    </div>
+
+    <h3>Properties &amp; Advantages of Distributed Systems</h3>
+
+    <table class="port-table">
+      <thead>
+        <tr><th>Property</th><th>Explanation</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="proto-name">Fault Tolerance</td>
+          <td>With multiple nodes, single node failures degrade performance but do not bring the whole system down. (A centralised system would go completely offline.)</td>
+        </tr>
+        <tr>
+          <td class="proto-name">Partial Role Execution</td>
+          <td>Each node performs only its designated portion of the task — no single node bears the full workload.</td>
+        </tr>
+        <tr>
+          <td class="proto-name">Resource Sharing</td>
+          <td>Compute resources (CPU, memory, storage) are shared across nodes in the system.</td>
+        </tr>
+        <tr>
+          <td class="proto-name">Load Balancing</td>
+          <td>Work can be distributed across nodes to prevent bottlenecks — distinct from but related to resource sharing.</td>
+        </tr>
+        <tr>
+          <td class="proto-name">Scalability</td>
+          <td>New nodes can be added to the network as demand grows — the system is easy to expand.</td>
+        </tr>
+        <tr>
+          <td class="proto-name">High Performance</td>
+          <td>Parallel computing (a subset of distributed computing) enables tasks to run concurrently across nodes for speed gains.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Why Distributed Systems Are Needed</h3>
+
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Application Nature</div>
+        <div class="concept-desc">Some applications are inherently distributed — e.g. banking, internet services — and demand it by design.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Performance</div>
+        <div class="concept-desc">Compute-intensive or data-intensive tasks benefit from parallel execution across multiple nodes.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Robustness</div>
+        <div class="concept-desc">Mission-critical applications cannot afford a single point of failure — distributed systems eliminate this risk even if the workload itself is light.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. concept summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Computing (ACM 2005):</strong> Any goal-oriented activity requiring computing machinery — spans hardware, software, AI, and communications across all user types.</div>
+    <div class="callout"><strong>Course Scope:</strong> Covers NIST model → cloud architecture → service models (IaaS/PaaS/SaaS) → deployment models → SLA → cloudonomics → resource management → data management → security → case studies → future trends.</div>
+    <div class="callout yellow"><strong>Cloudonomics analogy:</strong> Buying vs. hiring compute is like buying vs. hiring a car — economical only above a certain usage threshold. Cloud is not always cheaper.</div>
+    <div class="callout pink"><strong>Data criticality:</strong> Unlike applications, lost data cannot be reinstalled — making cloud data security and backup mechanisms fundamentally more critical than application security.</div>
+    <div class="callout green"><strong>Trust–Reputation–Risk triangle:</strong> These three factors are deeply interlinked in any cloud deployment and collectively govern how a CSP should be evaluated and trusted.</div>
+    <div class="callout"><strong>Distributed Computing:</strong> The foundational paradigm for cloud — autonomous nodes with local memory communicating via message passing. Cloud inherits its fault tolerance, scalability, load balancing, and resource-sharing properties.</div>
+    <div class="callout green"><strong>Evolution lineage:</strong> Distributed → Cluster → Grid → Utility → Cloud. These are not strictly sequential; each addressed specific needs and contributed building blocks to cloud computing.</div>
+  </div>
+
+  <!-- 5. doubts placeholder -->
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>
