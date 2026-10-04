@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 4 — Cloud Computing Architecture | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec3.html" class="nav-lec">← prev</a>
+      <a href="lec5.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 04</span>
+    <span class="high-badge">High priority</span>
+    <h1>Cloud Computing Architecture</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Introduces cloud architecture: the path from business goals to quality attributes to architectural tactics, the XaaS stack with its cross-layer management and security, scale up vs scale out for elasticity, and the XaaS family of service models including business process as a service. Concept-heavy and foundational for the architecture lectures that follow.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · High-Level Architectural Approach</div>
+    <div class="callout">From the cloud perspective the aim is to achieve some <strong>business goal</strong> (for consumers, for the producer, or for the overall cloud framework). This needs <strong>quality attributes</strong> to be managed, which in turn are achieved through <strong>architectural tactics</strong>.</div>
+    <div class="stack">
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Business goals</span>
+        <span class="layer-desc">TCO, quality, market share, flexibility, stakeholder satisfaction, compliance</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">Quality attributes</span>
+        <span class="layer-desc">Availability, elasticity, interoperability, security, adaptability, performance, usability, maintainability</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Architectural tactics</span>
+        <span class="layer-desc">Stateless design, loose coupling, caching, claim-based authentication, scale-out architecture, pipelining, divide and conquer, firewall traversal, partitioning, publish-subscribe, strong encryption, multi-tenancy, reliable messaging, asynchronous communication</span>
+      </div>
+    </div>
+    <div class="callout"><strong>Business goals</strong> (from the cloud service provider's point of view): TCO (total cost to the organization), stakeholder satisfaction, compliance with standards, market share and flexibility.</div>
+    <div class="callout"><strong>Quality attributes</strong> are the major characteristics of cloud seen in earlier lectures (how available, how elastic, how interoperable). They let a service provider define their business goal across the different cloud markets.</div>
+    <div class="callout"><strong>Architectural tactics</strong> are the architectural techniques used to achieve these: e.g. stateless design, loose coupling (devices are geographically spread and heterogeneous), interconnection and homogeneity over broad network access, caching, and claim-based authentication.</div>
+    <div class="callout pink"><strong>Note:</strong> these aspects manifest differently in each service model (IaaS, PaaS, SaaS), so keep this in mind while developing or proposing any architectural view.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Major Building Blocks of Cloud Architecture</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Technical architecture</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">1</span>Structuring according to the XaaS stack</div>
+          <div class="compare-row"><span class="label">2</span>Adopting cloud computing paradigms</div>
+          <div class="compare-row"><span class="label">3</span>Structuring cloud services and cloud components</div>
+          <div class="compare-row"><span class="label">4</span>Showing relationships and external endpoints</div>
+          <div class="compare-row"><span class="label">5</span>Middleware and communication</div>
+          <div class="compare-row"><span class="label">6</span>Management and security</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Deployment operation architecture</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Geo-location check</span>Legal issues, export control</div>
+          <div class="compare-row"><span class="label">Operation and monitoring</span>The operational view, how it will be monitored, and how the XaaS stacks look in operation</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Example (geo-location):</strong> due to a federal requirement, all data and applications for government-related activities must stay within the country's territory. A mail service's data and mail server would then have to reside within the nation's geographic boundary. There may be other legal issues as well.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Cloud Architecture — the XaaS Stack</div>
+    <div class="stack">
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">Client infrastructure</span>
+        <span class="layer-desc">Interacts with the application</span>
+      </div>
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Application (SaaS)</span>
+        <span class="layer-desc">Software as a Service</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Service and cloud runtime (PaaS)</span>
+        <span class="layer-desc">Middleware or platform: services, cloud runtime libraries</span>
+      </div>
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Storage and infrastructure (IaaS)</span>
+        <span class="layer-desc">Infrastructure as a Service</span>
+      </div>
+    </div>
+    <div class="callout">Two <strong>vertical stacks, Management and Security</strong>, span all the layers. Some references also include quality of service (QoS) alongside management. Security or management cannot be achieved by considering a single layer, so cross-layer consideration is needed, which is why they are vertical stacks.</div>
+    <div class="callout green"><strong>Responsibility depends on the service model:</strong> with IaaS, once the infrastructure (e.g. virtual machines) is provisioned, management and security of what is run on it is the consumer's responsibility. With SaaS (e.g. word processing or CRM), management and security are provided by the provider up to that layer.</div>
+
+    <h3>Customer view vs provider view</h3>
+    <table class="port-table">
+      <thead><tr><th>Layer</th><th>Primary user</th><th>Example on slide</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">SaaS</td><td>End user, application administrator</td><td>CRM</td></tr>
+        <tr><td class="proto-name">PaaS</td><td>Software architect, developer, who use infrastructure as a service to develop things deployed to support the applications above</td><td>Access control</td></tr>
+        <tr><td class="proto-name">IaaS</td><td>IT architect, IT operator</td><td>VMs and networks</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">Different categories of users have different views of the same architecture. The slide also shows a separate provider view.</div>
+
+    <h3>Microsoft Azure vs Amazon EC2</h3>
+    <span class="ts">▶ 07:59</span>
+    <div class="callout yellow">Worth watching: the Azure and EC2 platforms drawn side by side on the three-layer stack, each with its own management and security bars.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Microsoft Windows Azure</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Infrastructure</span>Windows servers and related stuff at the bottom, with storage</div>
+          <div class="compare-row"><span class="label">Middle</span>Middleware emulating the platform</div>
+          <div class="compare-row"><span class="label">Top</span>Windows Azure applications</div>
+          <div class="compare-row"><span class="label">Client</span>Silverlight client or a browser</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Amazon EC2</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Infrastructure</span>Windows or Linux infrastructure, with Amazon S3 and other storage</div>
+          <div class="compare-row"><span class="label">Middle</span>Middleware emulating the platform</div>
+          <div class="compare-row"><span class="label">Top</span>Amazon applications</div>
+          <div class="compare-row"><span class="label">Client</span>Browser</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout">Both also have the vertical management and security stacks, with their own security and management components.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · Architecture for Elasticity</div>
+    <div class="callout green">Elasticity (scaling up and down) is one of the most important characteristics of cloud. There are two broad approaches, which also apply to elastic computing without cloud.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Vertical scale up</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Idea</span>Add more resources to a single computation unit, i.e. buy a bigger box</div>
+          <div class="compare-row"><span class="label">Workload</span>Move the workload to a computation unit with more resources</div>
+          <div class="compare-row"><span class="label">Best for</span>Small scenarios: probably cheaper, and code "just works"</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Horizontal scale out</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Idea</span>Add more computation units and have them act in concert</div>
+          <div class="compare-row"><span class="label">Workload</span>Split the workload across multiple units; database partitioning</div>
+          <div class="compare-row"><span class="label">Best for</span>Larger scenarios: scale out is the only solution, and a 1×64-way server is much more expensive than 64×1-way servers</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Scale-up example:</strong> a rack that starts with 24 servers gets more servers added; or a chassis holding up to 16 blades starts with 4 and is later filled to 16.</div>
+    <div class="callout pink"><strong>Caveat:</strong> expanding a large scenario by scaling up is costly, and also affects maintainability and failure rate. A single system is a single point of failure; with multiple systems, if some fail the rest can continue at a lower performance level. The choice depends on requirements.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · Service Models (XaaS)</div>
+    <div class="callout"><strong>XaaS (anything/everything as a service):</strong> a generalization for cloud-related services. The combination of service-oriented infrastructure (SOI) and cloud computing realizes XaaS. It refers to an increasing number of services delivered over the Internet rather than provided locally or on-site, and is the essence of cloud computing.</div>
+    <div class="callout">XaaS is a service driven approach to infrastructure, platform or any other type of offering. Service oriented architecture is to be revisited in subsequent lectures.</div>
+
+    <h3>XaaS layers</h3>
+    <div class="stack">
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">BPaaS — Business Process as a Service</span>
+        <span class="layer-desc">Horizontal or vertical business processes provided on a subscription basis to companies or industries</span>
+      </div>
+      <div class="stack-layer layer-app">
+        <span class="layer-name">SaaS — Software as a Service</span>
+        <span class="layer-desc">Software applications hosted in the cloud and provided on a subscription basis</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">PaaS — Platform as a Service</span>
+        <span class="layer-desc">Virtualized application development and run-time platform</span>
+      </div>
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">IaaS — Infrastructure as a Service</span>
+        <span class="layer-desc">Raw infrastructure (CPU, memory, storage, network) available on an as-needed basis</span>
+      </div>
+    </div>
+
+    <h3>Business Process as a Service (BPaaS)</h3>
+    <div class="callout">A business workflow offered as a service. It is not a single application: different processes or applications are orchestrated, and an application depends on other applications. It is an integration of sub-processes or sub-applications with a timing relationship, described by a process execution tree or graph. Examples: banking sector, development planning operations.</div>
+    <span class="ts">▶ 17:16</span>
+    <div class="callout yellow">Worth watching: hand-drawn process graph: P1 and P2 give P12, which feeds P3; P3 and P4 give the final outcome.</div>
+    <div class="callout green"><strong>Why it matters:</strong> it is more than SaaS. The processes may come from different, heterogeneous providers, so the user collaborates with different cloud service providers. This matters to organizations; a popular language for defining business process flow is the business process execution language.</div>
+
+    <h3>Service layers: maturity, definition and examples</h3>
+    <table class="port-table">
+      <thead><tr><th>Layer</th><th>Definition</th><th>Examples</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Software (maturing)</td><td>Applications enabled for the cloud; supports an architecture that can run multiple instances regardless of location; stateless application architecture; monthly subscription-based pricing.</td><td>Google Docs, MobileMe, Zoho</td></tr>
+        <tr><td class="proto-name">Platform (nascent)</td><td>A platform that enables developers to write applications that run on the cloud; usually has several application services for quick deployment.</td><td>Microsoft Azure, Google App Engine, Force.com</td></tr>
+        <tr><td class="proto-name">Infrastructure (evolving)</td><td>A highly scaled, redundant and shared computing infrastructure accessible using Internet technologies; consists of servers, storage, security, databases and other peripherals.</td><td>Amazon EC2, S3, Rackspace Mosso, Sun's cloud services, Terremark</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Other XaaS instances</h3>
+    <div class="callout">Most common: SaaS, PaaS and IaaS. Others:</div>
+    <div class="tag-row">
+      <span class="tag">Business Process as a Service (BPaaS)</span>
+      <span class="tag">Storage as a Service (another SaaS)</span>
+      <span class="tag">Security as a Service (SECaaS)</span>
+      <span class="tag">Database as a Service (DaaS)</span>
+      <span class="tag">Monitoring/Management as a Service (MaaS)</span>
+      <span class="tag">Communications, content and computing as a Service (CaaS)</span>
+      <span class="tag">Identity as a Service (IDaaS)</span>
+      <span class="tag">Backup as a Service (BaaS)</span>
+      <span class="tag">Desktop as a Service (DaaS)</span>
+    </div>
+    <div class="callout yellow"><strong>Examples given:</strong> database as a service means no need to install a database, just use it as a service. Monitoring/management as a service: managing a large IT infrastructure such as the institute's labs, from software issues to hardware problems, through a service connected to the machines.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · Requirements of a Cloud Service Provider (CSP)</div>
+    <div class="tag-row">
+      <span class="tag tag-good">Increase productivity</span>
+      <span class="tag tag-good">Increase end user satisfaction</span>
+      <span class="tag tag-good">Increase innovation</span>
+      <span class="tag tag-good">Increase agility</span>
+    </div>
+    <div class="callout">The provider seeks these to hold its market position, and to offer its infrastructure as an asset that can configure itself to need.</div>
+    <div class="callout green"><strong>XaaS fulfils all four demands:</strong> broad network access (cloud) + resource pooling (cloud) + business-driven infrastructure on-demand (SOI) + service orientation (SOI) = XaaS.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">7 · Classical Service Model vs XaaS</div>
+    <h3>Classical service model (layers managed by the user)</h3>
+    <div class="stack">
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Applications</span>
+        <span class="layer-desc">Top of the stack</span>
+      </div>
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Data</span>
+        <span class="layer-desc">Closely tied to the application</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">Runtime</span>
+        <span class="layer-desc">Runtime libraries</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">Middleware</span>
+        <span class="layer-desc">Middleware layer</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">O/S</span>
+        <span class="layer-desc">Operating system placed on the virtual machine</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Virtualization</span>
+        <span class="layer-desc">Virtual machines, virtual network, virtual storage</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">Servers</span>
+        <span class="layer-desc">Physical infrastructure</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">Storage</span>
+        <span class="layer-desc">Omnipresent; kept as a separate aspect because storage management is a different matter</span>
+      </div>
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Network</span>
+        <span class="layer-desc">Underlying broad network access that lets things talk to each other</span>
+      </div>
+    </div>
+    <div class="callout">This is a <strong>logical representation</strong>, not a strict layering where one thing is always done over the other. Network, storage and servers are the bare-metal building blocks. Not all components are equally important for every XaaS type, but each plays a role.</div>
+    <div class="callout pink"><strong>Characteristics of the classical model:</strong> all layers (hardware, OS, development tools, applications) are managed by the users; initial IT budget and resources are required; users bear the cost of hardware, maintenance and technology; each system is designed and funded for a specific business activity (custom build-to-order); systems are deployed as a tightly coupled vertical stack so no single part can easily be replaced or changed; manual operations for provisioning and management prevail. Result: <strong>legacy IT</strong>.</div>
+
+    <h3>Legacy IT vs Evergreen IT</h3>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Legacy IT</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Stack</span>End-user devices, application, dedicated infrastructure</div>
+          <div class="compare-row"><span class="label">Coupling</span>Strongly coupled; a dedicated application runs on dedicated infrastructure</div>
+          <div class="compare-row"><span class="label">Sizing</span>Application sizing is based on the infrastructure, or the other way around</div>
+          <div class="compare-row"><span class="label">End user</span>Also has a dedicated application</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Evergreen IT</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Stack</span>Simplified IT stack, with the same three tiers</div>
+          <div class="compare-row"><span class="label">Coupling</span>Not very strongly bound; flexibilities are maintained</div>
+          <div class="compare-row"><span class="label">Benefit</span>Better utilization of resources and better return on investment; different services on a common resource base</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Example:</strong> UG/PG labs have huge computing resources but are heavily used only 8 to 10 hours a day. Outside lab hours they can be clubbed together so researchers can run high simulations on basic PC platforms, utilizing own resources better.</div>
+
+    <h3>Classic model vs XaaS</h3>
+    <table class="port-table">
+      <thead><tr><th>Type</th><th>Business model</th><th>Definition</th><th>Examples</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Traditional</td><td>Licensed software</td><td>Traditional software licenses with upgrade and maintenance</td><td>Oracle, SAP, Microsoft</td></tr>
+        <tr><td class="proto-name">Traditional</td><td>Hardware product</td><td>Hardware sale (PC, server, router) plus maintenance/support services</td><td>Cisco, Dell, HP</td></tr>
+        <tr><td class="proto-name">Traditional</td><td>People-based services</td><td>Professional services</td><td>IBM Global Services, Accenture, Wipro</td></tr>
+        <tr><td class="proto-name">New emerging</td><td>SaaS</td><td>Software functionality delivered as utility services</td><td>Salesforce.com, Taleo, Workday, NetSuite</td></tr>
+        <tr><td class="proto-name">New emerging</td><td>IaaS</td><td>Storage-on-demand, compute capacity</td><td>eVault, Amazon EC2, Dropbox</td></tr>
+        <tr><td class="proto-name">New emerging</td><td>PaaS</td><td>Entire web services development environment/platform</td><td>Force.com, Azure, Amazon Web Services</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">8 · Client-Server Architecture</div>
+    <div class="callout">A server serves several clients over the network. The server program runs on the server and waits for clients to connect. This classical architecture is extremely popular and still in use in many cases; examples are FTP server, telnet and HTTP, where a daemon on the server side talks to the client.</div>
+    <div class="callout green"><strong>Migration to SOA:</strong> instead of the strongly coupled client-server model, services talk to each other. The distinct advantages are that heterogeneous things can talk to each other and there is much more flexibility.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Architectural approach:</strong> business goals (TCO, compliance, market share, flexibility) are achieved through quality attributes (availability, elasticity, security and so on), which are achieved through architectural tactics.</div>
+    <div class="callout"><strong>Building blocks:</strong> technical architecture (XaaS stack, middleware, management and security) and deployment operation architecture (geo-location check, operation and monitoring).</div>
+    <div class="callout green"><strong>XaaS stack:</strong> IaaS at the bottom, PaaS in the middle, SaaS on top, with vertical management and security spanning every layer; the consumer's responsibility for them depends on the service model.</div>
+    <div class="callout"><strong>Elasticity:</strong> scale up adds resources to one box and suits small scenarios; scale out adds many units and suits large scenarios and avoids a single point of failure.</div>
+    <div class="callout green"><strong>XaaS:</strong> the combination of service-oriented infrastructure and cloud computing; SaaS, PaaS, IaaS, BPaaS and many other services delivered over the Internet.</div>
+    <div class="callout"><strong>BPaaS:</strong> orchestrated business workflows offered as a service, possibly across heterogeneous providers.</div>
+    <div class="callout green"><strong>CSP needs:</strong> productivity, end user satisfaction, innovation and agility, all fulfilled by XaaS.</div>
+    <div class="callout pink"><strong>Legacy IT:</strong> tightly coupled, user-managed, custom build-to-order stacks with manual operations; evergreen IT loosens this coupling for better utilization and return on investment.</div>
+    <div class="callout yellow"><strong>Example:</strong> using idle UG/PG lab machines outside class hours for researchers' simulations.</div>
+    <div class="callout"><strong>Client-server:</strong> still widely used (FTP, telnet, HTTP) but the move is towards loosely coupled, service oriented architecture.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

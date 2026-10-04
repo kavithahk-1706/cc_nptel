@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 3 — Cloud Computing Introduction | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec2.html" class="nav-lec">← prev</a>
+      <a href="lec4.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 03</span>
+    <span class="high-badge">High priority</span>
+    <h1>Cloud Computing — Introduction</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Builds on the NIST definition and lays out the foundations of cloud computing: essential and common characteristics, service oriented architecture, service models (SaaS, PaaS, IaaS), deployment models, virtualization, cloud-sourcing concerns, cloud storage, and advantages and disadvantages. Definition-heavy and foundational; most of it is detailed in later lectures.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · NIST Definition Recap</div>
+    <div class="callout">Cloud computing is a model for enabling ubiquitous, convenient, on-demand network access to a <strong>shared pool of configurable computing resources</strong> (networks, servers, storage, applications, services) that can be rapidly provisioned and released with minimal management effort or service provider interaction.</div>
+    <div class="callout green"><strong>Key point:</strong> the pool of resources is configured as per demand. When a consumer needs resources they are provisioned; when there is no requirement they are de-provisioned. This is exactly the pay-as-you-go model.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Essential Characteristics (NIST)</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 1</div>
+        <div class="proto-card-title">On-demand self-service</div>
+        <div class="proto-card-desc">A consumer can unilaterally provision computing capabilities, such as server time and network storage, automatically, without human interaction with each service provider.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 2</div>
+        <div class="proto-card-title">Broad network access</div>
+        <div class="proto-card-desc">Capabilities are available over the network and accessed through standard mechanisms that support heterogeneous thin or thick client platforms (mobile phones, tablets, laptops, workstations). Appropriate network access is essential because resources are pooled from different geographical locations.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 3</div>
+        <div class="proto-card-title">Resource pooling</div>
+        <div class="proto-card-desc">The provider's computing resources are pooled to serve multiple consumers using a <strong>multi-tenant model</strong>, with physical and virtual resources dynamically assigned and reassigned according to demand.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 4</div>
+        <div class="proto-card-title">Measured service</div>
+        <div class="proto-card-desc">Cloud systems automatically control and optimize resource use through metering at a level of abstraction suited to the service (storage, processing, bandwidth, active user accounts). Usage is monitored, controlled and reported, giving transparency to both provider and consumer. The user pays for what is used.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 5</div>
+        <div class="proto-card-title">Rapid elasticity</div>
+        <div class="proto-card-desc">Capabilities can be elastically provisioned and released, in some cases automatically, to scale rapidly outward and inward with demand. To the consumer they appear unlimited and can be appropriated in any quantity at any time.</div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Example (resource pooling):</strong> from the same provider, one user may get a Windows system with a given hardware and software specification while another gets a Linux (Ubuntu) system. Pooling and managing the resources this way is an important aspect.</div>
+    <div class="callout yellow"><strong>Example (elasticity):</strong> while running a simulation with 4 GB RAM, more data or load arrives and RAM must go from 4 GB to 8 GB for some time. It should be provisioned rapidly and also be released when no longer needed (go up and come down).</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Common Characteristics</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">characteristic</div>
+        <div class="proto-card-title">Massive scale</div>
+        <div class="proto-card-desc">Resources can scale up and down massively.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic</div>
+        <div class="proto-card-title">Resilient computing</div>
+        <div class="proto-card-desc">Listed on the slide; not elaborated in the lecture.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic</div>
+        <div class="proto-card-title">Homogeneity</div>
+        <div class="proto-card-desc">The user sees a homogeneous resource without caring about the heterogeneous resources behind it.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic</div>
+        <div class="proto-card-title">Geographic distribution</div>
+        <div class="proto-card-desc">Resources are usually spread across geographic locations.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic</div>
+        <div class="proto-card-title">Virtualization</div>
+        <div class="proto-card-desc">Several virtual machines are created over the infrastructure, e.g. Windows virtualized over Linux, with different applications on them. Covered in more detail in later lectures.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic</div>
+        <div class="proto-card-title">Service orientation</div>
+        <div class="proto-card-desc">Services communicate with each other; the model is service oriented rather than data driven.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic</div>
+        <div class="proto-card-title">Low cost software</div>
+        <div class="proto-card-desc">Because software is used in a multi-tenant way, the overall cost to the consumer comes down.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic</div>
+        <div class="proto-card-title">Advanced security</div>
+        <div class="proto-card-desc">Expected to provide advanced access control, resilience against attacks, and data preservation with no data loss.</div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Example (security):</strong> data kept in one's own system is one's own responsibility to keep up. A mail application on the cloud is expected to be more stable, whereas running one's own mail server and mail relay means doing the maintenance oneself.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · Service Oriented Architecture (SOA)</div>
+    <span class="ts">▶ 05:18</span>
+    <div class="callout yellow">Worth watching: hand-drawn triangle of Registry, Service Provider and Service Consumer, with SaaS, PaaS and IaaS noted alongside.</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Registry (catalogue)</div>
+        <div class="concept-desc">A logically centralized (though distributed) registry. Service providers upload and update their services in it.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Service provider</div>
+        <div class="concept-desc">Represents a bunch of providers who publish services to the registry.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Service consumer</div>
+        <div class="concept-desc">Looks up the registry to find available services, then connects to the provider to access the service.</div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Analogy:</strong> a telephone directory with yellow pages. To find, say, home delivery services, look them up in the directory and then connect by a telephone call.</div>
+    <div class="callout green"><strong>Takeaway:</strong> one of the major aspects of cloud computing is to realize a service oriented architecture.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · Cloud Service Models</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">SaaS — Software as a Service</div>
+        <div class="concept-desc">The consumer uses the provider's applications running on cloud infrastructure, accessed from client devices through a thin client interface such as a web browser (e.g. web-based email) or a program interface. The consumer does not manage the underlying infrastructure (network, servers, OS, storage), except possibly limited user-specific configuration. E.g. Google Spreadsheet.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">PaaS — Platform as a Service</div>
+        <div class="concept-desc">Provides a platform for development work, running test cases, and similar tasks. The infrastructure is available, the OS may come with it, and the user loads other applications and runs and tests them. Lies between IaaS and SaaS.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">IaaS — Infrastructure as a Service</div>
+        <div class="concept-desc">Provides processing, storage, networks and other fundamental computing resources; the consumer can deploy and run arbitrary software. E.g. Amazon Web Services and Flexiscale.</div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>SaaS convenience:</strong> word processing and spreadsheets on the web are examples. The user needs only a minimal interface such as a web browser, plus knowledge of how to use the software. There is no need to purchase it, maintain updates, or worry about hardware requirements; scaling of the software becomes the provider's responsibility. Data may be stored on the local machine or with another data service provider.</div>
+    <div class="callout yellow"><strong>IaaS example:</strong> realizing a machine of a particular specification (e.g. 4 GB RAM, a given processor speed and hard disk) as if it were on one's desk. Today 4 GB RAM, tomorrow 64 GB, the next day 2 GB; such variable requirements are handled by provisioning infrastructure as a service.</div>
+    <div class="callout">Other models exist, such as data as a service and even science as a service. The cloud philosophy aims at <strong>XaaS</strong>: anything as a service.</div>
+
+    <h3>Service model stack</h3>
+    <div class="stack">
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">Cloud clients</span>
+        <span class="layer-desc">Web browser, mobile app, thin client, terminal emulator</span>
+      </div>
+      <div class="stack-layer layer-app">
+        <span class="layer-name">SaaS</span>
+        <span class="layer-desc">CRM, email, virtual desktop, communication, games</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">PaaS</span>
+        <span class="layer-desc">Execution runtime, database, web server, development tools</span>
+      </div>
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">IaaS</span>
+        <span class="layer-desc">Virtual machines, servers, storage, load balancers, network</span>
+      </div>
+    </div>
+    <div class="callout">A provider may offer SaaS, PaaS, IaaS or a mix. From the client side, the universal way to access the cloud is the web browser; mobile apps, thin clients and terminal emulators are other interfaces.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · Types of Cloud (Deployment Models)</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">deployment model</div>
+        <div class="proto-card-title">Private cloud</div>
+        <div class="proto-card-desc">Infrastructure operated solely for one organization. E.g. Windows Server Hyper-V (slide).</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">deployment model</div>
+        <div class="proto-card-title">Community cloud</div>
+        <div class="proto-card-desc">Infrastructure shared by several organizations and supporting a specific goal; semi-public, semi-private.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">deployment model</div>
+        <div class="proto-card-title">Public cloud</div>
+        <div class="proto-card-desc">Infrastructure made available to the general public. E.g. Google Docs and spreadsheets.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">deployment model</div>
+        <div class="proto-card-title">Hybrid cloud</div>
+        <div class="proto-card-desc">A composition of two or more clouds (private, community or public). E.g. cloud bursting for load balancing between clouds.</div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Private cloud example (Meghamala):</strong> IIT Kharagpur built a cloud called Meghamala with open source systems, mainly used by faculty and research scholars, primarily as IaaS, with data and big data services on top. It is accessible only within the IIT Kharagpur network and, being institute funded, is not charged for.</div>
+    <div class="callout yellow"><strong>Public cloud examples:</strong> Amazon (infrastructure), Microsoft Azure (platform), Google Docs and spreadsheets (software).</div>
+    <div class="callout yellow"><strong>Community cloud examples:</strong> a banking cloud for the banking sector with RBI as the nodal agency; a government-funded institutional cloud; a geospatial cloud. It addresses a community of multiple organizations with a common purpose.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">7 · Cloud and Virtualization</div>
+    <div class="callout green">Cloud and virtualization go hand in hand. Details come in subsequent lectures.</div>
+
+    <h3>Virtualization elements</h3>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Virtual workspaces</div>
+        <div class="concept-desc">An abstraction of an execution environment that can be made dynamically available to authorized clients using well-defined protocols, with a resource quota (e.g. CPU, memory share) and software configuration (e.g. OS).</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Virtual machines (VMs)</div>
+        <div class="concept-desc">An abstraction of a physical host machine. A hypervisor intercepts and emulates instructions from VMs and manages them. E.g. VMware, Xen, KVM.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Infrastructure API</div>
+        <div class="concept-desc">Plug-ins to hardware and support structures, giving APIs to connect to different infrastructure.</div>
+      </div>
+    </div>
+
+    <h3>Virtualized stack</h3>
+    <div class="stack">
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Apps and OS</span>
+        <span class="layer-desc">Applications on guest operating systems, one set per VM</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Hypervisor (VMM)</span>
+        <span class="layer-desc">Virtual machine monitor that emulates the machines</span>
+      </div>
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Hardware</span>
+        <span class="layer-desc">Bare metal: possibly several systems connected through a network</span>
+      </div>
+    </div>
+
+    <span class="ts">▶ 19:16</span>
+    <div class="callout yellow">Worth watching: hand-drawn sketch of two VMs (16 GB Windows, 64 GB Linux) on a hypervisor over hardware.</div>
+    <div class="callout">The hardware can be different systems across different networks. To realize, say, a 16 GB machine running Windows and a 64 GB machine running Linux, a <strong>VMM (virtual machine monitor) or hypervisor</strong> is needed in between to emulate these machines.</div>
+    <div class="callout yellow"><strong>Example (virtual workspace):</strong> a team needs a development, visualization or computing environment for a short project of, say, 14 days. Purchasing hardware for 14 days is costly; provisioning it from a public cloud on pay-as-you-go may be the solution.</div>
+    <div class="callout">Meghamala realizes three categories of virtual machines and provisions them on request, based on availability.</div>
+
+    <h3>Virtual machines</h3>
+    <span class="ts">▶ 21:50</span>
+    <div class="callout yellow">Worth watching: several VMs (Linux, NetBSD and Windows guest OS with their apps) on one VMM over hardware, with Xen and VMware named as hypervisors.</div>
+    <div class="callout green"><strong>VM technology</strong> allows multiple virtual machines to run on a single physical machine. A "single physical machine" can be several machines clubbed together. Each VM has a <strong>guest OS</strong> (e.g. Linux, Windows) and its own applications, and can be used by someone at a different geographical location.</div>
+    <div class="callout yellow"><strong>Example:</strong> ten 4 GB systems give an effective 40 GB, which may be realized as, say, two 16 GB machines and one 8 GB machine. Not every division is possible; virtualization has requirements.</div>
+    <div class="callout">Popular hypervisors: <strong>Xen</strong> and <strong>VMware</strong>. Performance: para-virtualization (e.g. Xen) is very close to raw physical performance.</div>
+
+    <h3>Advantages of virtual machines</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Run operating systems where the physical hardware is unavailable</span>
+      <span class="tag tag-good">Easier to create new machines, backup machines</span>
+      <span class="tag tag-good">Software testing using clean installs of OS and software</span>
+      <span class="tag tag-good">Emulate more machines than are physically available</span>
+      <span class="tag tag-good">Timeshare lightly loaded systems on one host</span>
+      <span class="tag tag-good">Debug problems (suspend and resume the problem machine)</span>
+      <span class="tag tag-good">Easy migration of VMs (shutdown needed or not)</span>
+      <span class="tag tag-good">Run legacy systems</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">8 · Cloud-Sourcing</div>
+    <h3>Why it is becoming important</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">High-scale, low-cost providers</span>
+      <span class="tag tag-good">Anytime, anyplace access via web browser</span>
+      <span class="tag tag-good">Rapid scalability, incremental cost and load sharing</span>
+      <span class="tag tag-good">Can forget the need to focus on local IT</span>
+    </div>
+    <div class="callout pink"><strong>Economics:</strong> cheaper services play an important role, but whether cloud economics is always beneficial is to be examined in a separate lecture.</div>
+
+    <h3>Concerns</h3>
+    <table class="port-table">
+      <thead><tr><th>Concern</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Performance, reliability and SLAs</td><td>What the performance and reliability will be, whether the service is always on, and whether the signed service level agreement is honored.</td></tr>
+        <tr><td class="proto-name">Control of data and service parameters</td><td>Data in the cloud must be secured and not tampered with. Service parameters such as 90% or 95% availability must be audited to check they are delivered.</td></tr>
+        <tr><td class="proto-name">Application features and choices</td><td>The provided application may be fixed, with no customized choice.</td></tr>
+        <tr><td class="proto-name">Interaction between cloud providers</td><td>One provider may purchase services from another, e.g. an infrastructure provider buying hardware from a data provider.</td></tr>
+        <tr><td class="proto-name">No standard API</td><td>Mix of SOAP and REST styles of services in service oriented architecture.</td></tr>
+        <tr><td class="proto-name">Privacy, security, compliance, trust</td><td>Also competence and risk. Especially critical for mission-critical or day-to-day operational requirements.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">9 · Cloud Storage</div>
+    <div class="callout">Several large web companies exploit the fact that they have data storage capacity that can be hired out to others. It allows data stored remotely to be temporarily cached on desktop computers, mobile phones or other Internet-linked devices, enabling syncing of data.</div>
+    <div class="callout green"><strong>Examples:</strong> Amazon's Elastic Compute Cloud (EC2) and Simple Storage Solution (S3) are well-known examples.</div>
+    <div class="callout pink"><strong>Why separate:</strong> data is extremely important to the consumer, so storage plays a pretty important role. It may be covered in more detail if time permits.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">10 · Advantages and Disadvantages of Cloud Computing</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Advantages</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Lower computing cost</span>No need for a high-powered, high-priced PC. Applications run in the cloud, so the PC needs less processing power and disk space; a smaller hard disk, less memory and a more efficient processor suffice, and not even a CD or DVD drive is needed.</div>
+          <div class="compare-row"><span class="label">Improved performance</span>Overall performance is expected to improve.</div>
+          <div class="compare-row"><span class="label">Reduced software costs</span>No need to purchase software separately.</div>
+          <div class="compare-row"><span class="label">Instant software updates</span>Updates are applied by the provider.</div>
+          <div class="compare-row"><span class="label">Improved document format compatibility</span>Interoperability issues are better addressed.</div>
+          <div class="compare-row"><span class="label">Unlimited storage</span>Theoretically unlimited; pay and get the storage.</div>
+          <div class="compare-row"><span class="label">Increased data reliability</span>Data is stored in a distributed manner with proper redundancy.</div>
+          <div class="compare-row"><span class="label">Universal information access</span>Information is accessible from anywhere.</div>
+          <div class="compare-row"><span class="label">Latest version available</span>Latest versions of systems and software are available.</div>
+          <div class="compare-row"><span class="label">Easier group collaboration</span>One data set can be used across different applications.</div>
+          <div class="compare-row"><span class="label">Device independence</span>Accessible from different types of devices.</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Disadvantages</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Requires a constant Internet connection</span>Impossible to use without it. If the connection is dead, nothing can be accessed, not even one's own documents; a deal-breaker where connections are few or unreliable.</div>
+          <div class="compare-row"><span class="label">Poor with low-speed connections</span>A low-speed connection, such as dial-up, makes cloud computing painful and often impossible. Web-based applications and large documents need a lot of bandwidth to download.</div>
+          <div class="compare-row"><span class="label">Features might be limited</span>May not match a customized personal setup, and can be slow at times because provisioning takes time.</div>
+          <div class="compare-row"><span class="label">Stored data may not be secure</span>Concerns about how secure the stored data is.</div>
+          <div class="compare-row"><span class="label">Stored data can be lost</span>Possible if there is a crash or the provider goes out of business.</div>
+          <div class="compare-row"><span class="label">Not truly high performance computing</span>Cloud should not be assumed to provide HPC-type performance; API connectivity and where a database will run can also be issues.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout green"><strong>NIST model:</strong> a shared, configurable pool of resources that is rapidly provisioned and de-provisioned with minimal effort, which is the pay-as-you-go model.</div>
+    <div class="callout"><strong>Essential characteristics:</strong> on-demand self-service, broad network access, resource pooling (multi-tenant), measured service and rapid elasticity.</div>
+    <div class="callout"><strong>Common characteristics:</strong> massive scale, resilient computing, homogeneity, geographic distribution, virtualization, service orientation, low cost software and advanced security.</div>
+    <div class="callout"><strong>SOA:</strong> providers publish to a registry, consumers look up the registry and connect to providers; cloud realizes this architecture.</div>
+    <div class="callout"><strong>Service models:</strong> SaaS (applications), PaaS (development platform) and IaaS (infrastructure), extended to XaaS.</div>
+    <div class="callout"><strong>Deployment models:</strong> private, community, public and hybrid clouds.</div>
+    <div class="callout green"><strong>Virtualization:</strong> a hypervisor (VMM) emulates multiple virtual machines, each with its own guest OS, on one physical machine, e.g. Xen and VMware.</div>
+    <div class="callout yellow"><strong>Example:</strong> Meghamala, IIT Kharagpur's private cloud, mainly offering IaaS to researchers within the institute network.</div>
+    <div class="callout pink"><strong>Cloud-sourcing concerns:</strong> performance and SLAs, control of data, limited application choice, provider interaction, no standard API, and privacy, security, compliance and trust.</div>
+    <div class="callout pink"><strong>Disadvantages:</strong> needs constant, good Internet connection, features may be limited, stored data may be insecure or lost, and cloud is not truly HPC.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

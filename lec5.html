@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 5 — Cloud Computing Architecture (Contd.) | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec4.html" class="nav-lec">← prev</a>
+      <a href="lec6.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 05</span>
+    <span class="high-badge">High priority</span>
+    <h1>Cloud Computing Architecture (Contd.)</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Continues the architecture discussion by contrasting the traditional client-server model with the cloud model, then goes through SaaS, PaaS and IaaS in detail: definitions, characteristics, and where each is or is not a good fit. Ends with the responsibility split across service models, the role of networking in the cloud, and a quick introduction to network function virtualization. Conceptual and definition-heavy; the service model material is core exam content.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · Client-Server Model (Recap)</div>
+    <div class="callout"><strong>Client-server model:</strong> a server and several clients connecting to it. Logically or physically, the server and client can be on the same machine, or on different machines (one client, one server). A client can also access a server for other purposes.</div>
+
+    <h3>Server process and ports</h3>
+    <div class="proto-grid">
+      <div class="proto-card">
+        <div class="proto-layer">server daemon → client</div>
+        <div class="proto-names">ftpd → ftp</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">server daemon → client</div>
+        <div class="proto-names">telnetd → telnet</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">server daemon → client</div>
+        <div class="proto-names">httpd → http client (browser)</div>
+      </div>
+    </div>
+    <div class="callout">For every server there is a matching client. To realize a server, the <strong>server process waits (listens) on a particular port</strong>. Whenever a client needs the service, it hooks into that port. Example: the http daemon listens on logical <strong>port 80</strong>, and any browser acts as the http client.</div>
+
+    <h3>Types of server</h3>
+    <div class="tag-row">
+      <span class="tag">Concurrent server: serves clients concurrently</span>
+      <span class="tag">Iterative server: serves clients one after another</span>
+    </div>
+    <div class="callout pink"><strong>Limitation:</strong> a component on each side (e.g. httpd and http) must talk to each other, so the model is more strongly bound. It still serves many purposes, in any application where data and application communicate with each other.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Client-Server Architecture</div>
+    <div class="callout">Consists of one or more load balanced servers servicing requests sent by clients. Clients and servers exchange messages in a <strong>request-response</strong> fashion.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Client</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Capability</span>Often a thin client or a machine with low computational capability (usually, not necessarily)</div>
+          <div class="compare-row"><span class="label">Devices</span>Anything from mobile devices to laptops; can also be higher end devices</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Server</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Form</span>A load balanced cluster or a standalone machine</div>
+          <div class="compare-row"><span class="label">Capability</span>Much stronger and fatter systems (e.g. an http server)</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout green"><strong>Three-tier architecture:</strong> client-server tries to emulate a three-tier architecture: <strong>presentation layer</strong> at the top, <strong>logical layer</strong> in the middle, and <strong>data layer</strong> at the bottom.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Client-Server Model vs Cloud Model</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Client-server model</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Services</span>Simple service model where the server services client requests</div>
+          <div class="compare-row"><span class="label">Load balancing</span>May or may not be load balanced</div>
+          <div class="compare-row"><span class="label">Scalability</span>Scalable to some extent in a cluster environment</div>
+          <div class="compare-row"><span class="label">Virtualization</span>No concept of virtualization</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Cloud computing model</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Services</span>Variety of complex service models (IaaS, PaaS, SaaS, i.e. XaaS) can be provided</div>
+          <div class="compare-row"><span class="label">Load balancing</span>Usually load balanced; a major aspect</div>
+          <div class="compare-row"><span class="label">Scalability</span>Theoretically infinitely scalable</div>
+          <div class="compare-row"><span class="label">Virtualization</span>Core concept</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout green"><strong>Takeaway:</strong> in client-server, every service needs its own server program the client connects to. Cloud offers XaaS service models with better utilization of resources, and can cater to a large number of stakeholders.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · Cloud Services: Layered View</div>
+    <span class="ts">▶ 05:57</span>
+    <div class="callout yellow">Worth watching: layered diagram of the cloud services reference architecture (infrastructure at the bottom, services, business processes, presentation layer, plus integration, QoS, information and governance on the side). The professor notes the picture is not very clear, so the video helps.</div>
+
+    <div class="stack">
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Presentation layer</span>
+        <span class="layer-desc">user interfaces / APIs</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">Business processes</span>
+        <span class="layer-desc">business process as a service</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Services</span>
+        <span class="layer-desc">IaaS, PaaS, SaaS</span>
+      </div>
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Infrastructure</span>
+        <span class="layer-desc">compute, network, storage, facilities</span>
+      </div>
+    </div>
+
+    <h3>Layer descriptions</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">bottom</div>
+        <div class="proto-card-title">Infrastructure (operational systems)</div>
+        <div class="proto-card-desc">The core bare metal: compute, network, storage and facilities.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">middle</div>
+        <div class="proto-card-title">Services</div>
+        <div class="proto-card-desc">Realization of IaaS, PaaS or SaaS services.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">above services</div>
+        <div class="proto-card-title">Business processes</div>
+        <div class="proto-card-desc">Services are used to run different business processes, and a business process can itself be offered as a service.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">top</div>
+        <div class="proto-card-title">Presentation layer</div>
+        <div class="proto-card-desc">Direct interfaces with users, or an API to connect to the different service models. Exposing an API means the provider does not expose itself directly. Customized user-end applications or interfaces are also possible.</div>
+      </div>
+    </div>
+
+    <h3>Cross-cutting aspects</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">aspect</div>
+        <div class="proto-card-title">Integration</div>
+        <div class="proto-card-desc">A (not very strongly coupled) integration platform, including integration of hardware. Service integration needs an <strong>orchestration engine</strong> for service execution.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">aspect</div>
+        <div class="proto-card-title">Quality of service</div>
+        <div class="proto-card-desc">Whether the system can operate at the appropriate level of service that is promised.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">aspect</div>
+        <div class="proto-card-title">Information</div>
+        <div class="proto-card-desc">Dissemination of information: what services are provided and how to hook into them.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">aspect</div>
+        <div class="proto-card-title">Governance</div>
+        <div class="proto-card-desc">Management of the infrastructure and of the whole system, plus legal issues and policies so that everything is valid under federal laws and regulations.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · Cloud Service Models</div>
+    <table class="port-table">
+      <thead><tr><th>Service class</th><th>Main access and management tool</th><th>Service content</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">SaaS</td><td>Web browser</td><td>Cloud applications: social networks, office suites, CRM, video processing</td></tr>
+        <tr><td class="proto-name">PaaS</td><td>Cloud development environment</td><td>Cloud platform: programming languages, frameworks, mashup editors, structured data</td></tr>
+        <tr><td class="proto-name">IaaS</td><td>Virtual infrastructure manager</td><td>Cloud infrastructure: compute servers, data storage, firewall, load balancer</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Simplified description</h3>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">SaaS</div>
+        <div class="concept-desc">Applications designed for end users and delivered over the web.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">PaaS</div>
+        <div class="concept-desc">The set of tools and services designed to make coding and deploying applications quick and efficient.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">IaaS</div>
+        <div class="concept-desc">The hardware and software that powers it all: servers, storage, network, operating systems.</div>
+      </div>
+    </div>
+
+    <h3>Transportation analogy</h3>
+    <div class="callout yellow"><strong>Analogy:</strong> by itself, infrastructure is not useful; it waits for someone to make it productive. Roads (e.g. the interstate system) are the <strong>infrastructure</strong>, cars and trucks are the <strong>platform</strong> that sits on top and transports, and goods and people are the <strong>software and information</strong> in the technical realm.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · Software as a Service (SaaS)</div>
+    <div class="callout"><strong>SaaS:</strong> software that is deployed over the internet. The provider licenses an application to customers either as a service on demand, through a subscription, in a pay-as-you-go model, or (increasingly) at no charge when revenue can be generated from other streams such as advertisement or user list sales.</div>
+
+    <h3>Characteristics</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 1</div>
+        <div class="proto-card-title">Web access</div>
+        <div class="proto-card-desc">Web access to commercial software.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 2</div>
+        <div class="proto-card-title">Logically centralized management</div>
+        <div class="proto-card-desc">Software is managed from a logically centralized location. Deployment may be distributed and on heterogeneous platforms, but management is logically centralized.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 3</div>
+        <div class="proto-card-title">One-to-many delivery</div>
+        <div class="proto-card-desc">Software is delivered in a one-to-many model.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 4</div>
+        <div class="proto-card-title">No upgrade burden</div>
+        <div class="proto-card-desc">Users are not required to handle software upgrades and patches.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 5</div>
+        <div class="proto-card-title">APIs for integration</div>
+        <div class="proto-card-desc">Application Programming Interfaces allow integration between different pieces of software, to build a larger whole.</div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Example:</strong> software offered as a service for computational support of different simulations (e.g. mathematical simulation). The platform may run on heterogeneous, distributed systems, but overall management is logically centralized.</div>
+
+    <h3>Where SaaS is useful vs not the best option</h3>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">SaaS may not be the best option</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Real time</span>Extremely fast processing of real time data is needed. Cloud cannot be considered high performance real time; delays and slow downs can occur (e.g. disaster management). Needs something dedicated with QoS maintenance.</div>
+          <div class="compare-row"><span class="label">Regulation</span>Legislation or regulation does not permit data to be hosted externally (e.g. organization email must stay on the organization mail server, not a public one).</div>
+          <div class="compare-row"><span class="label">Legacy</span>An existing on-premise solution already fulfils all of the organization's needs, so there is no wish to shift.</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">SaaS may be useful</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Interplay</span>Significant interplay between organization and outside world (e.g. email newsletter campaign software).</div>
+          <div class="compare-row"><span class="label">Web / mobile</span>Need for web or mobile access (e.g. mobile sales management software).</div>
+          <div class="compare-row"><span class="label">Short term</span>Software needed only for short term use.</div>
+          <div class="compare-row"><span class="label">Demand spikes</span>Demand spikes significantly (e.g. tax or billing software).</div>
+          <div class="compare-row"><span class="label">Example</span>Salesforce Customer Relationship Management (CRM) software.</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Short term use:</strong> running a particular examination or written test for an interview. It is not run day to day, so there is no need to deploy everything permanently. Get the service on a lab desktop, run the examination, then forget about it for the time being.</div>
+    <div class="callout yellow"><strong>Demand spikes:</strong> tax filing has a particular time window during the year. Demand rises in that window and otherwise slows down.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">7 · Platform as a Service (PaaS)</div>
+    <div class="callout"><strong>PaaS:</strong> brings the benefits that SaaS brought for applications, but to the software development world. It is a computing platform that allows creation of web applications quickly and easily, without the complexity of buying and maintaining the software and infrastructure underneath it. Analogous to SaaS except that, rather than software delivered over the web, it is a <strong>platform for the creation of software</strong>, delivered over the web.</div>
+
+    <h3>Characteristics</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 1</div>
+        <div class="proto-card-title">Integrated development environment</div>
+        <div class="proto-card-desc">Services to develop, test, deploy, host and maintain applications in the same IDE.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 2</div>
+        <div class="proto-card-title">Web based UI tools</div>
+        <div class="proto-card-desc">Web based user interface creation tools help create, modify, test and deploy different UI scenarios.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 3</div>
+        <div class="proto-card-title">Multi-tenant architecture</div>
+        <div class="proto-card-desc">Multiple concurrent users utilize the same development application.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 4</div>
+        <div class="proto-card-title">Built-in scalability</div>
+        <div class="proto-card-desc">Scalability of deployed software, including load balancing and failover.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 5</div>
+        <div class="proto-card-title">Integration</div>
+        <div class="proto-card-desc">Integration with web services and databases via common standards.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 6</div>
+        <div class="proto-card-title">Team collaboration</div>
+        <div class="proto-card-desc">Support for development team collaboration; some PaaS solutions include project planning and communication tools.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 7</div>
+        <div class="proto-card-title">Billing and subscription</div>
+        <div class="proto-card-desc">Tools to handle billing and subscription management.</div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Collaboration example:</strong> a development team spread over several regions or countries wants a common development platform to work on; PaaS gives a good solution.</div>
+
+    <h3>Where PaaS is ideal vs not ideal</h3>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">PaaS is not ideal</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Portability</span>Application needs to be highly portable in terms of where it is hosted.</div>
+          <div class="compare-row"><span class="label">Proprietary</span>Proprietary languages or approaches would impact the development process, especially in mission critical areas such as defense or the financial sector.</div>
+          <div class="compare-row"><span class="label">Vendor lock-in</span>A proprietary language would hinder a later move to another provider.</div>
+          <div class="compare-row"><span class="label">Customization</span>Application performance requires customization of the underlying hardware and software (a customized rather than generic stack).</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">PaaS is useful</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Multiple developers</span>Multiple developers work on a project, or external parties need to interact with the development process.</div>
+          <div class="compare-row"><span class="label">Automation</span>Developers wish to automate testing and deployment services.</div>
+          <div class="compare-row"><span class="label">Agile</span>Popularity of agile software development (iterative and incremental methodologies) increases PaaS uptake, as it eases rapid development and iteration.</div>
+          <div class="compare-row"><span class="label">Examples</span>Microsoft Azure, Google App Engine</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Coordination example:</strong> a core development team in the organization's office, a development team at the customer premises interacting with the customer day to day, and another team in the head office. PaaS can be an ideal base to coordinate between them.</div>
+    <div class="callout pink"><strong>Note on "open":</strong> the professor clarifies that proprietary does not simply mean "not open source"; it means not on public systems, using proprietary approaches to the problem.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">8 · Infrastructure as a Service (IaaS)</div>
+    <div class="callout"><strong>IaaS:</strong> a way of delivering cloud computing infrastructure (servers, storage, network and operating systems) as an on-demand service. Rather than purchasing servers, software, datacenter space or network equipment, clients buy those resources as a fully outsourced service on demand, e.g. virtual machines and virtual storage.</div>
+
+    <h3>Characteristics</h3>
+    <div class="tag-row">
+      <span class="tag">Resources are distributed as a service</span>
+      <span class="tag">Allows dynamic scaling</span>
+      <span class="tag">Variable cost, utility (pay as you use) pricing model</span>
+      <span class="tag">Generally includes multiple users on a single piece of hardware</span>
+    </div>
+    <div class="callout green"><strong>Key point:</strong> many users can work on the same hardware stack, each realizing different virtual machines on it.</div>
+
+    <h3>Where IaaS makes sense vs not the best option</h3>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">IaaS may not be the best option</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Compliance</span>Regulatory compliance or legal bindings make offshoring or outsourcing of data storage and processing difficult.</div>
+          <div class="compare-row"><span class="label">Performance</span>The highest levels of performance are required and on-premise or dedicated hosted infrastructure can meet the organization's needs (e.g. mission critical operations needing customization).</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">IaaS makes sense</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Volatile demand</span>Significant spikes and troughs in demand on the infrastructure.</div>
+          <div class="compare-row"><span class="label">New organizations</span>No capital to invest in hardware.</div>
+          <div class="compare-row"><span class="label">Rapid growth</span>The organization is growing rapidly and scaling hardware would be problematic.</div>
+          <div class="compare-row"><span class="label">Capital expenditure</span>Pressure to limit capital expenditure and move to operating expenditure.</div>
+          <div class="compare-row"><span class="label">Trial / temporary</span>Specific line of business, trial or temporary infrastructural needs (e.g. proof of concept).</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Proof of concept (PoC):</strong> immediately purchasing hardware may not be feasible, and purchasing takes a lot of time. IaaS gives a kick start to the whole process.</div>
+    <div class="callout pink"><strong>Performance overhead:</strong> VMs mean underlying hardware, a virtual machine monitor over it, and different VMs on top. All of this consumes some resources and computational time, so it is not suitable when the highest performance is needed.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">9 · Service Providers</div>
+    <h3>SaaS providers</h3>
+    <table class="port-table">
+      <thead><tr><th>Provider</th><th>Software</th><th>Pricing model</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Salesforce.com</td><td>CRM</td><td>Pay per use</td></tr>
+        <tr><td class="proto-name">Google Gmail</td><td>Email</td><td>Free</td></tr>
+        <tr><td class="proto-name">Process Maker Live</td><td>Business process management</td><td>Pay per use</td></tr>
+        <tr><td class="proto-name">XDrive</td><td>Storage</td><td>Subscription</td></tr>
+        <tr><td class="proto-name">SmugMug</td><td>Data sharing</td><td>Subscription</td></tr>
+        <tr><td class="proto-name">OpSource</td><td>Billing</td><td>Subscription</td></tr>
+        <tr><td class="proto-name">Appian Anywhere</td><td>Business process management</td><td>Pay per use</td></tr>
+        <tr><td class="proto-name">Box.net</td><td>Storage</td><td>Pay per use</td></tr>
+        <tr><td class="proto-name">MuxCloud</td><td>Data processing</td><td>Pay per use</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">Pricing models vary: pay as you go, free, or subscription (e.g. subscribe for a year, then use).</div>
+
+    <h3>PaaS and IaaS providers</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">PaaS providers</div>
+        <div class="proto-card-title">Different flavors and targets</div>
+        <div class="proto-card-desc">Differ in what they offer: some use databases such as Bigtable; targets include the .NET platform, web development and enterprise applications.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">IaaS providers</div>
+        <div class="proto-card-title">Different capacities</div>
+        <div class="proto-card-desc">Differ in hardware capacities, operating systems offered and billing mechanisms. There are several major IaaS providers and many others.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">10 · XaaS: Who Manages What</div>
+    <table class="port-table">
+      <thead><tr><th>Layer</th><th>SaaS</th><th>PaaS</th><th>IaaS</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Applications</td><td>Provider</td><td>User</td><td>User</td></tr>
+        <tr><td class="proto-name">Data</td><td>Provider</td><td>User</td><td>User</td></tr>
+        <tr><td class="proto-name">Runtime</td><td>Provider</td><td>Provider</td><td>User</td></tr>
+        <tr><td class="proto-name">Middleware</td><td>Provider</td><td>Provider</td><td>User</td></tr>
+        <tr><td class="proto-name">O/S</td><td>Provider</td><td>Provider</td><td>User (guest OS)</td></tr>
+        <tr><td class="proto-name">Virtualization</td><td>Provider</td><td>Provider</td><td>Provider</td></tr>
+        <tr><td class="proto-name">Servers</td><td>Provider</td><td>Provider</td><td>Provider</td></tr>
+        <tr><td class="proto-name">Storage</td><td>Provider</td><td>Provider</td><td>Provider</td></tr>
+        <tr><td class="proto-name">Network</td><td>Provider</td><td>Provider</td><td>Provider</td></tr>
+      </tbody>
+    </table>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">SaaS</div>
+        <div class="concept-desc">Everything up to and including the application level is the provider's responsibility.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">PaaS</div>
+        <div class="concept-desc">Provider's responsibility goes up to the runtime; data and applications belong to the user.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">IaaS</div>
+        <div class="concept-desc">Provider handles up to virtualization and providing VMs. The provider may supply the guest OS, or the user can choose which guest OS to load. The rest is the consumer's responsibility.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">11 · Role of Networking in Cloud Computing</div>
+    <div class="callout green"><strong>Key point:</strong> networking plays a critical role in realizing the cloud. At the bare metal, hardware resources are connected over the network, and servers (e.g. rack or blade servers) work at extremely high operating speed, so the backbone network is highly redundant.</div>
+
+    <h3>Virtualizing the network</h3>
+    <div class="callout yellow"><strong>Example:</strong> to set up a network for an event (say an examination), the classical way is to purchase separate routers and servers and connect them. Alternatively, just as a virtual machine is obtained, a whole <strong>virtual network</strong> can be created for the duration of the event and then given away. This is a "soft" way of realizing the overall networking.</div>
+    <div class="callout">Network resources in cloud computing can be <strong>provisioned dynamically</strong>. Networking concepts at the core of cloud computing are <strong>Virtual Local Area Networks (VLAN)</strong>, <strong>Virtual Private Networks (VPN)</strong> and the different protocol layers.</div>
+    <div class="tag-row">
+      <span class="tag">OpenSSH</span>
+      <span class="tag">OpenVPN</span>
+    </div>
+    <p>Examples of tools that help set up different network topologies and facilitate various network configurations.</p>
+
+    <h3>Networking in different cloud models</h3>
+    <table class="port-table">
+      <thead><tr><th>OSI layer</th><th>Example protocols</th><th>IaaS</th><th>PaaS</th><th>SaaS</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">7 Application</td><td>HTTP, FTP, NFS, SMTP, SSH</td><td>Consumer</td><td>Consumer</td><td>Provider</td></tr>
+        <tr><td class="proto-name">6 Presentation</td><td>SSL, TLS</td><td>Consumer</td><td>Provider</td><td>Provider</td></tr>
+        <tr><td class="proto-name">5 Session</td><td>TCP</td><td>Consumer</td><td>Provider</td><td>Provider</td></tr>
+        <tr><td class="proto-name">4 Transport</td><td>TCP</td><td>Consumer</td><td>Provider</td><td>Provider</td></tr>
+        <tr><td class="proto-name">3 Network</td><td>IP, IPSec</td><td>Consumer</td><td>Provider</td><td>Provider</td></tr>
+        <tr><td class="proto-name">2 Data link</td><td>Ethernet, Fibre channel</td><td>Provider</td><td>Provider</td><td>Provider</td></tr>
+        <tr><td class="proto-name">1 Physical</td><td>Copper, optic fibre</td><td>Provider</td><td>Provider</td><td>Provider</td></tr>
+      </tbody>
+    </table>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">IaaS</div>
+        <div class="concept-desc">Provider is responsible up to the data link layer; the rest is the consumer's responsibility.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">PaaS</div>
+        <div class="concept-desc">Provider is responsible up to the presentation (sometimes session) layer, i.e. it gives a platform.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">SaaS</div>
+        <div class="concept-desc">Provider is responsible for the whole stack.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">12 · Network Function Virtualization (NFV)</div>
+    <div class="callout">Quick introduction only; to be discussed in subsequent lectures. <strong>NFV</strong> aims to transform the way network operators architect networks, by using standard IT virtualization technology to consolidate many network equipment types onto industry standard high volume servers, switches and storage, which could be located in datacentres, network nodes and end user premises.</div>
+    <div class="callout">It involves implementing network functions in <strong>software</strong> that can run on a range of industry standard server hardware, and that can be moved to, or instantiated in, various locations in the network as required, <strong>without installing new equipment</strong>.</div>
+    <div class="callout green"><strong>Key idea:</strong> on one basic infrastructure, different virtual networks can be realized over the same infrastructure, so not only different virtual machines but different virtual networks are possible.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Client-server:</strong> server daemons (ftpd, telnetd, httpd) listen on ports, clients connect; request-response, thin clients and fat servers, emulating a three-tier architecture (presentation, logic, data).</div>
+    <div class="callout green"><strong>Client-server vs cloud:</strong> cloud adds complex XaaS service models, usual load balancing, theoretically infinite scalability and virtualization as the core concept.</div>
+    <div class="callout"><strong>Cloud services layers:</strong> infrastructure at the bottom, then services (IaaS, PaaS, SaaS), business processes and a presentation layer (UI or API), with integration/orchestration, QoS, information and governance across them.</div>
+    <div class="callout"><strong>SaaS:</strong> software delivered over the internet (on demand, subscription, pay-as-you-go or free), managed centrally, one-to-many. Good for short term use, demand spikes and web/mobile access; poor for real time processing, regulated data and satisfactory on-premise solutions.</div>
+    <div class="callout"><strong>PaaS:</strong> a platform for creating software, delivered over the web; multi-tenant with built-in scalability and team collaboration. Good for multi-developer and agile projects (Azure, Google App Engine); poor where portability, customization or avoiding vendor lock-in matters.</div>
+    <div class="callout"><strong>IaaS:</strong> servers, storage, network and OS as an on-demand, pay-as-you-use service with dynamic scaling and multiple users per hardware. Good for volatile demand, PoCs and low capital; poor under regulatory limits or when peak performance is needed.</div>
+    <div class="callout yellow"><strong>Analogy:</strong> transportation, where roads are infrastructure, cars and trucks are the platform, and goods and people are the software and information.</div>
+    <div class="callout green"><strong>Responsibility split:</strong> SaaS provider manages up to the application; PaaS provider up to the runtime; IaaS provider up to virtualization, and the user manages the rest.</div>
+    <div class="callout"><strong>Networking:</strong> a critical role in the cloud; network resources can be provisioned dynamically and virtualized (VLAN, VPN, OpenSSH, OpenVPN). Provider responsibility across the OSI stack grows from IaaS to PaaS to SaaS.</div>
+    <div class="callout pink"><strong>NFV:</strong> network functions implemented in software on standard hardware, instantiated where needed without new equipment, allowing multiple virtual networks on one infrastructure.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>
