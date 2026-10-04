@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 11 — Service Level Agreement (SLA) | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec10.html" class="nav-lec">← prev</a>
+      <a href="lec12.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 11</span>
+    <span class="high-badge">High priority</span>
+    <h1>Service Level Agreement (SLA)</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Covers the service level agreement, the formal contract between cloud provider and consumer: its contents, SLOs and KPIs, web service SLA versus cloud SLA, types of SLA, considerations and requirements, monitoring metrics, and example SLAs of real cloud providers. Concept-heavy and applied; the SLA-SLO-KPI hierarchy and the list of requirements are likely exam material.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · What is an SLA?</div>
+    <div class="callout">Whenever a service provider and a consumer exchange metered services involving costing, there must be an agreement on pricing, service availability and other quality factors. A consumer moving from their own proprietary computing to a cloud expects the same reliability, performance and security they had on their own premises, where the system was in their control. Today there is <strong>no very standard format</strong> for this; usually one signs off the provider's terms and conditions.</div>
+    <div class="callout"><strong>Service Level Agreement (SLA):</strong> a formal contract between a service provider (SP) and a service consumer (SC). It is the <strong>foundation of consumer trust</strong> in the provider and a basis for comparing one provider with another. Its purpose is to define a formal basis for the performance and availability the provider guarantees to deliver (e.g. a guaranteed uptime of 95 percent). The SLA and SLOs are the basis of selecting a cloud provider.</div>
+
+    <h3>Service Level Objectives (SLOs)</h3>
+    <div class="callout">An SLA contains <strong>SLOs</strong>: objectively measurable conditions for the service. They cannot be verbal; they must be measurable, e.g. "performance should be 95 percent". Objectives vary between consumers and over time:</div>
+    <div class="callout yellow"><strong>Examples:</strong> an academic institution may accept 95 percent uptime but need much higher data persistence. Another organization may need uptime above 99 percent but not require backup. Availability may need to exceed 99 percent during peak hours but only 90 percent during off-peak hours.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · SLA Contents</div>
+    <div class="callout">SLAs apply to IaaS, PaaS, SaaS and other services such as data services, so an SLA corresponds to the particular service model. A typical SLA contains:</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">services</div>
+        <div class="proto-card-title">Set of services and their definitions</div>
+        <div class="proto-card-desc">The set of services the provider will deliver, with a complete, specific definition of each service.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">duties</div>
+        <div class="proto-card-title">Responsibilities</div>
+        <div class="proto-card-desc">The responsibilities of the provider and the consumer.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">measurement</div>
+        <div class="proto-card-title">Metrics</div>
+        <div class="proto-card-desc">A set of metrics to measure whether the provider is offering the services as guaranteed.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">monitoring</div>
+        <div class="proto-card-title">Auditing mechanism</div>
+        <div class="proto-card-desc">An auditing mechanism to monitor the services, possibly by a third party auditor who checks for violations.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">violations</div>
+        <div class="proto-card-title">Remedies and penalties</div>
+        <div class="proto-card-desc">Remedies available to the consumer and the provider if terms are not satisfied (payback or other incentive), like penalties in an MoU.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">time</div>
+        <div class="proto-card-title">Change over time</div>
+        <div class="proto-card-desc">How the SLA will change over time (within a day or over different days).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Web Service SLA and Cloud SLA</div>
+    <div class="callout">Cloud evolved from web services and SOA, so cloud SLAs are related to web service SLAs.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">WS-Agreement</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">What</span>XML-based language and protocol for negotiating, establishing and managing service agreements at runtime</div>
+          <div class="compare-row"><span class="label">Template</span>Specifies the nature of the agreement template (the agreed format)</div>
+          <div class="compare-row"><span class="label">Discovery</span>Facilitates discovering compatible providers</div>
+          <div class="compare-row"><span class="label">Interaction</span>Usually request-response</div>
+          <div class="compare-row"><span class="label">Violation</span>Dynamically managed and verified</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">WSLA (Web Service Level Agreement framework)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">What</span>A formal XML-schema based language to express SLAs, plus a runtime interpreter</div>
+          <div class="compare-row"><span class="label">Role</span>Measures and monitors QoS parameters and reports violations</div>
+          <div class="compare-row"><span class="label">Gap</span>Lack of formal definitions for the semantics of the metrics (e.g. whether a parameter means the system is going down or a failure is expected)</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Cloud SLA vs web service SLA</h3>
+    <table class="port-table">
+      <thead><tr><th>Aspect</th><th>Traditional web service</th><th>Cloud computing</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">QoS parameters</td><td>Response time, SLA violation rate for reliability, availability, cost of services</td><td>QoS related to security, privacy, trust, management etc. is more important</td></tr>
+        <tr><td class="proto-name">Automation</td><td>SLA negotiation, provisioning, service delivery and monitoring are not automated</td><td>SLA automation is required for highly dynamic and scalable service consumption (scale up and down)</td></tr>
+        <tr><td class="proto-name">Resource allocation</td><td>UDDI registry is used for advertising and discovering between web services</td><td>Resources are allocated and distributed globally without any central directory</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · Types of SLA</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Off-the-shelf (non-negotiable / direct) SLA</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Suitability</span>Not conducive for mission-critical data or applications</div>
+          <div class="compare-row"><span class="label">Creation</span>The provider creates the SLA template and defines all criteria (contract period, billing, response time, availability etc.)</div>
+          <div class="compare-row"><span class="label">Use</span>Followed by present day state-of-the-art clouds, especially public clouds, where you accept the terms and conditions</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Negotiable SLA</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Negotiation</span>Via an external agent between provider and consumer, or via multiple external agents (e.g. when several services are combined)</div>
+          <div class="compare-row"><span class="label">Use</span>Suited to large requirements, such as moving a whole organization's process to the cloud</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Analogy:</strong> booking one or two rooms or seats, you take whatever is available (off-the-shelf); booking a whole hotel or a whole bus, you negotiate a special rate and fine tune the agreement.</div>
+    <div class="callout green"><strong>Rule of thumb:</strong> small requirement or small scale operation gives off-the-shelf; large requirement gives negotiable.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · SLO Examples and Service Level Management</div>
+    <div class="callout">An SLO encompasses multiple QoS parameters, such as availability, serviceability, billing, penalties, throughput, response time or quality.</div>
+    <div class="tag-row">
+      <span class="tag">Availability of service X is 99.9%</span>
+      <span class="tag">Response time of a database query Q is between 3 to 5 seconds</span>
+      <span class="tag">Throughput of a server S at peak load time is 0.875</span>
+    </div>
+    <div class="callout"><strong>Service level management:</strong> monitoring and measuring the performance of services based on SLOs. From the <strong>provider</strong> perspective, decisions are based on business objectives and technical realities (how much the provider has at the back end). From the <strong>consumer</strong> perspective, decisions are about how to use cloud services and whether they suit the organization or personal need.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · Considerations for SLA</div>
+    <table class="port-table">
+      <thead><tr><th>Consideration</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Business level objectives</td><td>Consumers should know why they are using cloud services before deciding how to use them</td></tr>
+        <tr><td class="proto-name">Responsibilities of provider and consumer</td><td>The balance varies by service type. Example: if the provider accepts data at x megabits per second and the consumer sends more, overflow may violate the provider's other SLAs; both must check, and auditing maintains this</td></tr>
+        <tr><td class="proto-name">Business continuity and disaster recovery</td><td>Consumers should ensure the provider has adequate protection in case of disaster (natural, man-made, system failure)</td></tr>
+        <tr><td class="proto-name">System redundancy</td><td>Many providers deliver services via massively redundant systems so consumers do not experience outages even if drives, network connections or servers fail</td></tr>
+        <tr><td class="proto-name">Maintenance</td><td>Maintenance of the cloud infrastructure affects any cloud offering (software and hardware)</td></tr>
+        <tr><td class="proto-name">Location of data</td><td>If the provider promises to enforce data location regulations, the consumer must be able to audit it to prove compliance (e.g. data staying within India)</td></tr>
+        <tr><td class="proto-name">Seizure of data</td><td>If law enforcement targets one consumer's data, multi-tenancy makes it likely that other consumers are affected, so consider keeping backups with a third party</td></tr>
+        <tr><td class="proto-name">Failure of the provider</td><td>Consider the financial health of the provider, contingency plans, and its policies for handling data of a delinquent or disputed account</td></tr>
+        <tr><td class="proto-name">Jurisdiction</td><td>Understand the laws that apply to any cloud provider considered, and where litigation would be addressed</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">7 · SLA Requirements</div>
+    <table class="port-table">
+      <thead><tr><th>Requirement</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Security</td><td>The consumer must understand the controls and federation patterns needed to meet security requirements; providers must understand what to deliver to enable them</td></tr>
+        <tr><td class="proto-name">Data encryption</td><td>Details of encryption and access control policies, including key management (where the encrypted data and keys reside and how keys are communicated)</td></tr>
+        <tr><td class="proto-name">Privacy</td><td>Isolation of customer data (and services) in a multi-tenant environment</td></tr>
+        <tr><td class="proto-name">Data retention and deletion</td><td>Providers may have legal requirements to retain data even if the consumer deleted it; they must prove compliance with these policies (how long data is retained, where deleted)</td></tr>
+        <tr><td class="proto-name">Hardware erasure and destruction</td><td>The provider must zero out memory when a consumer powers off a VM, and even the disk platters if hardware is disposed of or recycled</td></tr>
+        <tr><td class="proto-name">Regulatory compliance</td><td>If regulations apply to data and applications, providers must be able to prove compliance</td></tr>
+        <tr><td class="proto-name">Transparency</td><td>For critical data and applications, providers must proactively notify consumers when SLA terms are breached</td></tr>
+        <tr><td class="proto-name">Certification</td><td>The provider should be responsible for proving the certification of any data or applications and keeping it up to date</td></tr>
+        <tr><td class="proto-name">Monitoring</td><td>To eliminate conflict of interest, a neutral third party organization is the best solution; easy to say but hard to implement, since a provider may not let a third party work on its systems</td></tr>
+        <tr><td class="proto-name">Auditability</td><td>Consumers are liable for breaches, so they should be able to audit provider systems and procedures; the SLA should state how and when audits take place. Audits are disruptive and expensive (downtime, resources), so providers will place limits on them and charge for them</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Requirements with respect to delivery models</h3>
+    <span class="ts">▶ 27:58</span>
+    <div class="callout yellow">Worth watching: the tick matrix of requirements against PaaS, IaaS and SaaS (source: "Cloud Computing Use Cases" white paper, version 4.0).</div>
+    <table class="port-table">
+      <thead><tr><th>Requirement</th><th>PaaS</th><th>IaaS</th><th>SaaS</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Data encryption</td><td>Yes</td><td>Yes</td><td>-</td></tr>
+        <tr><td class="proto-name">Privacy</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td class="proto-name">Data retention and deletion</td><td>-</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td class="proto-name">Hardware erasure and destruction</td><td>-</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td class="proto-name">Regulatory compliance</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td class="proto-name">Transparency</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td class="proto-name">Certification</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td class="proto-name">Terminology for KPIs</td><td>-</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td class="proto-name">Metrics</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td class="proto-name">Auditability</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td class="proto-name">Monitoring</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td class="proto-name">Machine-readable SLAs</td><td>-</td><td>Yes</td><td>-</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">8 · KPIs, SLOs and SLA</div>
+    <span class="ts">▶ 24:51</span>
+    <div class="callout yellow">Worth watching: the hand-drawn hierarchy with KPI at the bottom leading up to SLO and then SLA.</div>
+    <div class="stack">
+      <div class="stack-layer layer-app">
+        <span class="layer-name">SLA</span>
+        <span class="layer-desc">Aggregation of SLOs</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">SLO</span>
+        <span class="layer-desc">Built from KPIs</span>
+      </div>
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">KPI</span>
+        <span class="layer-desc">Lowest level metric</span>
+      </div>
+    </div>
+    <div class="callout"><strong>Key Performance Indicators (KPIs)</strong> are low-level resource metrics measured directly from system parameters, such as downtime, uptime, in-bytes, out-bytes and packet size. Multiple KPIs are composed, aggregated or converted into high-level SLOs, and multiple SLOs are integrated into the SLA.</div>
+    <div class="callout green"><strong>Possible mapping:</strong> availability (A) = 1 - (downtime / uptime), as written on the slide.</div>
+
+    <h3>Industry-defined KPIs: monitoring and auditability</h3>
+    <div class="callout">Natural questions: who should monitor the performance of the provider, and does the consumer meet its responsibilities? The solution is a <strong>neutral third-party organization</strong>, which eliminates conflicts of interest (e.g. when the provider reports an outage at its sole discretion, or the consumer is responsible for the outage). For auditability, the consumer needs to know whether the provider adheres to legal regulations or industry standards, and the SLA should make clear how and when audits are conducted.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">9 · Metrics for Monitoring and Auditing</div>
+    <table class="port-table">
+      <thead><tr><th>Metric</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Throughput</td><td>How quickly the service responds</td></tr>
+        <tr><td class="proto-name">Availability</td><td>Percentage of uptime for a service in a given observation period</td></tr>
+        <tr><td class="proto-name">Reliability</td><td>How often the service is available</td></tr>
+        <tr><td class="proto-name">Load balancing</td><td>When elasticity kicks in (new VMs booted or terminated), how well load is balanced</td></tr>
+        <tr><td class="proto-name">Durability</td><td>How likely the data is to be lost</td></tr>
+        <tr><td class="proto-name">Elasticity</td><td>Ability of a resource to grow infinitely, with limits (e.g. maximum storage or bandwidth) clearly stated</td></tr>
+        <tr><td class="proto-name">Linearity</td><td>How a system performs as the load increases</td></tr>
+        <tr><td class="proto-name">Agility</td><td>How quickly the provider responds as the consumer's resource load scales up and down</td></tr>
+        <tr><td class="proto-name">Automation</td><td>Percentage of requests handled without any human interaction</td></tr>
+        <tr><td class="proto-name">Customer service response times</td><td>How quickly the provider responds to a service request (human interaction when something goes wrong with on-demand, self-service)</td></tr>
+        <tr><td class="proto-name">Service-level violation rate</td><td>Mean rate of SLA violation due to infringements of the agreed warranty levels</td></tr>
+        <tr><td class="proto-name">Transaction time</td><td>Time from when a service is invoked until the transaction completes, including delays</td></tr>
+        <tr><td class="proto-name">Resolution time</td><td>Time between detection of a service problem and its resolution</td></tr>
+      </tbody>
+    </table>
+    <div class="callout green"><strong>Linearity:</strong> if provisioning increases linearly as load increases, it is easy to scale up and chase higher demand; if it is non-linear (especially exponential), scaling is difficult.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">10 · Example Cloud SLAs</div>
+    <span class="ts">▶ 28:16</span>
+    <div class="callout yellow">Worth watching: the example SLA tables listing provider, service, delivery model and guarantee definitions for each cloud provider.</div>
+    <table class="port-table">
+      <thead><tr><th>Provider and service</th><th>Model</th><th>SLA guarantee</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Amazon EC2</td><td>IaaS</td><td>Availability 99.95% (service year of 365 days, annual percentage uptime, region unavailability, eligible credit period, service credit)</td></tr>
+        <tr><td class="proto-name">Amazon S3</td><td>Storage-as-a-service</td><td>Availability 99.9% (error rate, monthly uptime percentage, service credit)</td></tr>
+        <tr><td class="proto-name">Amazon SimpleDB</td><td>Database-as-a-service</td><td>No specific SLA defined; the agreement does not guarantee availability</td></tr>
+        <tr><td class="proto-name">Salesforce CRM</td><td>PaaS</td><td>No SLA guarantees for the service provided</td></tr>
+        <tr><td class="proto-name">Google App Engine</td><td>PaaS</td><td>Availability 99.9% (error rate, error request, monthly uptime percentage, scheduled maintenance, service credits, SLA exclusions)</td></tr>
+        <tr><td class="proto-name">Microsoft Azure Compute</td><td>IaaS/PaaS</td><td>Availability 99.95% (monthly connectivity uptime service level, monthly role instance uptime service level, service credits, SLA exclusions)</td></tr>
+        <tr><td class="proto-name">Microsoft Azure Storage</td><td>Storage-as-a-service</td><td>Availability 99.9% (error rate, monthly uptime percentage, total and failed storage transactions, service credit, SLA exclusions)</td></tr>
+        <tr><td class="proto-name">Zoho suite (mail, CRM, books)</td><td>SaaS</td><td>User can customize SLA guarantees based on resolution time, business hours and support plans, and escalation</td></tr>
+        <tr><td class="proto-name">Rackspace Cloud Server</td><td>IaaS</td><td>Internal network 100%, data center infrastructure 100%, load balancers 99.9%; server migration notified 24 hours in advance and completed in at most 3 hours; recovery within 1 hour after the problem is identified</td></tr>
+        <tr><td class="proto-name">Terremark vCloud Express</td><td>IaaS</td><td>Monthly uptime percentage 100% (service credit, credit request and payment procedure, SLA exclusions)</td></tr>
+        <tr><td class="proto-name">Nirvanix (public, private, hybrid storage)</td><td>Storage-as-a-service</td><td>Monthly availability 99.9% (service availability, service credits, data replication policy, credit request procedure, SLA exclusions)</td></tr>
+      </tbody>
+    </table>
+    <div class="callout green"><strong>Why it matters:</strong> when migrating from a traditional system to cloud, for personal or organizational use, one must check across SLAs which parameters are needed, whether they are measurable at the provider's end, and how to guarantee that the business process is not adversely affected by the provider.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>SLA:</strong> a formal contract between provider and consumer, the foundation of consumer trust, containing objectively measurable SLOs; there is no standard format yet.</div>
+    <div class="callout green"><strong>SLA contents:</strong> services and their definitions, responsibilities, metrics, an auditing mechanism, remedies and penalties, and how the SLA changes over time.</div>
+    <div class="callout"><strong>Hierarchy:</strong> KPIs (low-level system metrics) are aggregated into SLOs, which together make up the SLA; for example availability = 1 - (downtime / uptime).</div>
+    <div class="callout green"><strong>Cloud vs web service SLA:</strong> cloud stresses security, privacy and trust, needs automated SLAs for dynamic scaling, and allocates resources globally with no central directory (unlike UDDI).</div>
+    <div class="callout"><strong>Types:</strong> off-the-shelf (non-negotiable, provider template, public clouds, small needs) versus negotiable (via external agents, large needs).</div>
+    <div class="callout pink"><strong>Caveats:</strong> third party monitoring is hard to implement, audits are costly so providers limit them, and multi-tenancy means data seizure for one consumer can affect others.</div>
+    <div class="callout green"><strong>Requirements:</strong> security, encryption, privacy, retention and deletion, hardware erasure, compliance, transparency, certification, monitoring and auditability; they differ across IaaS, PaaS and SaaS, and only IaaS needs machine-readable SLAs in the slide's matrix.</div>
+    <div class="callout yellow"><strong>Examples:</strong> EC2 and Azure Compute 99.95%; S3, Azure Storage, Google App Engine and Nirvanix 99.9%; Terremark 100% monthly uptime; Salesforce CRM and SimpleDB offer no SLA guarantees.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

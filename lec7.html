@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 7 — Virtualization | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec6.html" class="nav-lec">← prev</a>
+      <a href="lec8.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 07</span>
+    <span class="high-badge">High priority</span>
+    <h1>Virtualization</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Revisits virtualization, the core enabler of cloud computing, through the IaaS lens: what the subscriber gets and controls, the three-level cloud manager architecture, the hypervisor and the Popek and Goldberg requirements, and the three approaches to server virtualization. Ends with an introduction to network virtualization. Concept-heavy and foundational; expect exam questions on hypervisors and the types of virtualization.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · Virtualization and IaaS</div>
+    <div class="callout">Virtualization is one of the core prime movers of cloud computing. It is not a new concept: we already virtualize a Linux system over Windows, and in networking we have the <strong>VLAN</strong> and the <strong>VPN</strong> (virtual private network). Cloud architecture exploits this feature to offer cloud services.</div>
+
+    <h3>What the IaaS subscriber gets</h3>
+    <div class="tag-row">
+      <span class="tag">Access to virtual computers</span>
+      <span class="tag">Network-accessible virtual storage</span>
+      <span class="tag">Network infrastructure components such as firewalls</span>
+      <span class="tag">Configuration services</span>
+    </div>
+    <div class="callout">The subscriber does not know where the machine is or how it is configured; they only ask through an interface for the type of machine they need. A combination of VMs with a backbone network can also be used to realize a network infrastructure.</div>
+
+    <h3>How usage fees are calculated</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Per CPU hour</span>
+      <span class="tag tag-good">GB of data stored per hour</span>
+      <span class="tag tag-good">Network bandwidth consumed</span>
+      <span class="tag tag-good">Network infrastructure used (e.g. IP addresses) per hour</span>
+      <span class="tag tag-good">Value-added services (e.g. monitoring, automatic scaling)</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · IaaS Provider / Subscriber Interaction</div>
+    <span class="ts">▶ 03:26</span>
+    <div class="callout yellow">Worth watching: the diagram of clients A, B and C mapped to different VMs while the provider retains the remaining pool.</div>
+    <div class="callout">The provider has a large pool of VMs that it allocates to clients by provisioning. Theoretically any configuration is possible, but in practice VMs come in a few fixed categories (flavors). The mix depends on backbone resource availability and on the type of requests received: if requests are mostly for small VMs, more small VMs are provisioned.</div>
+    <div class="callout yellow"><strong>Example (Megamala, IIT Kharagpur):</strong> three flavors. IIT KGP VM has 4 GB RAM and 20 GB hard disk; IIT KGP large has 8 GB RAM; IIT KGP extra large has 60 GB RAM.</div>
+    <div class="callout green"><strong>Allocation in the slide:</strong> client A has VM1 and VM2, client B has VM3, client C has VM4 to VM6, and the provider retains VM7 through VMn for other users.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · IaaS Component Stack and Scope of Control</div>
+    <div class="callout">The IaaS component stack comprises hardware, operating system, middleware and applications. The operating system layer is split into two: the lower, more privileged layer is the <strong>Virtual Machine Monitor (VMM) or hypervisor</strong>; the higher layer is the OS running within a VM, the <strong>Guest OS</strong>.</div>
+    <span class="ts">▶ 05:34</span>
+    <div class="callout yellow">Worth watching: the slide showing provider control and subscriber control against each layer of the stack.</div>
+    <div class="stack">
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Application</span>
+        <span class="layer-desc">e.g. mail, CRM</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">Middleware</span>
+        <span class="layer-desc">e.g. Java</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Guest OS</span>
+        <span class="layer-desc">Inside the VM</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">Hypervisor</span>
+        <span class="layer-desc">Also called VMM</span>
+      </div>
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Hardware</span>
+        <span class="layer-desc">Bare metal</span>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Cloud provider</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Hardware</span>Total control</div>
+          <div class="compare-row"><span class="label">Hypervisor</span>Administrative control</div>
+          <div class="compare-row"><span class="label">Upper layers</span>No control over Guest OS, middleware and applications</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Cloud subscriber</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Hardware</span>No (practically low) control</div>
+          <div class="compare-row"><span class="label">Hypervisor</span>Can only make requests (e.g. request a VM)</div>
+          <div class="compare-row"><span class="label">Upper layers</span>Total control over Guest OS, middleware and applications</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout green"><strong>Key insight:</strong> control at the upper layers moves to the subscriber and control at the lower layers moves to the provider.</div>
+    <div class="callout">The subscriber is free, using the provider's utilities, to load any supported OS into the VM, and typically maintains complete control over the operation of the Guest OS in each VM. A hypervisor uses the hardware to synthesize one or more VMs, each being "an efficient, isolated duplicate of a real machine". The VM appears to the subscriber as actual hardware that can be administered (powered on/off, peripherals configured) via commands sent over the network to the provider.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · IaaS Cloud Architecture</div>
+    <span class="ts">▶ 08:49</span>
+    <div class="callout yellow">Worth watching: the logical IaaS architecture with users, cloud manager, DOS, cluster managers with PLS, and computer managers running hypervisors and VMs.</div>
+    <div class="callout">The architecture is a <strong>three-level hierarchy</strong>. Subscriber queries and commands enter at the top and are forwarded down through the layers, which either answer queries or execute commands.</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Cloud Manager (top)</div>
+        <div class="concept-desc">Responsible for central control of the whole cloud.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Cluster Manager (middle)</div>
+        <div class="concept-desc">Manages possibly large computer clusters, which may be geographically distant from one another.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Computer Manager (bottom)</div>
+        <div class="concept-desc">Runs the host computing system on which VMs are created.</div>
+      </div>
+    </div>
+    <div class="callout">Cluster managers can be geographically distributed. Within a cluster, the computer managers are connected via a high speed network.</div>
+
+    <h3>Cloud Manager</h3>
+    <div class="callout">The <strong>public access point</strong> to the cloud, where subscribers sign up for accounts, manage the resources they rent, and access data stored in the cloud. It is the front end of the whole system. Its mechanisms:</div>
+    <div class="tag-row">
+      <span class="tag">Authenticating subscribers</span>
+      <span class="tag">Generating or validating access credentials used when communicating with VMs</span>
+      <span class="tag">Top-level resource management</span>
+    </div>
+    <div class="callout">For each subscriber request, the cloud manager determines whether the cloud has enough free resources to satisfy it. It maintains metadata information, and if the requested VMs are not available it has to take a call.</div>
+
+    <h3>Data Object Storage (DOS)</h3>
+    <div class="callout">DOS generally stores the subscriber's metadata, such as user credentials and operating system images. The DOS service is usually <strong>single for a cloud</strong>: it acts as a registry, catalogue or metadata service for the whole cloud, recording which services and free resources are available. It is the binding block of the whole system.</div>
+
+    <h3>Cluster Manager</h3>
+    <div class="callout">Responsible for the operation of a collection of computers connected via a high speed local area network. It receives resource allocation commands and queries from the cloud manager and calculates whether part or all of a command can be satisfied using the resources of computers in its cluster, then signals accept or cannot accept. It queries the computer managers for resource availability and returns messages to the cloud manager, so it acts as a middleware or agent between the cloud manager and the computer managers. It also instructs the computer managers to perform resource allocation, reconfiguration and de-allocation.</div>
+    <div class="callout green"><strong>Persistent Local Storage (PLS):</strong> cluster managers connect to a PLS, which is non-volatile storage that provides persistent disk-like storage to the VMs. When a VM is shut down or fails, the data is still there the next time the user logs in.</div>
+
+    <h3>Computer Manager</h3>
+    <div class="callout">Runs on each computer system at the lowest level and uses virtualization to provide VMs to subscribers. It maintains status information, including how many VMs are running and how many can still be started, and uses the command interface of its hypervisor to start, stop, suspend and reconfigure VMs.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · Virtualization Concept</div>
+    <span class="ts">▶ 15:12</span>
+    <div class="callout yellow">Worth watching: the non-virtualized system (one OS controls all hardware) versus the virtualized system (a virtualization layer hosts multiple virtual containers).</div>
+    <div class="callout"><strong>Virtualization</strong> is a broad term: virtual memory, virtual network, virtual storage and so on. The primary focus here is <strong>platform virtualization</strong>: allowing one computer to do the job of multiple computers by sharing the resources of a single hardware across multiple environments.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Non-virtualized system</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Control</span>A single OS controls all hardware platform resources</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Virtualized system</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Control</span>A virtualization layer makes it possible to run multiple virtual containers on a single physical platform</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Challenge:</strong> with Windows, Linux or other Guest OSs on the same bare metal, the instruction set of each Guest OS must still run on the hardware. There are also issues of application sizing, and of how to manage a VM that asks for more resources or wants to release them.</div>
+
+    <h3>Virtualization vs dual boot</h3>
+    <div class="callout">Virtualization runs multiple operating systems and user applications on the same hardware (e.g. Windows and Linux on the same laptop). Unlike dual boot, <strong>both OSs run simultaneously</strong>, and in true virtualization they are <strong>completely isolated</strong> from each other.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · Hypervisor / Virtual Machine Monitor</div>
+    <div class="callout">A <strong>hypervisor (VMM)</strong> runs the Guest OS directly on the CPU. This works only if the Guest OS uses the same instruction set as the host; otherwise instruction translation must come into play. Since the Guest OS runs in user mode, privileged instructions must be intercepted or replaced, which imposes restrictions on the CPU instruction set.</div>
+
+    <h3>Three goals of a VM architecture (Popek and Goldberg)</h3>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Equivalence</div>
+        <div class="concept-desc">The VM should be indistinguishable from the underlying hardware, as if it ran on the hardware itself.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Resource control</div>
+        <div class="concept-desc">The VM should be in complete control of any virtualized resources (e.g. the 4 GB RAM or 60 GB disk given to it).</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Efficiency</div>
+        <div class="concept-desc">Most VM instructions should execute directly on the underlying CPU without involving the hypervisor.</div>
+      </div>
+    </div>
+
+    <h3>Classification of instructions</h3>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Privileged instructions</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Behaviour</span>Cause a trap if executed in user mode</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Sensitive instructions</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Behaviour</span>Change the underlying resources (e.g. doing I/O, changing page tables), or observe information that indicates the current privilege level (exposing that the guest is not on bare hardware)</div>
+          <div class="compare-row"><span class="label">Types</span>The former class is called control sensitive and the latter behavior sensitive; the distinction is not particularly important</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout green"><strong>Popek and Goldberg result:</strong> a VM with all three desired properties can be run if the sensitive instructions are a <strong>subset of the privileged instructions</strong>. Then most instructions run directly, and any sensitive instruction traps to the hypervisor, which emulates it, hopefully without much slowdown. They gave a formal proof of this requirement.</div>
+    <div class="callout pink"><strong>Note:</strong> the lower the level of operation (level 0, level 1 and so on), the closer to bare metal. The higher the level at which virtualization operates, the more latency and translation come into play, so the level of operation matters especially for IaaS.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">7 · Approaches to Server Virtualization</div>
+    <span class="ts">▶ 22:42</span>
+    <div class="callout yellow">Worth watching: the evolution diagram showing where the hypervisor, dynamic translation and virtualization logic sit in each generation.</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">1st gen: Full virtualization</div>
+        <div class="concept-desc">Binary rewriting; software based; supported by VMware and Microsoft. A dynamic translator rewrites instructions for the underlying hardware.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">2nd gen: Para-virtualization</div>
+        <div class="concept-desc">Cooperative virtualization with a modified guest; VMware and Xen. The VMM penetrates a little into the VM.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">3rd gen: Hardware-assisted</div>
+        <div class="concept-desc">Silicon based; unmodified guest; VMware and Xen on virtualization-aware hardware platforms.</div>
+      </div>
+    </div>
+
+    <h3>Full virtualization</h3>
+    <div class="callout">First generation offering for x86/x64 server virtualization using <strong>dynamic binary translation</strong>. An emulation layer talks to the computer hardware, and the Guest OS does not see that it is in an emulated environment. All hardware including the CPU is emulated. Two popular open source emulators: <strong>QEMU</strong> and <strong>Bochs</strong>.</div>
+    <div class="compare">
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Advantages</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Isolation</span>The emulation layer isolates VMs from the host OS and from each other, and controls each VM's access to resources so an unstable VM cannot hurt system performance</div>
+          <div class="compare-row"><span class="label">Portability</span>Total VM portability: by emulating a consistent set of hardware, VMs can move between hosts with dissimilar hardware (e.g. a VM on a Dell server relocated to a Hewlett-Packard server), and an OS developed for another architecture can run on yours</div>
+        </div>
+      </div>
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Drawbacks</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Performance</span>Hardware emulation comes with a performance price</div>
+          <div class="compare-row"><span class="label">Rings</span>In traditional x86, OS kernels expect to run privileged code in Ring 0. Ring 0 is controlled by the host OS, so VMs are forced to run at Ring 1/3, which requires the VMM to trap and emulate instructions</div>
+        </div>
+      </div>
+    </div>
+    <span class="ts">▶ 24:42</span>
+    <div class="callout yellow">Worth watching: ring placement of application, Guest OS and VMM in full virtualization compared with traditional x86.</div>
+    <div class="callout green">Because of these performance limitations, para-virtualization and hardware-assisted virtualization were developed.</div>
+
+    <h3>Para-virtualization</h3>
+    <div class="callout">The Guest OS is modified and runs kernel-level operations at <strong>Ring 1 (or 3)</strong>. The guest is fully aware of how to process privileged instructions, so privileged instruction translation by the VMM is no longer necessary. The Guest OS uses a <strong>specialized API</strong> to talk to the VMM and execute privileged instructions, and the VMM handles the virtualization requests and passes them to the hardware. It is not full translation, so performance increases, and it is becoming pretty popular.</div>
+    <div class="callout">Guest OSs are para-virtualized in two ways:</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Recompiling the OS kernel</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Needs</span>Para-virtualization drivers and APIs must reside in the guest OS kernel, so a modified, virtualization-aware OS must be compiled</div>
+          <div class="compare-row"><span class="label">Vendors</span>Some vendors (e.g. Novell) have embraced this and provide para-virtualized OS builds; others (e.g. Microsoft) have not</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Installing para-virtualized drivers</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Why</span>In some OSs complete para-virtualization is not possible as it needs a specialized OS version</div>
+          <div class="compare-row"><span class="label">How</span>It can be applied to individual devices for good performance, e.g. instructions from network boards or graphics cards are modified before leaving the VM</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Hardware-assisted virtualization</h3>
+    <div class="callout">The Guest OS runs at <strong>Ring 0</strong>. The VMM uses processor extensions (such as <strong>Intel VT or AMD-V</strong>) to intercept and emulate privileged operations in the guest. This removes many of the problems that make writing a VMM a challenge. The VMM runs in a ring more privileged than 0, so a <strong>Virtual-1</strong> ring is created.</div>
+    <div class="compare">
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Pros</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Guest</span>Runs unmodified OSs, so a legacy OS can be run without problems</div>
+        </div>
+      </div>
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Cons</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Speed</span>Speed and flexibility: an unmodified OS does not know it is virtualized, so it cannot take advantage of virtualization features. This can be partially resolved using para-virtualization</div>
+          <div class="compare-row"><span class="label">Portability</span>VM portability is lost, since migration requires hardware that understands the same virtualization support</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">8 · Network Virtualization</div>
+    <div class="callout">After hardware (server) virtualization, the focus shifts to the network level: emulating a virtual network over a given network.</div>
+    <div class="callout"><strong>Network virtualization</strong> is a networking environment that allows multiple service providers to dynamically compose multiple heterogeneous virtual networks that co-exist in isolation from each other, and to deploy customized end-to-end services on-the-fly and manage them on those virtual networks by effectively sharing and utilizing underlying network resources leased from multiple infrastructure providers.</div>
+    <span class="ts">▶ 27:38</span>
+    <div class="callout yellow">Worth watching: one physical network drawn as two different virtualized (logical) networks.</div>
+    <div class="callout green"><strong>Core idea:</strong> make a physical network appear as multiple logical ones.</div>
+
+    <h3>Typical approach</h3>
+    <div class="tag-row">
+      <span class="tag">Networking technology: IP, ATM</span>
+      <span class="tag">Layer of virtualization</span>
+      <span class="tag">Architectural domain: network resource management, spawning networks</span>
+      <span class="tag">Level of virtualization: node virtualization, full virtualization</span>
+    </div>
+
+    <h3>Why virtualize?</h3>
+    <div class="callout">The Internet is almost "paralyzed": there are many makeshift solutions (e.g. overlays) and a new, clean-slate architecture is needed. A one-size-fits-all architecture is hard to design because it is almost impossible to predict what the future might unleash, so the aim is an <strong>all-sizes-fit-into-one</strong>, open and expandable architecture. Virtual networks also serve as a <strong>testbed</strong> for future networking architectures and protocols, since putting up a whole real network for testing is a challenge.</div>
+
+    <h3>Related concepts</h3>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Virtual Private Networks</div>
+        <div class="concept-desc">A virtual network connecting distributed sites. Not customizable enough.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Active and Programmable Networks</div>
+        <div class="concept-desc">Customized network functionalities, with programmable interfaces and active codes.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Overlay Networks</div>
+        <div class="concept-desc">Application layer virtual networks. Not flexible enough.</div>
+      </div>
+    </div>
+    <div class="callout">These are already in place for several years, and network virtualization is emulated over them. The network virtualization model covers four aspects: business model, architecture, design principles and design goals.</div>
+
+    <h3>Business model: players</h3>
+    <span class="ts">▶ 29:09</span>
+    <div class="callout yellow">Worth watching: the relationship diagram between end user, broker, service provider and infrastructure provider (with agreements labelled between them).</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">InPs</div>
+        <div class="proto-card-title">Infrastructure Providers</div>
+        <div class="proto-card-desc">Manage the underlying physical networks.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">SPs</div>
+        <div class="proto-card-title">Service Providers</div>
+        <div class="proto-card-desc">Create and manage virtual networks and deploy customized end-to-end services.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">users</div>
+        <div class="proto-card-title">End Users</div>
+        <div class="proto-card-desc">Buy and use services from different service providers.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">mediators</div>
+        <div class="proto-card-title">Brokers</div>
+        <div class="proto-card-desc">Mediators or arbiters between the players.</div>
+      </div>
+    </div>
+    <div class="callout">The players have a very complex relationship with each other. This business model holds for other sorts of virtualization as well, not only network virtualization.</div>
+
+    <h3>Architecture</h3>
+    <span class="ts">▶ 29:35</span>
+    <div class="callout yellow">Worth watching: infrastructure providers at the bottom, with virtual networks VN1 and VN2 built over them by service providers SP1 and SP2, plus parent and child virtual networks.</div>
+    <div class="callout">Over the infrastructure providers' physical network, service provider 1 emulates a virtual network and service provider 2 emulates another, so different varieties of network can be realized on one basic underlying network.</div>
+    <div class="callout green"><strong>Why it matters:</strong> to conduct, say, testing across geographical space, one needs not only servers but also a network infrastructure. That requires server-level (IaaS) virtualization as well as network-level virtualization, together giving a virtualized IP infrastructure.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>IaaS subscriber:</strong> gets virtual machines, virtual storage and network components, and pays per CPU hour, GB stored, bandwidth, network infrastructure and value-added services.</div>
+    <div class="callout green"><strong>Scope of control:</strong> the provider controls hardware and administers the hypervisor; the subscriber controls the Guest OS, middleware and applications. Upper layers go to the subscriber, lower layers to the provider.</div>
+    <div class="callout"><strong>IaaS architecture:</strong> a three-level hierarchy of cloud manager (public access point, authentication, top-level resource management), cluster managers (clusters of computers, possibly distributed) and computer managers (hypervisor and VMs), with DOS as the single metadata store and PLS for persistent VM storage.</div>
+    <div class="callout green"><strong>Virtualization:</strong> one computer does the job of many by sharing a single hardware; unlike dual boot, the OSs run simultaneously and isolated.</div>
+    <div class="callout"><strong>Hypervisor goals:</strong> equivalence, resource control and efficiency (Popek and Goldberg).</div>
+    <div class="callout green"><strong>Popek and Goldberg condition:</strong> a true VM is possible if sensitive instructions are a subset of privileged instructions, so that sensitive instructions trap to the hypervisor and are emulated.</div>
+    <div class="callout"><strong>Full virtualization:</strong> dynamic binary translation with the whole hardware emulated (QEMU, Bochs); isolation and portability, but a performance price.</div>
+    <div class="callout green"><strong>Para-virtualization:</strong> modified Guest OS at Ring 1/3 using a specialized API to talk to the VMM; better performance, but needs kernel recompilation or para-virtualized drivers.</div>
+    <div class="callout pink"><strong>Hardware-assisted virtualization:</strong> unmodified Guest OS at Ring 0 with Intel VT or AMD-V support; runs legacy OSs, but loses portability, speed and flexibility.</div>
+    <div class="callout"><strong>Network virtualization:</strong> makes one physical network appear as multiple isolated logical networks; players are infrastructure providers, service providers, end users and brokers; useful as a testbed and for realizing a virtualized IP infrastructure alongside server virtualization.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

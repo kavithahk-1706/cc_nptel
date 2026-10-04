@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 9 — XML Basics (Contd.) | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec8.html" class="nav-lec">← prev</a>
+      <a href="lec10.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 09</span>
+    <span class="med-badge">Medium priority</span>
+    <h1>XML Basics (Contd.)</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Continues XML basics with XML Schema, namespaces, the main parser APIs (SAX, DOM, JDOM, dom4j), XSLT transformations, and XML messaging with XML-RPC and SOAP. Explains why XML is the de facto language for interoperability in cloud and distributed systems. Moderately technical; it builds on the previous lecture, and the parser comparison and SOAP-over-HTTP ideas are the likely exam material.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · XML Schemas</div>
+    <div class="callout">XML schema defines the <strong>structure</strong> of XML. Example: an XML file of a batch's student data is huge; when the placement or accounts section wants to share part of it with external agencies, the schema (or a part of it) is shared. Likewise, when an organization takes data from another, the schema must first be <strong>agreed upon</strong>. So XML schema plays a vital role in exchanging information and in interoperability between repositories.</div>
+    <span class="ts">▶ 03:46</span>
+    <div class="callout yellow">Worth watching: the XML Schema version of the earlier transfers DTD, showing it is itself an XML document (simple.xsd).</div>
+    <div class="callout">XML Schema is a new specification (2001) for specifying validation rules for XML. A parser first checks that the document is <strong>well-formed</strong>, then checks it against the schema if available; if it conforms it is a <strong>valid</strong> XML document.</div>
+    <div class="tag-row">
+      <span class="tag tag-good">Uses pure XML (no special DTD grammar)</span>
+      <span class="tag tag-good">More powerful than DTDs: integer types, date strings, real numbers in a given range</span>
+      <span class="tag tag-good">Used for type validation and for relating database schemas to XML models</span>
+      <span class="tag tag-bad">Cannot declare entities; that can only be done in DTDs</span>
+    </div>
+    <div class="callout green"><strong>Key insight:</strong> because a schema is an XML document, it can be handled the same way as XML data. Knowing the schema, one can create a database and load the XML data into it, or the other way around.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · XML Namespaces</div>
+    <div class="callout">Since XML allows user defined data, you must be careful which definition and which namespace you are using. A <strong>namespace</strong> is a mechanism for identifying different "spaces" for XML names, i.e. element or attribute names. It identifies different <strong>language dialects</strong>, consisting of names that have specific semantic and processing meanings.</div>
+    <div class="callout yellow"><strong>Examples:</strong> a "table" element can be a table of furniture or a table of a word processor or spreadsheet, each with its own definition. A key in one language may mean a security key, while a key in another means a database key; the two are told apart by their namespaces.</div>
+    <div class="callout">A special attribute <strong>xmlns</strong> defines the namespace. The namespace is given as a <strong>URL string</strong>, but the URL does not reference anything in particular; there may be nothing there.</div>
+
+    <h3>Mixing language dialects</h3>
+    <span class="ts">▶ 06:39</span>
+    <div class="callout yellow">Worth watching: an XHTML document that declares xhtml as the default space and an mt prefix for MathML, then uses mt-prefixed elements inside the page.</div>
+    <div class="callout green">Namespaces make it relatively easy to mix languages in one document. Here the default space is <strong>xhtml</strong> (defined by W3C), and the <strong>mt:</strong> prefix indicates the space <strong>mathml</strong>, a different language. Elements written as mt:title then refer to the MathML namespace.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · XML Software: Parsers</div>
+    <div class="callout">An <strong>XML parser</strong> reads XML data, checks syntactic (and possibly DTD or schema) constraints, and makes the data available to an application. There are three generic parser APIs: <strong>SAX</strong> (Simple API for XML, event based), <strong>DOM</strong> (Document Object Model, object/tree based) and <strong>JDOM</strong> (Java Document Object Model, object/tree based). Many parsers exist for Unix, Windows, OS/390 or z/OS and others.</div>
+    <div class="callout pink"><strong>Speed and memory:</strong> SAX-based parsers are fast, often as fast as you can stream data. DOM is slower and more memory intensive, since it creates an in-memory version of the entire document. Validating can be much slower than non-validating, because the parser must check conformance to the schema before doing any processing.</div>
+
+    <h3>SAX, DOM and JDOM compared</h3>
+    <table class="port-table">
+      <thead><tr><th>Parser</th><th>Nature</th><th>Advantages</th><th>Disadvantages</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">SAX</td><td>Event-based interface; reports an event whenever it sees a tag, attribute, text node or unresolved external entity; programmer attaches event handlers</td><td>Simple to use; very fast; low memory footprint (does not read the whole document into memory)</td><td>Does not do much for you, so you do everything yourself; not useful for dynamically modifying the document in memory</td></tr>
+        <tr><td class="proto-name">DOM</td><td>Object-based interface; generates an in-memory tree corresponding to the document, with methods for accessing and modifying the tree</td><td>Very useful for dynamic modification and for queries that depend on tree structure; same interface across languages such as C++ and Java</td><td>Can be slow and memory hungry (must build the tree); programming interface is not straightforward and needs more expertise</td></tr>
+        <tr><td class="proto-name">JDOM</td><td>Java-specific object-oriented interface; in-memory tree with methods for accessing and modifying it</td><td>Useful for dynamic modification and structure-dependent queries; much nicer object-oriented programming interface than DOM</td><td>Can be slow and take lots of memory; new and not entirely cooked; works only with Java and is not (yet) part of core Java standard</td></tr>
+      </tbody>
+    </table>
+    <div class="callout green"><strong>When to use SAX:</strong> a vanilla XML processing requirement that must run fast with a low memory footprint and a simple interface.</div>
+    <span class="ts">▶ 13:08</span>
+    <div class="callout yellow">Worth watching: the DOM parser processing model, where the parser interface builds a Document "object" (tree) that the application works on.</div>
+
+    <h3>dom4j</h3>
+    <div class="callout">A Java framework for reading, writing, navigating and editing XML. It gives access to SAX, DOM and JDOM interfaces and other XML utilities such as XSLT and JAXP, and can do <strong>mixed SAX/DOM parsing</strong>: use SAX up to one point in a document, then turn the rest into a DOM tree. Advantages: lots of goodies in one easy-to-use Java package, and an Apache open source licence (free use). Disadvantages: Java only, and possible concerns over its open source nature.</div>
+
+    <h3>Other parsers and benchmarks</h3>
+    <div class="tag-row">
+      <span class="tag">Xerces (C++; Apache open source)</span>
+      <span class="tag">XML toolkit (Java and C++; commercial)</span>
+      <span class="tag">XML for C++ (IBM; based on Xerces; commercial)</span>
+      <span class="tag">XMLBooster (COBOL, C++; commercial)</span>
+      <span class="tag">XML4Cobol</span>
+    </div>
+    <div class="compare">
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">SAX</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Speed</span>Faster</div>
+          <div class="compare-row"><span class="label">Memory</span>Less memory</div>
+          <div class="compare-row"><span class="label">Model</span>Stream processing</div>
+        </div>
+      </div>
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">DOM</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Speed</span>Slower</div>
+          <div class="compare-row"><span class="label">Memory</span>More memory</div>
+          <div class="compare-row"><span class="label">Model</span>Object / persistence processing</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout green">Benchmarks also show that <strong>non-validating parsers are always faster than validating ones</strong>.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · XSLT</div>
+    <div class="callout"><strong>XSLT (eXtensible Stylesheet Language Transformations)</strong> is an XML language for processing XML. It does <strong>tree transformations</strong>: it takes an XML document and an XSLT style sheet as input and produces a new XML document with a different structure. It can filter, e.g. extract a sub-tree of an XML tree that an application needs. The style sheet also gives how XML is to be represented or displayed, so XML plus XSLT is sometimes equivalent to HTML in characteristics (not in power).</div>
+    <div class="compare">
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Advantages</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Transform</span>Very useful for tree transformations; much easier than DOM or SAX for this purpose</div>
+          <div class="compare-row"><span class="label">Query</span>Can be used to query a document (pulls out the part you want)</div>
+        </div>
+      </div>
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Disadvantages</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Speed</span>Can be slow for large documents or style sheets</div>
+          <div class="compare-row"><span class="label">Debugging</span>Style sheets can be difficult to debug, with poor error detection (much better if you use schemas)</div>
+        </div>
+      </div>
+    </div>
+    <span class="ts">▶ 18:16</span>
+    <div class="callout yellow">Worth watching: the XSLT processing model, where the style sheet and the XML data each go through an XML parser into the XSLT processor, which outputs new XML.</div>
+    <div class="callout green"><strong>Flow:</strong> the XSLT style sheet needs its own XML parser, and the XML data goes through another. Both feed the XSLT processor, which works on the document "objects" (trees) and outputs filtered XML data.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · XML Messaging</div>
+    <div class="callout"><strong>XML messaging</strong> uses XML as the format for sending messages between systems. XML needs a carrier protocol to transfer the data; this "transport mechanism" runs over the network and should not be confused with transport layer protocols.</div>
+    <div class="compare">
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Advantages and requirements</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Syntax</span>Common syntax, self-describing, easier to parse</div>
+          <div class="compare-row"><span class="label">Transport</span>Can use existing mechanisms: HTTP, HTTPS, SMTP (email), MQ, IIOP/CORBA, JMS</div>
+          <div class="compare-row"><span class="label">Needs</span>Shared understanding of dialects for transport (a registry, i.e. namespace, to identify dialects) and shared acceptance of the messaging contract</div>
+        </div>
+      </div>
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Disadvantages</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Delivery</span>Asynchronous transport; no guarantee of delivery, and no guarantee that the external partner shares acceptance of the contract</div>
+          <div class="compare-row"><span class="label">Size</span>Messages are much larger than binary (10x or more), though they can be compressed</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Common messaging model: XML over HTTP</h3>
+    <span class="ts">▶ 19:55</span>
+    <div class="callout yellow">Worth watching: an HTTP POST request with headers (content-type application/xml) followed by the XML message markup.</div>
+    <div class="callout">HTTP is used to transport XML messages. The HTTP request (e.g. a POST) is a standard protocol mechanism, and the XML document is <strong>embedded</strong> in it: HTTP is the envelope and the XML message is the payload.</div>
+
+    <h3>Standards for message format</h3>
+    <div class="callout">These define dialects designed to "wrap" remote invocation messages.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">XML-RPC</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Idea</span>A very simple way of encoding a function/method call name and its passed parameters in an XML message</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">SOAP (Simple Object Access Protocol)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Idea</span>A more complex wrapper that lets you specify schemas for interfaces and more complex rules for handling and proxying messages</div>
+          <div class="compare-row"><span class="label">Use</span>Primarily used in web services in a service oriented architecture; a core component of Microsoft's .NET strategy and integrated into recent versions of WebSphere and other commercial packages</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>XML messaging plus processing</h3>
+    <span class="ts">▶ 21:13</span>
+    <div class="callout yellow">Worth watching: a factory application placing orders with several suppliers via SOAP over HTTP, with the application, SOAP API, XML/EDI and transport layers drawn alongside.</div>
+    <div class="callout green"><strong>Key insight:</strong> XML is a <strong>universal format for data exchange</strong>. An application with a SOAP API can interact with different suppliers; the SOAP message piggybacks on HTTP as its payload, and the other entity extracts it and delivers it to the application running there. Transport can be HTTP(S), SMTP or others.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · The XML Family</div>
+    <span class="ts">▶ 22:12</span>
+    <div class="callout yellow">Worth watching: the map of XML and related specifications, with the core (XML 1.0, XML names, XSLT, XSL, XPath, XPointer, XML schema) in the middle and APIs, protocols, web services and application areas around it.</div>
+    <div class="callout">The core of the family includes XML, XSLT, XSL, XPath and XPointer; not all components are covered in the course. Around the core sit APIs (SAX, DOM, JDOM), styling, protocols (SOAP, XML-RPC), web services (WSDL, UDDI) and other namespaces and application areas such as MathML and SVG (for generating graphics). Further learning is possible through any standard book or the W3C Schools tutorial.</div>
+    <div class="callout green"><strong>Why it matters:</strong> XML is versatile in allowing data transformation, and with styling (XSLT or other style sheets) the data can be displayed, even by generating an HTML file for the other end. SOAP, WSDL and UDDI messaging in distributed systems are primarily XML based, so for cloud or any distributed system with interoperability needs, <strong>XML is the de facto language</strong>.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>XML Schema:</strong> a 2001 specification written in XML that defines structure and validation rules, is more powerful than DTDs (types such as integers and dates), but cannot declare entities.</div>
+    <div class="callout green"><strong>Namespaces:</strong> the xmlns attribute (a URL string) identifies which dialect an element or attribute name belongs to, so different languages can be mixed in one document using prefixes.</div>
+    <div class="callout"><strong>Parsers:</strong> SAX is event-based, fast and low memory; DOM and JDOM build an in-memory tree, suit dynamic modification and structure-based queries, but are slower and memory hungry; dom4j allows mixed SAX/DOM parsing; non-validating is always faster than validating.</div>
+    <div class="callout green"><strong>XSLT:</strong> transforms an XML document into a new XML document with a different structure using a style sheet, useful for filtering a sub-tree but hard to debug.</div>
+    <div class="callout"><strong>XML messaging:</strong> XML is carried over transports such as HTTP, HTTPS and SMTP; it is self-describing and easy to parse, but asynchronous with no delivery guarantee and much larger than binary.</div>
+    <div class="callout green"><strong>XML-RPC and SOAP:</strong> XML-RPC encodes a method call and its parameters simply; SOAP is a richer wrapper used in web services and SOA, carried as the payload of HTTP.</div>
+    <div class="callout pink"><strong>Caveat:</strong> messaging needs a shared namespace registry and an agreed messaging contract, and nothing guarantees the partner accepts the contract.</div>
+    <div class="callout"><strong>Big picture:</strong> XML and its companion technologies (SOAP, WSDL, UDDI, MathML, SVG) are the de facto means of interoperability in cloud and distributed systems, especially for SaaS.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

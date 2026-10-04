@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 8 — XML Basics | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec7.html" class="nav-lec">← prev</a>
+      <a href="lec9.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 08</span>
+    <span class="high-badge">High priority</span>
+    <h1>XML Basics</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Introduces XML as the basic building block of service oriented architecture and web services, which is how heterogeneous cloud services interoperate. Covers XML structure, the tree data model, parsers, well-formed versus valid documents, DTDs, entities, and XML Schema. Moderately technical and foundational for the SOA and SaaS lectures that follow.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · Why XML for Cloud</div>
+    <div class="callout">Cloud offers many services (XaaS), so a protocol is needed that lets them <strong>interoperate</strong>. For the consumer it is independent of how and where the provider hosts the cloud, and of how the client accesses it. This is a <strong>service oriented architecture</strong>: web services let loosely coupled, heterogeneous services interoperate to achieve an expected output.</div>
+    <div class="callout green"><strong>Key insight:</strong> one of the basic building blocks of all such service exchanges is <strong>XML</strong>. In SOA there are three major components (consumer, provider and registry), and the messages between them (SOAP, WSDL, UDDI) are all XML documents.</div>
+    <div class="callout">The term "XML" has evolved to imply a growing family of software tools and standards: how XML data is represented and processed, and application frameworks (tools, dialects) based on XML. Most popular XML discussion refers to this latter meaning; both are covered.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · What is XML?</div>
+    <div class="callout"><strong>XML (Extensible Markup Language)</strong> is a syntax for encoding text-based data (words, phrases, numbers). Unlike HTML, which is a data display language, XML is more of a data transformation language that helps achieve interoperation.</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Text-based syntax</div>
+        <div class="concept-desc">Written using printable Unicode characters; no explicit binary data and no character encoding issues.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Extensible</div>
+        <div class="concept-desc">You define your own elements (essentially data types) within the constraints of the syntax rules.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Universal format</div>
+        <div class="concept-desc">Syntax rules ensure all XML processing software must handle a given piece of XML data identically.</div>
+      </div>
+    </div>
+    <div class="callout green"><strong>Guiding principle:</strong> if you can read and process it, so can anybody else. This is what makes XML ubiquitous.</div>
+
+    <h3>HTML vs XML</h3>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">HTML</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Purpose</span>Data display / representation</div>
+          <div class="compare-row"><span class="label">Tags</span>Predefined set; you cannot define your own</div>
+          <div class="compare-row"><span class="label">Vocabulary</span>Fixed</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">XML</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Purpose</span>Data transformation and interoperation</div>
+          <div class="compare-row"><span class="label">Tags</span>User defined, within the syntax rules</div>
+          <div class="compare-row"><span class="label">Vocabulary</span>Extensible</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Structure of an XML Document</div>
+    <span class="ts">▶ 06:18</span>
+    <div class="callout yellow">Worth watching: the annotated part-orders example labelling the element, tags, an attribute of the quantity element, and the hierarchical structure.</div>
+    <div class="callout">The simple example is a <strong>partorders</strong> document containing <strong>order</strong> elements, each with a description, part number, quantity and delivery date. It shows these parts:</div>
+    <div class="tag-row">
+      <span class="tag">XML declaration (states the version and encoding)</span>
+      <span class="tag">XML namespace (xmlns)</span>
+      <span class="tag">Elements and tags (user defined)</span>
+      <span class="tag">Attributes (e.g. units on the quantity element)</span>
+    </div>
+
+    <h3>Namespace</h3>
+    <div class="callout">Since tags are user defined, the meaning of a tag must be identifiable. Example: a tag called "table" could belong to the furniture category or to the word processing category. The <strong>XML namespace</strong> lets us define our own user defined elements so the other end knows which one is meant.</div>
+
+    <h3>XML data model: a tree</h3>
+    <span class="ts">▶ 07:51</span>
+    <div class="callout yellow">Worth watching: the same document converted into a tree, with partorders at the root, order nodes below it, and ref/date/xmlns attributes and desc/part/quantity/delivery-date children.</div>
+    <div class="callout green">An XML document is <strong>hierarchical, structured information</strong>, representable as an XML tree. The top-most node is the root (partorders, carrying the namespace), with levels beneath it.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · XML: Why It Is This Way</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">simple</div>
+        <div class="proto-card-title">Simple, like HTML, but not quite so simple</div>
+        <div class="proto-card-desc">Strict syntax rules eliminate syntax errors. The syntax defines structure (hierarchically) and names the structural parts (element names), so XML is self-describing data.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">extensible</div>
+        <div class="proto-card-title">Extensible, unlike HTML</div>
+        <div class="proto-card-desc">Vocabulary is not fixed; you can create your own language of tags and elements. Strict syntax ensures such markup can still be reliably processed.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">distributed</div>
+        <div class="proto-card-title">Designed for a distributed environment</div>
+        <div class="proto-card-desc">Data can be all over the place and can be retrieved and used reliably, interoperating with different nodes of a distributed system.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">mixing</div>
+        <div class="proto-card-title">Can mix different data types</div>
+        <div class="proto-card-desc">One set of tags can be mixed with another, and the resulting data can still be reliably processed.</div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Example:</strong> an institute combines student academic data (from the academic section) with student activity data (from another centre) to find the best all-rounder of a semester, batch or year. Distributed, diverse data sets are mixed on the fly into a new data set.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · XML Processing and the Parser</div>
+    <span class="ts">▶ 11:44</span>
+    <div class="callout yellow">Worth watching: a bank-transfers XML sample with intrabank and internal fundsTransfer records, used as the data to process.</div>
+    <div class="callout">Because elements are user defined, we must first find out which elements exist and what they mean before processing. The data is enveloped in XML, so it must first be extracted using a tool: the <strong>XML parser</strong>. In the example, transactions are either internal (within a bank) or interbank (between banks).</div>
+
+    <h3>XML parser processing model</h3>
+    <span class="ts">▶ 13:17</span>
+    <div class="callout yellow">Worth watching: XML data flowing into the parser, which connects through a parser interface to the XML-based application.</div>
+    <div class="stack">
+      <div class="stack-layer layer-app">
+        <span class="layer-name">XML-based application</span>
+        <span class="layer-desc">Triggered by the parser</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">Parser interface</span>
+        <span class="layer-desc">Between parser and app</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Parser</span>
+        <span class="layer-desc">Checks and extracts</span>
+      </div>
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">XML data</span>
+        <span class="layer-desc">Input</span>
+      </div>
+    </div>
+    <div class="callout">The parser must verify that the XML data is <strong>syntactically correct</strong>. Such data is said to be <strong>well-formed</strong>, the minimal requirement to "be" XML. A parser <strong>must</strong> stop processing if the data is not well-formed, i.e. stop and throw an exception to the XML-based application. The XML 1.0 spec requires this behaviour.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · DTD and Internal Entities</div>
+    <div class="callout">Like a relational database needs a table schema, user defined hierarchical XML needs a definition of which elements exist, their levels and their types. Earlier this was done with the <strong>DTD (Document Type Declaration)</strong>. First the document type is declared, and the rest of the data follows it.</div>
+    <span class="ts">▶ 14:40</span>
+    <div class="callout yellow">Worth watching: a DOCTYPE with an internal entity declaration (messageHeader) and its entity reference used inside the transfers element.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Well-formed XML</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Meaning</span>Syntactically correct</div>
+          <div class="compare-row"><span class="label">Minimum</span>The minimum requirement to be XML and be processable</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Valid XML</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Meaning</span>Well-formed and also consistent with the specific DTD or XSD (schema)</div>
+          <div class="compare-row"><span class="label">Relation</span>All valid XML documents are well-formed</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout">While getting XML data, the parser consults the DTD. Many parsers can operate in either validating or non-validating mode (parameter dependent); the relationship and behaviour depend on parser nature.</div>
+
+    <h3>How the parser handles internal entities</h3>
+    <div class="callout">The parser processes the DTD content, identifies the internal entities and checks that each entity is well-formed. There are explicit syntax rules for DTD content, and well-formed XML must be correct there too. It then <strong>replaces every occurrence of an entity reference</strong> by the referenced entity, doing so recursively within entities. The resolved data object is then made available to the XML application. By then, well-formedness checking and DTD checking (validation) are done.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">7 · External Entities and Types of Parsers</div>
+    <span class="ts">▶ 18:45</span>
+    <div class="callout yellow">Worth watching: an external entity declaration pointing to a file via a URL, so the entity can be shared by multiple resources.</div>
+    <div class="callout">An <strong>external entity</strong> is put in another file and referred to by a URL, so it can be shared by multiple resources. With internal entities the DTD or schema is defined in the document itself; with external ones it refers to an external structure. The parser processes the DTD content, identifies the external entities, tries to resolve them, and replaces each entity reference recursively as with internal entities.</div>
+    <div class="callout pink"><strong>Problem:</strong> what if the parser cannot find the external entity (e.g. due to firewall blockage)? That depends on the application and parser type.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Validating parser</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Entities</span>Must retrieve all entities and process all DTD content</div>
+          <div class="compare-row"><span class="label">On failure</span>Stops processing and indicates a failure</div>
+          <div class="compare-row"><span class="label">Also</span>Tests compatibility with the DTD rules (allowed elements, attributes etc.)</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Non-validating parser</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Entities</span>Tries to retrieve all entities defined in the DTD</div>
+          <div class="compare-row"><span class="label">On failure</span>Ceases processing the DTD content at the first entity it cannot find; this is not an error</div>
+          <div class="compare-row"><span class="label">Output</span>Makes the XML data and the names of unresolved entities available to the application</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout green"><strong>Key insight:</strong> application behaviour depends on the parser type.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">8 · Special Issues: Characters and Charsets</div>
+    <div class="callout">The XML specification defines what characters can be used as whitespace in tags.</div>
+    <div class="tag-row">
+      <span class="tag tag-bad">The EBCDIC character NEL cannot be used as whitespace</span>
+      <span class="tag">Characters not in the encoding charset (e.g. Greek characters in an ISO-Latin-1 document) use character references</span>
+      <span class="tag">Binary data must be encoded as printable characters</span>
+    </div>
+    <div class="callout yellow"><strong>Example:</strong> the character reference <code>&amp;#9824;</code> stands for the 9824th character of the Unicode character set, the spades character.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">9 · DTD vs XML Schema</div>
+    <div class="callout">There are two ways to define the structure of an XML document: the DTD (part of the core XML spec) and <strong>XML Schema (XSD)</strong>, a newer specification (2001) that allows stronger constraints on XML documents. Both do broadly the same job.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">DTD</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Syntax</span>Not written as an XML document</div>
+          <div class="compare-row"><span class="label">Power</span>Less powerful</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">XML Schema (XSD)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Syntax</span>Written in XML, so schema handling goes hand in hand with XML data</div>
+          <div class="compare-row"><span class="label">Power</span>Much more powerful: used for type validation and for relating database schemas to XML models</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout">A DTD or schema specifies allowed elements and attribute data, hierarchical nesting rules, and element content and type restrictions. It does <strong>not contain any XML data</strong>; the information is in the XML file and only the structure is defined in the schema.</div>
+    <div class="callout green"><strong>Why it matters for interoperation:</strong> two organizations only need to agree on the <strong>structure</strong> of the exchange, not exchange data. Sharing data raises privacy issues and maintenance costs, while sharing the schema is not critical. Using a schema, one can also create a database table and transfer data between the two parties. Today schemas are primarily used for interoperation between parties.</div>
+    <div class="callout yellow"><strong>Example:</strong> IIT Kharagpur and a bank (State Bank, Punjab Bank etc.) doing payment transfers must first agree on the structure of student data. IIT Kharagpur only tells the bank what its student schema is like, not how many students there are or their properties.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">10 · DTD Examples and Use in Interoperation</div>
+    <span class="ts">▶ 29:20</span>
+    <div class="callout yellow">Worth watching: an internal DTD with element and attribute declarations for transfers, fundsTransfer, from, to and amount.</div>
+    <div class="callout">An example DTD can be part of the document itself. A DTD does not follow the XML document format, whereas a schema is itself represented as an XML document.</div>
+    <div class="callout"><strong>External DTD:</strong> the DOCTYPE refers to a DTD file by a URL (SYSTEM identifier); the DTD file must be there and accessible. When consuming data from another provider, the external DTD shows what sort of data is coming, e.g. its ordering and hierarchy.</div>
+    <div class="callout green"><strong>Use in practice:</strong> the parser filters and extracts the portion of data needed, and transformations such as centigrade to fahrenheit or meter to feet can be done at the consumer's end before passing the data to the application. This is useful for interoperation and for realizing cloud, especially SaaS models, to be continued in later lectures.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>XML in cloud:</strong> a basic building block of service oriented architecture; SOAP, WSDL and UDDI are XML documents that let heterogeneous services interoperate.</div>
+    <div class="callout green"><strong>XML vs HTML:</strong> XML is text-based, extensible (user defined tags), universal and self-describing, and is a data transformation language, while HTML has predefined tags for display.</div>
+    <div class="callout"><strong>Structure:</strong> a hierarchical tree of elements and attributes, with a declaration and namespaces to disambiguate user defined tags.</div>
+    <div class="callout green"><strong>Parser:</strong> verifies syntax and must stop and throw an exception if the data is not well-formed; well-formed is the minimum requirement for XML.</div>
+    <div class="callout"><strong>Well-formed vs valid:</strong> valid means well-formed and conforming to its DTD or schema; all valid documents are well-formed.</div>
+    <div class="callout green"><strong>Entities:</strong> the parser resolves internal and external entity references recursively before passing data to the application.</div>
+    <div class="callout pink"><strong>Parser types:</strong> a validating parser must retrieve all entities and fails if it cannot, while a non-validating parser stops processing the DTD at the first unresolved entity without error; application behaviour depends on parser type.</div>
+    <div class="callout"><strong>DTD vs XSD:</strong> XSD (2001) is written in XML and is much more powerful; neither contains data, only structure.</div>
+    <div class="callout yellow"><strong>Example:</strong> IIT Kharagpur and a bank agree on the student data schema without exchanging any student data.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

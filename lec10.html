@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 10 — Web Services, Service Oriented Architecture | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec9.html" class="nav-lec">← prev</a>
+      <a href="lec11.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 10</span>
+    <span class="high-badge">High priority</span>
+    <h1>Web Services, Service Oriented Architecture</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Covers web services and service oriented architecture (SOA), a major building block of cloud computing: definitions, history, the publish-find-bind model, and the core components SOAP, WSDL and UDDI built on XML. Concept-heavy and foundational; it ties the XML lectures to how IaaS, PaaS and SaaS services are offered and discovered.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · What Are Web Services?</div>
+    <div class="callout">There are several definitions in the literature:</div>
+    <table class="port-table">
+      <thead><tr><th>Source</th><th>Definition</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">W3C (Oct 2002)</td><td>A software application identified by a URI, whose interfaces and bindings can be defined, described and discovered as XML artifacts</td></tr>
+        <tr><td class="proto-name">Microsoft</td><td>Programmable application logic accessible using standard Internet protocols</td></tr>
+        <tr><td class="proto-name">IBM</td><td>An interface that describes a collection of operations that are network accessible through standardized XML messaging</td></tr>
+        <tr><td class="proto-name">Sun</td><td>Software components that can be spontaneously discovered, combined and recombined to provide a solution to the user's problem or request</td></tr>
+      </tbody>
+    </table>
+    <div class="callout green"><strong>Key insight:</strong> web services are an XML based phenomenon. Services are available at a standardized URI and work on an XML based message exchange protocol. Applications can talk to each other without caring what happens in the background; only where the service is and how to talk to it matters. Legacy applications can also talk to other applications. Unlike tightly bound client-server protocols, this is <strong>loosely bound</strong>.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Background: History, Distributed Computing and EDI</div>
+    <h3>History</h3>
+    <div class="stack">
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Web services</span>
+        <span class="layer-desc">Latest</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">World Wide Web</span>
+        <span class="layer-desc">Internetworking</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Electronic Data Interchange</span>
+        <span class="layer-desc">EDI</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">Distributed computing</span>
+        <span class="layer-desc">Earlier lectures</span>
+      </div>
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Structured, then object-oriented programming</span>
+        <span class="layer-desc">Earliest</span>
+      </div>
+    </div>
+    <div class="callout">All of these facilitated the evolution of web services.</div>
+
+    <h3>Distributed computing</h3>
+    <div class="callout">For substantial applications it is often more efficient, or even necessary, to run different tasks on different computers: <strong>N-tier applications</strong>. A 3-tier application might have the user interface on one computer, business-logic processing on a second and a database on a third. Components (e.g. programming objects) on different computers must communicate, e.g. via DCE, CORBA, DCOM or RMI. <strong>Interoperability</strong> (communicating and sharing data with software from different vendors and platforms) is a major issue and is limited among conventional proprietary distributed computing technologies.</div>
+
+    <h3>Electronic Data Interchange (EDI)</h3>
+    <div class="callout"><strong>EDI</strong> is computer-to-computer exchange of business data and documents between companies using standard formats recognized nationally and internationally. The information is organized according to a format set by both participating companies, so the format or schema must be known before data is exchanged and the other party knows what data to expect.</div>
+    <div class="tag-row">
+      <span class="tag tag-good">Lower operating costs (saves time and money)</span>
+      <span class="tag tag-good">Less errors, more accuracy (no data entry)</span>
+      <span class="tag tag-good">Increased productivity (faster throughput)</span>
+      <span class="tag tag-good">Faster trading cycle (streamlined processes)</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Web Services: Features</div>
+    <div class="callout">Web services take advantage of OOP by letting developers build applications from existing software components in a <strong>modular approach</strong>, transforming a network such as the Internet into one library of programmatic components, with significant productivity gains. They improve distributed computing interoperability using <strong>open (non-proprietary) standards</strong> that can enable, theoretically, any two software components to communicate. They are also easier to debug because the communication protocols are text-based rather than binary.</div>
+    <div class="callout yellow"><strong>Example (online travel booking):</strong> a travel portal has neither flights nor hotels itself. It talks to different airline services, pulls the data and shows it to the user; when booking, it calls credit card, debit card or net banking services. Multiple services are amalgamated in a choreographed way to execute one job. The airlines are not directly hooked to the user, and the card provider need not know a ticket is being bought; each service acknowledges a request in a particular form and replies in a particular form, an XML type of message exchange.</div>
+
+    <h3>Web services vs EDI and WWW</h3>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Web services vs EDI</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Capability</span>Similar to EDI, but simpler and less expensive to implement</div>
+          <div class="compare-row"><span class="label">Agreement</span>No predefined agreement on data format needed</div>
+          <div class="compare-row"><span class="label">Coexistence</span>Can be configured to work with EDI systems, or to phase out EDI while adopting web services</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Web services vs WWW</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Design</span>Separates visual from non-visual components</div>
+          <div class="compare-row"><span class="label">Language</span>XML is for data transformation and interoperability, while HTML is for display; XML plus styling is needed to visualize</div>
+          <div class="compare-row"><span class="label">Clients</span>Interaction through a browser or a desktop client (Java Swing, Python, Windows etc.)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · Three Problems Web Services Solve</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Interoperability</div>
+        <div class="concept-desc">Lack of interoperability standards in distributed object messaging: DCOM apps are strictly bound to the Windows operating system, and RMI is bound to the Java language.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Firewall traversal</div>
+        <div class="concept-desc">CORBA and DCOM use non-standard ports. Web services use HTTP, and most firewalls allow port 80, leading to easier and dynamic collaboration.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Complexity</div>
+        <div class="concept-desc">A developer-friendly service system using open, text-based standards (like XML) so components in different languages and platforms can communicate.</div>
+      </div>
+    </div>
+    <div class="callout green"><strong>Incremental adoption:</strong> web services can be implemented incrementally rather than all at once, which lessens cost and reduces organizational disruption from an abrupt technology switch. An organization can also keep running legacy software and tools if they have a proper web service interface for the external world.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · Web Service Definition Revisited</div>
+    <div class="callout">A web service is an application component that:</div>
+    <table class="port-table">
+      <thead><tr><th>Capability</th><th>Technology</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Communicates via open protocols</td><td>HTTP, SMTP etc. (any TCP/IP application layer protocol)</td></tr>
+        <tr><td class="proto-name">Processes XML messages framed using</td><td>SOAP</td></tr>
+        <tr><td class="proto-name">Describes its messages (data organization) using</td><td>XML Schema</td></tr>
+        <tr><td class="proto-name">Provides an endpoint description (where launched, how configured) using</td><td>WSDL</td></tr>
+        <tr><td class="proto-name">Can be discovered (published and discovered) using</td><td>UDDI</td></tr>
+      </tbody>
+    </table>
+    <div class="callout green"><strong>Key insight:</strong> the three major components are <strong>SOAP, WSDL and UDDI</strong>, all W3C compliant and based on XML.</div>
+    <span class="ts">▶ 16:29</span>
+    <div class="callout yellow">Worth watching: the web-based purchase example showing the PO service, credit service and inventory service producing an invoice.</div>
+    <div class="callout yellow"><strong>Example (web-based purchase):</strong> a purchase order triggers a credit check and reserve inventory; the credit response and inventory response come back; results are consolidated and returned as an invoice. The credit, inventory and PO services are different parties choreographed to serve the request, and composing services like this creates a larger application.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · Service Oriented Architecture (SOA)</div>
+    <div class="callout"><strong>SOA</strong> is IBM's model for web service interactions, consisting of relationships between three entities. It is a generic model describing service collaboration, not specific to web services only.</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Service provider</div>
+        <div class="concept-desc">Owner of the service and the platform that hosts access to it.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Service requestor</div>
+        <div class="concept-desc">The consumer: a business that requires certain functions, or an application looking for and invoking an interaction with a service.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Service registry (broker)</div>
+        <div class="concept-desc">A searchable registry of service descriptions where providers publish their service descriptions.</div>
+      </div>
+    </div>
+
+    <h3>Web service model</h3>
+    <span class="ts">▶ 18:13</span>
+    <div class="callout yellow">Worth watching: the triangle of service registry, service provider and service requestor with Publish, Find and Bind arrows (WSDL and UDDI on the publish and find sides).</div>
+    <div class="callout">The requestor needs a way to find where services are, so there is a <strong>registry</strong>. The provider <strong>publishes</strong> a new or updated service in the registry, the requestor <strong>finds</strong> the service from it using WSDL and UDDI, and then <strong>binds</strong> with the provider (possibly choosing among more than one provider). Anything developed on this basis is a service driven or service oriented architecture.</div>
+    <div class="callout yellow"><strong>Analogy:</strong> a telephone directory (yellow and white pages). The directory tells you how to search, e.g. for a plumber, so it acts as a directory or registry service.</div>
+    <table class="port-table">
+      <thead><tr><th>Operation</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Publish</td><td>Service descriptions are published so the requestor can find them</td></tr>
+        <tr><td class="proto-name">Find</td><td>The requestor retrieves a service description directly or queries the registry for the service required</td></tr>
+        <tr><td class="proto-name">Bind</td><td>The requestor invokes or initiates an interaction with the service at runtime</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">7 · Web Service Components, Steps and Stack</div>
+    <table class="port-table">
+      <thead><tr><th>Component</th><th>Full form</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">XML</td><td>eXtensible Markup Language</td><td>A uniform data representation and exchange mechanism</td></tr>
+        <tr><td class="proto-name">SOAP</td><td>Simple Object Access Protocol</td><td>A standard way of communication</td></tr>
+        <tr><td class="proto-name">WSDL</td><td>Web Services Description Language</td><td>A standard meta language to describe the services offered</td></tr>
+        <tr><td class="proto-name">UDDI</td><td>Universal Description, Discovery and Integration</td><td>A mechanism to register and locate web service based applications (registry service)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Steps of operation</h3>
+    <span class="ts">▶ 22:09</span>
+    <div class="callout yellow">Worth watching: the numbered flow between client, UDDI registry, WSDL document and web service.</div>
+    <ol>
+      <li>The client queries the registry to locate the service.</li>
+      <li>The registry refers the client to a WSDL document.</li>
+      <li>The client accesses the WSDL document.</li>
+      <li>The WSDL provides data to interact with the web service.</li>
+      <li>The client sends a SOAP message request.</li>
+      <li>The web service returns a SOAP message response.</li>
+    </ol>
+
+    <h3>Web service stack</h3>
+    <span class="ts">▶ 22:42</span>
+    <div class="callout yellow">Worth watching: the conceptual web services stack with vertical bars for security, management and quality of service.</div>
+    <div class="stack">
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Service flow</span>
+        <span class="layer-desc">WSFL</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">Service discovery</span>
+        <span class="layer-desc">UDDI (static)</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">Service publication</span>
+        <span class="layer-desc">UDDI (direct)</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Service description</span>
+        <span class="layer-desc">WSDL</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">XML-based messaging</span>
+        <span class="layer-desc">SOAP</span>
+      </div>
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Network</span>
+        <span class="layer-desc">HTTP, FTP, email, MQ, IIOP</span>
+      </div>
+    </div>
+    <div class="callout">The base works on standard internetworking (TCP/IP or OSI). Over it sit SOAP messaging, service description, UDDI (static or dynamic publication) and WSFL for flow management. Three vertical components span the stack: <strong>quality of service</strong> (QoS) management, <strong>management</strong>, and <strong>security</strong> (security breaches, policies, whom to trust).</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">8 · XML Recap and XML vs HTML</div>
+    <div class="callout">XML developed from <strong>SGML (Standard Generalized Markup Method)</strong> and is widely supported by W3C. Its essential characteristic is the <strong>separation of content from presentation</strong>; it is designed to describe data. An XML document can optionally reference a DTD (schema; XSD is more popular), the parser checks syntax, and if the document adheres to the schema it is valid. Tags are not predefined, so you define your own, which enables cross-platform data communication in web services.</div>
+    <span class="ts">▶ 24:20</span>
+    <div class="callout yellow">Worth watching: the same John Doe contact as an HTML page (and how it displays) and then as XML with name, address, country, phone and email tags.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">HTML</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Focus</span>Specifies how the document is displayed, not what information it contains</div>
+          <div class="compare-row"><span class="label">Reading</span>Hard for a machine to extract the embedded information; relatively easy for a human</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">XML</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Focus</span>Data description (name, address, country, phone, email), with no presentation</div>
+          <div class="compare-row"><span class="label">Display</span>Needs additional work (styling) to represent</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">9 · SOAP</div>
+    <div class="callout"><strong>SOAP (Simple Object Access Protocol)</strong> is a format for sending messages over the Internet between programs. It is XML-based, W3C compliant, platform and language independent, simple and extensible, and <strong>stateless and one-way</strong> (though applications can create more complex interaction patterns). It uses mainly HTTP as the transport protocol: the HTTP message contains the SOAP message as its payload section.</div>
+    <div class="callout pink"><strong>Caution:</strong> this "transport protocol" (HTTP carrying SOAP) must not be mixed up with the TCP/IP or OSI transport layer protocols.</div>
+
+    <h3>SOAP building blocks</h3>
+    <span class="ts">▶ 25:51</span>
+    <div class="callout yellow">Worth watching: nesting of transport protocol, MIME header, SOAP envelope, SOAP header, SOAP body and fault.</div>
+    <table class="port-table">
+      <thead><tr><th>Block</th><th>Required?</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Envelope</td><td>Required</td><td>Identifies the XML document as a SOAP message</td></tr>
+        <tr><td class="proto-name">Header</td><td>Optional</td><td>Contains header information</td></tr>
+        <tr><td class="proto-name">Body</td><td>Required</td><td>Call and response information</td></tr>
+        <tr><td class="proto-name">Fault</td><td>Optional</td><td>Errors that occurred while processing the message</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">Message structure: a request invokes a method on a remote object and the response returns the result of running the method. The SOAP specification defines an <strong>envelope</strong> that wraps the message itself. The message is a different vocabulary, and a namespace prefix is used to distinguish the two parts. The SOAP message becomes the payload of the transport protocol (HTTP).</div>
+
+    <h3>SOAP request and response</h3>
+    <span class="ts">▶ 26:29</span>
+    <div class="callout yellow">Worth watching: an HTTP POST carrying a SOAP envelope with a GetStockPrice call for IBM, followed by the HTTP 200 OK response carrying the price.</div>
+    <div class="callout yellow"><strong>Example:</strong> the request is an HTTP POST whose SOAP body asks for a stock price with stock name IBM. The response is an HTTP response whose SOAP body returns a price value (34.5). The data is structured for exchange, not for HTML display.</div>
+
+    <h3>Why SOAP, characteristics and usage</h3>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Other technologies failed on the Internet</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Unix RPC</span>Requires binary-compatible Unix implementations at each endpoint</div>
+          <div class="compare-row"><span class="label">CORBA</span>Requires compatible ORBs</div>
+          <div class="compare-row"><span class="label">RMI</span>Requires Java at each endpoint</div>
+          <div class="compare-row"><span class="label">DCOM</span>Requires Windows at each endpoint</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">SOAP: platform-neutral choice</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Format</span>Simply an XML wire format</div>
+          <div class="compare-row"><span class="label">Restrictions</span>None on the endpoint implementation technology, so legacy things can run</div>
+        </div>
+      </div>
+    </div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Extensibility</div>
+        <div class="concept-desc">Security and WS-routing are among the extensions under development.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Neutrality</div>
+        <div class="concept-desc">Can be used over any transport protocol such as HTTP, SMTP or even TCP.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Independence</div>
+        <div class="concept-desc">Allows any programming model.</div>
+      </div>
+    </div>
+    <div class="callout"><strong>Usage models:</strong> (1) RPC-like message exchange, where the request bundles the method name and parameters and the response contains return values (not required by SOAP). (2) Any kind of body content, e.g. XML documents of any type: send a purchase order document to the inbox of a B2B partner and expect a shipping and exceptions report as the response.</div>
+    <div class="callout pink"><strong>SOAP security:</strong> since SOAP uses HTTP it can use HTTP security, mainly HTTP over SSL. But SOAP can also run over other application protocols (such as SMTP), so security has to be considered separately; the <strong>WS-Security</strong> specification defines a complete encryption system. Details are deferred to the security lectures.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">10 · WSDL</div>
+    <div class="callout"><strong>WSDL (Web Services Description Language; the slide spells it Definition)</strong> is an XML vocabulary standard, W3C compliant, for describing web services and their capabilities. It is the <strong>contract</strong> between the XML web service and the client. It specifies what a request message must contain and what the response will look like in unambiguous notation, and defines where the service is available and which communications protocol is used to talk to it.</div>
+    <div class="callout">A WSDL document is just a simple XML document. It defines a web service using these major elements:</div>
+    <table class="port-table">
+      <thead><tr><th>Element</th><th>Describes</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">port type</td><td>The operations performed by the web service</td></tr>
+        <tr><td class="proto-name">message</td><td>The messages used by the web service</td></tr>
+        <tr><td class="proto-name">types</td><td>The data types used by the web service</td></tr>
+        <tr><td class="proto-name">binding</td><td>The communication protocols used by the web service</td></tr>
+      </tbody>
+    </table>
+    <span class="ts">▶ 28:26</span>
+    <div class="callout yellow">Worth watching: a sample WSDL with getTermRequest and getTermResponse messages and a glossaryTerms port type, then the same extended with a binding to SOAP.</div>
+    <div class="callout green"><strong>Binding to SOAP:</strong> the WSDL description binds the SOAP message, i.e. it describes how the SOAP data is transferred between source and destination (requestor, registry, consumer).</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">11 · UDDI</div>
+    <div class="callout"><strong>UDDI (Universal Description, Discovery and Integration)</strong> is a framework to define XML-based registries. Registries are repositories that contain documents describing business data and also provide search capabilities and programmatic access to remote applications. Businesses can publish information about themselves and the services they offer, and requestors look up this metadata and how to bind with a provider.</div>
+    <span class="ts">▶ 29:13</span>
+    <div class="callout yellow">Worth watching: the UDDI roles triangle (publish, find, bind) and the Harbour Metals example showing the registration and discovery steps.</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Service registry</div>
+        <div class="concept-desc">Supports publishing and locating services, like telephone yellow pages.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Service provider</div>
+        <div class="concept-desc">Provides e-business services and publishes them through a registry.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Service requestor</div>
+        <div class="concept-desc">Finds required services via the service broker and binds to services via the service provider.</div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Example (Harbour Metals):</strong> Harbour Metals creates an online website with a local ASP; the ASP registers Harbour Metals with the UBR (UDDI registry); marketplaces and search engines query the UBR, cache Harbour Metals data and bind to its services; consumers and businesses then discover Harbour Metals and do business with it.</div>
+    <div class="tag-row">
+      <span class="tag tag-good">Discover the right business from the millions online</span>
+      <span class="tag tag-good">Define how to enable commerce once the preferred business is discovered</span>
+      <span class="tag tag-good">Reach new customers and increase access to current customers</span>
+      <span class="tag tag-good">Expand offerings and extend market reach</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">12 · Security, QoS and Relevance to Cloud</div>
+    <div class="callout">Security is an integral part of web services and works as a vertical across the stack, with components such as web service policy, trust, privacy, secure conversation, federation and authorization. Management and QoS also work vertically. These are covered in later lectures.</div>
+    <div class="callout green"><strong>Why it matters for cloud:</strong> web services and SOA play an important role in setting up the cloud. For IaaS, PaaS, SaaS or any XaaS, the basic building block is the web service: the publish, find and bind phenomenon also holds for cloud services, where one must know the service provider and consumer and where the service is launched. The development of web services and SOA played an important role in making cloud computing viable.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Web services:</strong> software applications identified by a URI, whose interfaces and bindings can be defined, described and discovered using XML; loosely coupled, standards based and platform independent.</div>
+    <div class="callout green"><strong>Why they exist:</strong> they solve interoperability, firewall traversal (HTTP on port 80) and complexity, and can be adopted incrementally while legacy software keeps running.</div>
+    <div class="callout"><strong>Versus EDI:</strong> similar capability but simpler, cheaper and needing no predefined data format agreement; unlike the WWW, visual and non-visual components are separate.</div>
+    <div class="callout green"><strong>SOA:</strong> three entities (service provider, requestor and registry or broker) with three operations: publish, find and bind.</div>
+    <div class="callout"><strong>Components:</strong> XML (data representation), SOAP (messaging), WSDL (service description) and UDDI (registry), with security, management and QoS spanning the stack.</div>
+    <div class="callout green"><strong>Steps of operation:</strong> the client queries the UDDI registry, gets the WSDL, then exchanges SOAP request and response messages with the web service.</div>
+    <div class="callout"><strong>SOAP:</strong> XML-based, stateless, one-way messages with an envelope, optional header, required body and optional fault, carried as the payload of HTTP; platform neutral where Unix RPC, CORBA, RMI and DCOM were not.</div>
+    <div class="callout green"><strong>WSDL and UDDI:</strong> WSDL is the contract (port type, message, types, binding) between service and client; UDDI is the XML registry, like telephone yellow pages.</div>
+    <div class="callout yellow"><strong>Example:</strong> an online travel portal choreographs airline and payment services without the user connecting to them directly.</div>
+    <div class="callout pink"><strong>Caveat:</strong> SOAP can run over protocols other than HTTP (such as SMTP), so HTTP security alone is not enough; WS-Security defines a complete encryption system.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>
