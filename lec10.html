@@ -230,12 +230,12 @@
         <span class="layer-desc">HTTP, FTP, email, MQ, IIOP</span>
       </div>
     </div>
-    <div class="callout">The base works on standard internetworking (TCP/IP or OSI). Over it sit SOAP messaging, service description, UDDI (static or dynamic publication) and WSFL for flow management. Three vertical components span the stack: <strong>quality of service</strong> (QoS) management, <strong>management</strong>, and <strong>security</strong> (security breaches, policies, whom to trust).</div>
+    <div class="callout">The base works on standard internetworking (TCP/IP or OSI). Over it sit SOAP messaging, service description, UDDI (static or dynamic publication) and WSFL for flow management. Three vertical components span the stack: <strong>security</strong> (breaches, policies, whom to trust), <strong>management</strong>, and <strong>quality of service</strong> (QoS).</div>
   </div>
 
   <div class="section">
     <div class="section-label">8 · XML Recap and XML vs HTML</div>
-    <div class="callout">XML developed from <strong>SGML (Standard Generalized Markup Method)</strong> and is widely supported by W3C. Its essential characteristic is the <strong>separation of content from presentation</strong>; it is designed to describe data. An XML document can optionally reference a DTD (schema; XSD is more popular), the parser checks syntax, and if the document adheres to the schema it is valid. Tags are not predefined, so you define your own, which enables cross-platform data communication in web services.</div>
+    <div class="callout">XML developed from <strong>SGML (Standard Generalized Markup Language)</strong> and is widely supported by W3C. Its essential characteristic is the <strong>separation of content from presentation</strong>; it is designed to describe data. An XML document can optionally reference a DTD (schema; XSD is more popular), the parser checks syntax, and if the document adheres to the schema it is valid. Tags are not predefined, so you define your own, which enables cross-platform data communication in web services.</div>
     <span class="ts">▶ 24:20</span>
     <div class="callout yellow">Worth watching: the same John Doe contact as an HTML page (and how it displays) and then as XML with name, address, country, phone and email tags.</div>
     <div class="compare">
@@ -332,7 +332,7 @@
     </table>
     <span class="ts">▶ 28:26</span>
     <div class="callout yellow">Worth watching: a sample WSDL with getTermRequest and getTermResponse messages and a glossaryTerms port type, then the same extended with a binding to SOAP.</div>
-    <div class="callout green"><strong>Binding to SOAP:</strong> the WSDL description binds the SOAP message, i.e. it describes how the SOAP data is transferred between source and destination (requestor, registry, consumer).</div>
+    <div class="callout green"><strong>Binding to SOAP:</strong> the WSDL binding specifies the protocol and message format used to reach the service, here SOAP over HTTP, i.e. how the SOAP messages are actually carried between the requestor and the service. (The lecture loosely describes this as data moving between requestor, registry and consumer.)</div>
   </div>
 
   <div class="section">
