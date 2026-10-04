@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 6 — Architecture: Deployment Models | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec5.html" class="nav-lec">← prev</a>
+      <a href="lec7.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 06</span>
+    <span class="high-badge">High priority</span>
+    <h1>Architecture — Deployment Models</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Covers the four cloud deployment models (public, private, community and hybrid), each with its on-site and outsourced variants. For every model the lecture walks through the same checklist: network dependency, hidden workload locations, multi-tenancy risk, data import/export limits, security, up-front cost and resource availability. Core exam content that sits alongside the service models (IaaS, PaaS, SaaS) from the previous lecture.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · Deployment Models: Overview</div>
+    <div class="callout">Besides the service models (IaaS, PaaS, SaaS), a cloud also has a <strong>deployment model</strong>. All sorts of services can be hosted in the different deployment models.</div>
+    <div class="proto-grid">
+      <div class="proto-card">
+        <div class="proto-layer">model 1</div>
+        <div class="proto-names">Public cloud</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">model 2</div>
+        <div class="proto-names">Private cloud</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">model 3</div>
+        <div class="proto-names">Community cloud</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">model 4</div>
+        <div class="proto-names">Hybrid cloud</div>
+      </div>
+    </div>
+    <table class="port-table">
+      <thead><tr><th>Model</th><th>Who it serves</th><th>Where it exists</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Public</td><td>The general public; anyone who can pay</td><td>On the premises of the cloud provider</td></tr>
+        <tr><td class="proto-name">Private</td><td>A single organization (with multiple business units)</td><td>On or off premises</td></tr>
+        <tr><td class="proto-name">Community</td><td>A specific community of organizations with shared concerns</td><td>On or off premises</td></tr>
+        <tr><td class="proto-name">Hybrid</td><td>Composition of two or more of the above</td><td>Depends on the constituent clouds</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Public Cloud</div>
+    <div class="callout"><strong>Public cloud:</strong> cloud infrastructure provisioned for open use by the general public. It may be owned, managed and operated by a business, academic or government organization, or some combination of them. It exists on the premises of the cloud provider (CSP).</div>
+    <div class="tag-row">
+      <span class="tag tag-good">Google App Engine</span>
+      <span class="tag tag-good">Microsoft Windows Azure</span>
+      <span class="tag tag-good">IBM Smart Cloud</span>
+      <span class="tag tag-good">Amazon EC2</span>
+    </div>
+    <div class="callout green"><strong>Key point:</strong> an enterprise or individual subscribes over the internet and gets the services. Anyone who can pay can use it, subject to legal and policy conformance. The computing and storage infrastructure resides at the CSP's premises, not at the user's.</div>
+
+    <h3>Public setting</h3>
+    <span class="ts">▶ 02:42</span>
+    <div class="callout yellow">Worth watching: diagram of clients (including possible attackers) reaching a cloud provider over the public internet, with an optional subscriber-controlled security perimeter.</div>
+    <div class="callout">The provider's computing and storage resources are potentially large. Communication links are assumed to be implemented over the public internet. The cloud serves a diverse pool of clients, and not all are faithful: there can be attackers and hackers.</div>
+
+    <h3>Characteristics and issues</h3>
+    <table class="port-table">
+      <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Workload locations hidden from clients</td><td>The provider may migrate a subscriber's workload or data at any time, to data centres where cost is low, and anywhere unless it offers optional location restriction policies. The user does not know where the VM or data resides, which server or location, or with whom.</td></tr>
+        <tr><td class="proto-name">Risks from multi-tenancy</td><td>A single machine may be shared by the workloads of any combination of subscribers, so a workload may be co-resident with that of competitors or adversaries. Introduces both reliability and security risk.</td></tr>
+        <tr><td class="proto-name">Network dependency</td><td>Subscribers connect to providers via the public internet. The connection depends on internet infrastructure such as DNS servers, router infrastructure and inter-router links. Network connectivity must be available up to a mark.</td></tr>
+        <tr><td class="proto-name">Limited visibility and control over data</td><td>Provider operation details and software are usually proprietary and not available for examination. A subscriber cannot verify that data has been completely deleted from the provider's systems. The only assurance is an SLA or MOU.</td></tr>
+        <tr><td class="proto-name">Elasticity: illusion of unlimited resources</td><td>Public clouds are generally unrestricted in location or size, with flexibility in moving workloads to match available resources. Resources are provisioned when needed and released (de-provisioned) when not; theoretically infinite scaling up and down.</td></tr>
+        <tr><td class="proto-name">Low up-front costs</td><td>Building your own private cloud means purchasing hardware, housing it, installing and testing software, and maintaining it. In a public cloud you just pay and use.</td></tr>
+        <tr><td class="proto-name">Restrictive default SLAs</td><td>Default service level agreements specify limited promises. Usually the provider's terms must be followed; special rates and SLAs can be negotiated only for large-scale deployments. A small institution or the public at large follows what is provided.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout yellow"><strong>Example:</strong> if IIT Kharagpur moved some or all of its labs to a public cloud, overall maintenance cost and load would reduce, but the first dependency is that network connectivity must always be available.</div>
+    <div class="callout pink"><strong>Caveat:</strong> if you are not very stringent on legal and policy matters about security, hidden locations are acceptable. Otherwise, multi-tenancy and loss of visibility are real concerns.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Private Cloud</div>
+    <div class="callout"><strong>Private cloud:</strong> cloud infrastructure provisioned for exclusive use by a single organization comprising multiple consumers (e.g. business units). It may be owned, managed and operated by the organization, a third party, or some combination, and it may exist on or off premises. Example: an IIT KGP private cloud catering to all its departments and sections.</div>
+    <div class="tag-row">
+      <span class="tag tag-good">Eucalyptus</span>
+      <span class="tag tag-good">OpenStack</span>
+      <span class="tag tag-good">Ubuntu Enterprise Cloud (UEC)</span>
+      <span class="tag tag-good">Amazon VPC (Virtual Private Cloud)</span>
+      <span class="tag tag-good">VMware Cloud Infrastructure Suite</span>
+      <span class="tag tag-good">Microsoft ECI data center</span>
+    </div>
+    <div class="callout pink"><strong>Contrary to popular belief:</strong> a private cloud may exist off premises and be managed by a third party. Even then it is under your jurisdiction, policies and organizational rules.</div>
+
+    <h3>Two private cloud scenarios</h3>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">On-site private cloud</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Location</span>Implemented at the customer's premises</div>
+          <div class="compare-row"><span class="label">Status</span>The de facto idea that comes to mind for "private"</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Outsourced private cloud</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Location</span>Server side outsourced to a hosting company</div>
+          <div class="compare-row"><span class="label">Status</span>A private chunk outside your premises, but still private to you</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · On-site Private Cloud</div>
+    <span class="ts">▶ 10:02</span>
+    <div class="callout yellow">Worth watching: diagram of a private cloud inside a subscriber-controlled security perimeter, with a boundary controller, legitimate access path and blocked access.</div>
+    <div class="callout">The security perimeter extends around both the subscriber's on-site resources and the private cloud's resources, so the organization's legal and security control encompasses the private cloud. The perimeter itself does not guarantee control over the private cloud's resources, but the subscriber can exercise control over them.</div>
+
+    <h3>Issues and characteristics</h3>
+    <table class="port-table">
+      <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Network dependency</td><td>Depends on the organization's internet and network.</td></tr>
+        <tr><td class="proto-name">Subscribers still need IT skills</td><td>The organization maintains its own cloud, so it needs the traditional IT skills to manage user devices plus cloud IT skills.</td></tr>
+        <tr><td class="proto-name">Workload locations hidden from clients</td><td>A private cloud must migrate workloads between machines without inconveniencing clients. The organization chooses the physical infrastructure, but individual clients (e.g. its own subunits) may still not know where their workloads physically exist.</td></tr>
+        <tr><td class="proto-name">Risks from multi-tenancy</td><td>Workloads of different clients may reside concurrently on the same systems and local networks, separated only by access policies implemented by the cloud provider's software. A flaw in the software or policies could expose client workloads to one another.</td></tr>
+        <tr><td class="proto-name">Data import/export and performance limits</td><td>On-demand bulk data import/export is limited by the on-site cloud's network capacity. Real-time or critical processing may be problematic because of networking limitations.</td></tr>
+        <tr><td class="proto-name">Potentially strong security from external threats</td><td>The subscriber can implement an appropriately strong security perimeter, to the same level of security achievable for non-cloud resources.</td></tr>
+        <tr><td class="proto-name">Significant-to-high up-front costs</td><td>Cloud management software must be installed on systems within the organization: numerous commodity systems, or a limited number of high-performance systems for process- or data-intensive workloads. Installing and managing it incurs significant up-front cost, even if the software is free and much of the hardware already exists.</td></tr>
+        <tr><td class="proto-name">Limited resources</td><td>At any given time the cloud has a fixed computing and storage capacity, sized to anticipated workloads and cost restrictions. Augmenting means purchasing, installing and interoperating with existing systems.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout yellow"><strong>Security example:</strong> IIT Kharagpur developed a private cloud for research purposes, Meghamala, within its own network premises. Whatever network security features IIT Kharagpur has also apply to this infrastructure.</div>
+    <div class="callout yellow"><strong>Limited resources example:</strong> estimate storage and computing needs and install with some provision, say buying x or installing 1.5x. You are then limited to that 1.5x.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · Outsourced Private Cloud</div>
+    <span class="ts">▶ 13:47</span>
+    <div class="callout yellow">Worth watching: diagram of a cloud provider's private cloud on the left, the subscriber on the right, two separate security perimeters, and a boundary controller link between them.</div>
+    <div class="callout">An outsourced private cloud has <strong>two security perimeters</strong>: one implemented by the cloud subscriber and one by the provider. They are joined by a <strong>protected communications link</strong>. The security of data and processing in the outsourced private cloud depends on the strength and availability of both perimeters and of the protected link. The infrastructure, the channel and the provider end must all be secured to the expected level.</div>
+
+    <h3>Issues and characteristics</h3>
+    <table class="port-table">
+      <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Network dependency</td><td>Subscribers may have an option to provision unique, protected and reliable communication links with the provider.</td></tr>
+        <tr><td class="proto-name">Workload locations hidden from clients</td><td>Same issue as before.</td></tr>
+        <tr><td class="proto-name">Risks from multi-tenancy</td><td>Same implications as on-site private. Other organizations may also host their private clouds on the same provider.</td></tr>
+        <tr><td class="proto-name">Data import/export and performance limits</td><td>Same as on-site private.</td></tr>
+        <tr><td class="proto-name">Potentially strong security</td><td>Still private and not open to everyone. Some infrastructure may be shared, with possible threat at a lower level, but at the higher level nobody is allowed in.</td></tr>
+        <tr><td class="proto-name">Modest-to-significant up-front costs</td><td>Resources are provisioned by the provider. Start-up costs for the subscriber relate to negotiating the SLA, possibly upgrading the subscriber's network, switching from traditional to cloud-hosted applications, porting existing non-cloud operations to the cloud, and training.</td></tr>
+        <tr><td class="proto-name">Extensive resources available</td><td>A subscriber can rent resources in any quantity offered by the provider. Provisioning and operating computing equipment at scale is a core competency of providers.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout green"><strong>Takeaway:</strong> outsourcing keeps the cloud private but shifts maintenance and installation to a third party, so up-front cost and resource limits improve. Both security perimeters and the link now matter.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · Community Cloud</div>
+    <div class="callout"><strong>Community cloud:</strong> cloud infrastructure provisioned for exclusive use by a specific community of consumers from organizations that have shared concerns (e.g. mission, security requirements, policy and compliance considerations). It may be owned, managed and operated by one or more organizations in the community, a third party, or some combination, and it may exist on or off premises. It can operate as public or private.</div>
+    <div class="tag-row">
+      <span class="tag tag-good">Google Apps for Government</span>
+      <span class="tag tag-good">Microsoft Government Community Cloud</span>
+    </div>
+    <div class="callout yellow"><strong>Analogy:</strong> several organizations A, B, C and X, Y, Z can form different combinations: ABC or XYZ as one community, A with X and Y as another. A community can exist at one point of time and not at another, and an organization can belong to more than one community, like being part of an office group and also a residential community. Grouping organizations with the same type of concern or workflow helps productivity.</div>
+
+    <h3>On-site community cloud</h3>
+    <span class="ts">▶ 17:47</span>
+    <div class="callout yellow">Worth watching: diagram of two groups of organizations, joined through boundary controllers and security perimeters, with some organizations providing cloud services and others consuming them.</div>
+    <div class="callout">Made up of a set of participant organizations. Each participant may provide cloud services, consume them, or both. At least one organization must provide cloud services, and each organization implements a security perimeter. Participants are connected via links between boundary controllers that allow access through their security perimeters (e.g. firewall policies).</div>
+    <table class="port-table">
+      <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Access policy</td><td>May be complex. With N community members, a decision must be made, implicitly or explicitly, on how to share each member's local cloud resources with the others. Leakage of information between communities must be restricted. Policy specification techniques such as <strong>role-based access control (RBAC)</strong> and <strong>attribute-based access control</strong> express the sharing policies.</td></tr>
+        <tr><td class="proto-name">Network dependency</td><td>Present, as in the other deployment models.</td></tr>
+        <tr><td class="proto-name">Subscribers still need IT skills</td><td>Providers in the community need skills similar to on-site private, but the overall configuration may be more complex and need a higher skill level. Identity and access control configuration among participants may be complex.</td></tr>
+        <tr><td class="proto-name">Workload locations hidden from clients</td><td>Participant organizations providing services may employ an outsourced private cloud as part of their implementation strategy.</td></tr>
+        <tr><td class="proto-name">Data import/export and performance limits</td><td>Links between participants can be provisioned at various levels of performance, security and reliability. Limitations are similar to the outsourced private cloud. Communities can be loosely coupled, which makes this harder to manage.</td></tr>
+        <tr><td class="proto-name">Potentially strong security</td><td>Depends on the security perimeters of all participating organizations and the strength of the communication links. Essentially similar to outsourced private, but with possibly more links and perimeters. Being in one community gives better resistance to external threats, based on community policies plus your own.</td></tr>
+        <tr><td class="proto-name">Highly variable up-front costs</td><td>Depend greatly on whether the organization only consumes or also provides cloud services. A participant that provides services faces costs similar to on-site private (significant-to-high).</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Outsourced community cloud</h3>
+    <span class="ts">▶ 20:52</span>
+    <div class="callout yellow">Worth watching: diagram of three organizations forming a community and connecting through boundary controllers to a private cloud inside a cloud provider's facility, with a provider-controlled security perimeter.</div>
+    <table class="port-table">
+      <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Network dependency</td><td>Similar to outsourced private. The primary difference is that multiple protected communication links are likely from the community members to the provider's facility.</td></tr>
+        <tr><td class="proto-name">Workload locations hidden from clients</td><td>Same as outsourced private.</td></tr>
+        <tr><td class="proto-name">Risks from multi-tenancy</td><td>Same as on-site community.</td></tr>
+        <tr><td class="proto-name">Data import/export and performance limits</td><td>Same as outsourced private.</td></tr>
+        <tr><td class="proto-name">Potentially strong security</td><td>Same as on-site community.</td></tr>
+        <tr><td class="proto-name">Up-front costs</td><td>Modest-to-significant, same as outsourced private. Outsourcing takes up much of the load, so up-front cost is likely much less than maintaining on premises.</td></tr>
+        <tr><td class="proto-name">Resources</td><td>Extensive resource availability is theoretically possible when outsourcing.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">7 · Hybrid Cloud</div>
+    <div class="callout"><strong>Hybrid cloud:</strong> a composition of two or more distinct cloud infrastructures (private, community or public) that remain unique entities but are bound together by standardized or proprietary technology that enables <strong>data and application portability</strong>.</div>
+    <div class="tag-row">
+      <span class="tag tag-good">Windows Azure (capable of hybrid cloud)</span>
+      <span class="tag tag-good">VMware vCloud (Hybrid Cloud Services)</span>
+    </div>
+
+    <h3>Why hybrid is important</h3>
+    <div class="callout yellow"><strong>Usage patterns differ:</strong> some usage is more critical or vulnerable to security threats and is kept private, with proper network perimeter security. Other usage need not be so secure and can go public. For example, practice sessions in computing labs need much less security than student records or examination data. The same type of operation can be outsourced to a public cloud, while the other is kept private even if that is less economical.</div>
+    <div class="callout yellow"><strong>Sudden demand:</strong> increasing resources in a private cloud (provisioning, purchasing) is a long process. You can instead use a public cloud for a short period for as long as the process is in place.</div>
+    <div class="callout green"><strong>Portability and interoperability:</strong> data and sometimes applications must work across clouds. An application running on a private cloud and then provisioned as a VM in the public domain may need resizing, and portability issues must be looked into.</div>
+
+    <h3>Composition and variation</h3>
+    <span class="ts">▶ 25:45</span>
+    <div class="callout yellow">Worth watching: diagram of a hybrid cloud built from on-site private, outsourced private, on-site community, outsourced community and public clouds, all linked together.</div>
+    <div class="callout">A hybrid cloud has significant variations in performance, reliability and security properties, depending on the type of clouds chosen to build it.</div>
+
+    <h3>Complexity and churn</h3>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Extremely complex</div>
+        <div class="concept-desc">An application running over a combination of public and private clouds needs a complex underlying architecture to run seamlessly.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Changes over time</div>
+        <div class="concept-desc">Constituent clouds may join and leave. A public cloud may disconnect when a subscription ends or the pricing model differs, or may cease to exist.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Needs may grow</div>
+        <div class="concept-desc">More public or community clouds may be added when more resources are needed.</div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Caveat:</strong> constituent clouds leaving or joining makes the whole process pretty complex to handle.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">8 · Choosing a Deployment Model</div>
+    <div class="callout green"><strong>Key point:</strong> the choice depends entirely on requirements.</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Small organization or individual</div>
+        <div class="concept-desc">Public cloud may be a good solution, as long as the business does not have needs that force a move to its own private cloud.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Mission-critical clients</div>
+        <div class="concept-desc">If your clients are in sectors like financial or defense, they may insist you keep resources on your own premises rather than outsourcing or using public clouds.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Mixed needs</div>
+        <div class="concept-desc">Build a hybrid, or classify applications and data into categories: this bunch to private, this to public, this to community.</div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Example:</strong> a data storage provider can keep storage on its own premises, or outsource and provision it from public clouds, depending on what its clients demand.</div>
+    <div class="callout pink"><strong>Challenge:</strong> managing all these categories is another big challenge for an organization or institution.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Deployment models:</strong> public, private, community and hybrid; all service models can be hosted on any of them.</div>
+    <div class="callout"><strong>Public cloud:</strong> open to anyone who can pay, at the CSP's premises. Hidden workload locations, multi-tenancy risk, limited visibility and restrictive default SLAs, but low up-front cost and near-infinite elasticity.</div>
+    <div class="callout"><strong>Private cloud:</strong> exclusive to one organization, either on-site or outsourced to a hosting company. On-site gives strong security and control but high up-front cost and fixed capacity; outsourced has two security perimeters joined by a protected link, with lower costs and extensive resources.</div>
+    <div class="callout"><strong>Community cloud:</strong> shared by organizations with common concerns (mission, security, compliance), on-site or outsourced. Access policy is complex and handled with RBAC or attribute-based access control.</div>
+    <div class="callout green"><strong>Hybrid cloud:</strong> two or more distinct clouds bound by technology that enables data and application portability. Useful for mixed security needs and sudden demand, but complex and changes as constituent clouds join and leave.</div>
+    <div class="callout yellow"><strong>Examples given:</strong> IIT Kharagpur's Meghamala private cloud; practice labs on public cloud versus student records and exams on private; the x vs 1.5x provisioning example for on-site private.</div>
+    <div class="callout pink"><strong>Recurring issues:</strong> network dependency, hidden workload locations, multi-tenancy risk, data import/export limits and up-front cost recur across all four models, with differences in degree.</div>
+    <div class="callout green"><strong>Choice:</strong> small organizations may do well on public cloud, mission-critical clients need private, and mixed needs call for hybrid or classifying applications and data.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

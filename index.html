@@ -1,314 +1,433 @@
-# NPTEL Lecture Notes — System Instructions
-
-For every NPTEL transcript I upload, generate complete exam-ready notes directly from
-the transcript. The notes must be comprehensive, covering all important information in a
-formal, concise, and easy-to-understand manner. Output only structured bare-bones HTML
-using the existing `styles.css` class names documented below. No `<style>` blocks, no
-inline styles, no new class names.
-
----
-
-## Repo structure (flat)
-
-Everything lives in the root of the `cc_nptel` repo. There are no week folders.
-
-```
-cc_nptel/
-├── index.html
-├── styles.css
-├── doubts.js
-├── doubts_log.md
-├── lec1.html
-├── lec2.html
-└── ... (lec60.html)
-```
-
-Lecture numbers are global (`lec1` to `lec60`) and never restart per week. All paths
-in lecture files are therefore plain relative paths with no `../`.
-
----
-
-## Page structure (required, always in this order)
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lecture N — [Topic] | [Course Name]</title>
+  <title>Cloud Computing — Lecture Notes</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+  <style>
+    /* index-specific styles only; all colours come from the tokens in styles.css */
+    .index-hero { margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 32px; }
+    .index-hero h1 { font-size: clamp(28px, 5vw, 44px); }
+    .hero-meta { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); margin-bottom: 0; }
+
+    /* search */
+    .search-wrap { position: relative; max-width: 440px; margin-bottom: 8px; }
+    .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 13px; pointer-events: none; }
+    #search { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 11px 16px 11px 36px; outline: none; transition: border-color .2s; }
+    #search::placeholder { color: var(--muted); }
+    #search:focus { border-color: var(--accent); }
+    .search-mode { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 20px; min-height: 16px; color: var(--muted); }
+    .search-mode.number  { color: var(--accent); }
+    .search-mode.keyword { color: var(--accent3); }
+    .status-line { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 18px; min-height: 18px; }
+    .status-line .count { color: var(--accent3); }
+
+    /* lecture grid */
+    .lec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+    .lec-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 6px; position: relative; overflow: hidden; transition: border-color .18s, transform .15s, box-shadow .18s; animation: fadeUp .25s ease both; }
+    .lec-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); opacity: 0; transition: opacity .18s; }
+    .lec-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 14px #2f7ec81a; }
+    .lec-card:hover::before { opacity: 1; }
+    .card-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .card-top .high-badge, .card-top .med-badge, .card-top .skip-badge { margin-left: 0; }
+    .card-num { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: .1em; }
+    .card-label { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; color: #0e2037; line-height: 1.3; }
+    .card-desc, .card-snippet { font-size: 13px; color: var(--muted); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .card-snippet mark { background: var(--tag-bg); color: var(--accent); border-radius: 2px; padding: 0 2px; }
+    .card-match-count { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--accent3); }
+    .card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+    .card-doubts { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--accent2); border: 1px solid #8875c744; background: #8875c711; border-radius: 4px; padding: 2px 8px; }
+    .card-arrow { font-size: 14px; color: var(--muted); margin-left: auto; transition: color .18s, transform .18s; }
+    .lec-card:hover .card-arrow { color: var(--accent3); transform: translateX(3px); }
+
+    /* states */
+    .state-box { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; padding: 56px 20px; gap: 12px; text-align: center; }
+    .state-msg { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--muted); margin: 0; }
+    .state-sub { font-size: 12px; color: var(--muted); max-width: 320px; line-height: 1.6; margin: 0; }
+    .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* doubts log */
+    .doubts-section { margin-top: 56px; border-top: 1px solid var(--border); padding-top: 32px; }
+    .doubts-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .doubts-heading { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; color: #0e2037; margin-bottom: 4px; }
+    .doubts-desc { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+    .doubts-stats { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 14px; min-height: 18px; }
+    .doubts-stats .count { color: var(--accent2); }
+    .doubts-btn { font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: #8875c711; color: var(--accent2); border: 1px solid #8875c744; padding: 10px 22px; border-radius: 8px; cursor: pointer; transition: background .2s; }
+    .doubts-btn:hover { background: #8875c722; }
+    #doubts-panel { display: none; margin-top: 18px; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    #doubts-panel.open { display: block; }
+    .doubts-filter { display: flex; flex-wrap: wrap; gap: 6px; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+    .chip { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); background: transparent; border: 1px solid var(--border); border-radius: 4px; padding: 3px 10px; cursor: pointer; }
+    .chip:hover { border-color: var(--accent2); color: var(--accent2); }
+    .chip.active { background: #8875c722; border-color: var(--accent2); color: var(--accent2); }
+    #doubts-scroll { max-height: 520px; overflow-y: auto; padding: 24px 28px; scrollbar-width: thin; scrollbar-color: #8875c755 transparent; }
+    .doubt-group-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; color: var(--accent2); margin: 30px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .doubt-group-title:first-child { margin-top: 0; }
+    .doubt-group-title a { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 400; color: var(--accent3); text-decoration: none; }
+    .doubt-group-title a:hover { text-decoration: underline; }
+    .doubt-card { background: #ffffffbb; border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; margin-bottom: 10px; }
+    .doubt-q { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: #0e2037; }
+    .doubt-a { font-size: 14px; color: var(--text); margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 8px; }
+    .doubt-q p, .doubt-a p { margin: 0 0 6px; }
+    .doubt-tag { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; margin-right: 8px; }
+    .doubt-q .doubt-tag { color: var(--accent2); }
+    .doubt-a .doubt-tag { color: var(--accent3); }
+    .doubt-a code, .doubt-q code { font-family: 'IBM Plex Mono', monospace; font-size: 12px; background: var(--surface); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; }
+    .doubt-pending { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #c49a20; background: #e8b84b33; border: 1px solid #e8b84b88; border-radius: 4px; padding: 2px 8px; display: inline-block; margin-top: 8px; }
+    .doubts-error { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--accent2); padding: 16px; background: #8875c711; border-radius: 8px; }
+  </style>
 </head>
 <body>
 <div class="container">
 
-  <!-- 1. nav -->
-  <!-- 2. lec-header -->
-  <!-- 3. content sections -->
-  <!-- 4. concept summary section -->
-  <!-- 5. doubts placeholder (always last, before </div></div>) -->
+  <div class="index-hero">
+    <span class="lec-tag">NPTEL · IIT Kharagpur</span>
+    <h1>Cloud Computing</h1>
+    <p class="hero-meta">Prof. Soumya Kanti Ghosh · Dept. of Computer Science &amp; Engineering · IIT Kharagpur</p>
+  </div>
 
-  <div class="section" id="doubts-placeholder"></div>
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input id="search" type="text" placeholder="search by number or keyword — try '5' or 'virtualization'" autocomplete="off">
+  </div>
+  <p class="search-mode" id="search-mode"></p>
+
+  <p class="status-line" id="status">loading...</p>
+  <div class="lec-grid" id="grid"></div>
+
+  <div class="doubts-section">
+    <p class="doubts-label">Doubts Log</p>
+    <p class="doubts-heading">Clarified Doubts</p>
+    <p class="doubts-desc">Every doubt from <code>doubts_log.md</code>, grouped by lecture. The same entries show up at the bottom of each lecture page.</p>
+    <p class="doubts-stats" id="doubts-stats">loading...</p>
+    <button class="doubts-btn" id="doubts-btn">▸ open doubts_log.md</button>
+    <div id="doubts-panel">
+      <div class="doubts-filter" id="doubts-filter"></div>
+      <div id="doubts-scroll"><div id="doubts-content"></div></div>
+    </div>
+  </div>
 
 </div>
-<script src="doubts.js"></script>
+
+<script>
+  // ── config ─────────────────────────────────────────────────────
+  const OWNER      = 'kavithahk-1706';
+  const REPO       = 'cc_nptel';
+  const LEC_DIR    = '';              // lecN.html files live in the repo root
+  const DOUBTS_URL = 'doubts_log.md'; // path relative to this page
+
+  const dirPath  = LEC_DIR ? LEC_DIR.replace(/^\/|\/$/g, '') + '/' : '';
+  const API      = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${dirPath}`;
+  const SITE     = `https://${OWNER}.github.io/${REPO}/${dirPath}`;
+  const CACHE_KEY = `lec-list:${OWNER}/${REPO}`;
+
+  const grid       = document.getElementById('grid');
+  const statusEl   = document.getElementById('status');
+  const searchEl   = document.getElementById('search');
+  const searchMode = document.getElementById('search-mode');
+
+  let lectures = [];            // { num, name, href, title, badge, desc, text }
+  let indexPromise = null;      // resolves once every lecture page has been fetched
+  let indexReady = false;
+  let doubts = new Map();       // num -> [{ q, a }]
+  let doubtsState = 'loading';  // loading | ready | error
+  let doubtsFilterLec = 'all';
+  let doubtsQuery = '';
+  let searchToken = 0;
+
+  // ── helpers ────────────────────────────────────────────────────
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pad = n => String(n).padStart(2, '0');
+
+  function md(text, inline) {
+    if (typeof marked === 'undefined') return esc(text).replace(/\n/g, '<br>');
+    return inline ? marked.parseInline(text) : marked.parse(text);
+  }
+
+  // ── 1. lecture list from the GitHub API ────────────────────────
+  async function fetchLectures() {
+    let files, fromCache = false;
+    try {
+      const res = await fetch(API);
+      if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+      files = await res.json();
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(files.map(f => ({ name: f.name, type: f.type })))); } catch (_) {}
+    } catch (err) {
+      let cached = null;
+      try { cached = JSON.parse(localStorage.getItem(CACHE_KEY)); } catch (_) {}
+      if (!cached) {
+        grid.innerHTML = `
+          <div class="state-box">
+            <p class="state-msg">couldn't reach the GitHub API</p>
+            <p class="state-sub">${esc(err.message)}<br>check REPO / LEC_DIR in the config, or try again in a bit (unauthenticated limit is 60 requests/hour)</p>
+          </div>`;
+        statusEl.textContent = '';
+        return;
+      }
+      files = cached;
+      fromCache = true;
+    }
+
+    lectures = files
+      .filter(f => f.type === 'file' && /^lec\d+\.html$/i.test(f.name))
+      .map(f => {
+        const num = pad(f.name.match(/\d+/)[0]);
+        return { num, name: f.name, href: SITE + f.name, title: '', badge: '', desc: '', text: '' };
+      })
+      .sort((a, b) => parseInt(a.num) - parseInt(b.num));
+
+    if (!lectures.length) {
+      statusEl.textContent = '';
+      grid.innerHTML = `<div class="state-box"><p class="state-msg">no lecture files found yet</p><p class="state-sub">push a lecN.html to the repo and it will show up here</p></div>`;
+      return;
+    }
+
+    applySearch();
+    if (fromCache) statusEl.innerHTML += ' <span>(cached list: GitHub API unreachable)</span>';
+    indexPromise = buildIndex();
+  }
+
+  // ── 2. fetch every lecture once: titles, badges, full-text index ─
+  async function buildIndex() {
+    await Promise.all(lectures.map(async lec => {
+      try {
+        const res = await fetch(lec.href);
+        if (!res.ok) return;
+        const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+
+        const head = doc.querySelector('.lec-header');
+        lec.title = (doc.querySelector('h1')?.textContent || '').trim();
+        lec.badge = ['high', 'med', 'skip'].find(b => head?.querySelector(`.${b}-badge`)) || '';
+        lec.desc  = (head?.querySelectorAll('p')[1]?.textContent || '').trim();
+
+        doc.querySelectorAll('script, style, nav').forEach(el => el.remove());
+        lec.text = (doc.body.textContent || '').replace(/\s+/g, ' ').trim();
+      } catch (_) { /* skip files that fail to load */ }
+    }));
+    indexReady = true;
+    applySearch();
+    renderDoubts();
+  }
+
+  // ── 3. search ──────────────────────────────────────────────────
+  const isNumericQuery = q => /^(lec)?\s*\d+$/i.test(q) || /^lec$/i.test(q);
+
+  function countMatches(text, q) {
+    return (text.match(new RegExp(reEsc(q), 'gi')) || []).length;
+  }
+
+  function getSnippet(text, q, len = 170) {
+    const idx = text.toLowerCase().indexOf(q.toLowerCase());
+    if (idx === -1) return '';
+    const start = Math.max(0, idx - 60);
+    const end = Math.min(text.length, start + len);
+    const raw = (start > 0 ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '');
+    return esc(raw).replace(new RegExp(`(${reEsc(esc(q))})`, 'gi'), '<mark>$1</mark>');
+  }
+
+  let searchTimer = null;
+  searchEl.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(applySearch, 250);
+  });
+
+  async function applySearch() {
+    const q = searchEl.value.trim();
+    const token = ++searchToken;
+    doubtsQuery = '';
+
+    if (!q) {
+      searchMode.textContent = ''; searchMode.className = 'search-mode';
+      renderGrid(lectures);
+      renderDoubts();
+      return;
+    }
+
+    if (isNumericQuery(q)) {
+      const digits = q.replace(/^lec/i, '').trim();
+      searchMode.textContent = 'filtering by lecture number';
+      searchMode.className = 'search-mode number';
+      renderGrid(lectures.filter(l => !digits || l.num.includes(digits) || String(parseInt(l.num)) === digits));
+      renderDoubts();
+      return;
+    }
+
+    searchMode.textContent = 'searching lecture content…';
+    searchMode.className = 'search-mode loading';
+
+    if (!indexReady) {
+      statusEl.textContent = 'indexing lecture content…';
+      grid.innerHTML = `<div class="state-box"><div class="spinner"></div><p class="state-msg">fetching all lectures to search</p><p class="state-sub">happens once per visit</p></div>`;
+      await indexPromise;
+      if (token !== searchToken) return; // a newer search took over
+    }
+
+    const results = new Map();
+    lectures.forEach(lec => {
+      if (lec.text.toLowerCase().includes(q.toLowerCase())) {
+        results.set(lec.name, { count: countMatches(lec.text, q), snippet: getSnippet(lec.text, q) });
+      }
+    });
+    const matched = lectures
+      .filter(l => results.has(l.name))
+      .sort((a, b) => results.get(b.name).count - results.get(a.name).count);
+
+    searchMode.textContent = `full-text search — ${matched.length} lecture${matched.length !== 1 ? 's' : ''} found`;
+    searchMode.className = 'search-mode keyword';
+    renderGrid(matched, results, q);
+
+    doubtsQuery = q;      // keyword search also filters the doubts log
+    renderDoubts();
+  }
+
+  // ── 4. render lecture grid ─────────────────────────────────────
+  function renderGrid(list, results = null, q = '') {
+    grid.innerHTML = '';
+
+    if (!list.length) {
+      statusEl.textContent = 'no results';
+      grid.innerHTML = `<div class="state-box"><p class="state-msg">nothing matches that</p><p class="state-sub">try a different keyword or clear the search</p></div>`;
+      return;
+    }
+
+    statusEl.innerHTML = `<span class="count">${list.length}</span> lecture${list.length !== 1 ? 's' : ''} ${results ? 'matched' : 'available'}`;
+
+    list.forEach((lec, i) => {
+      const a = document.createElement('a');
+      a.className = 'lec-card';
+      a.href = lec.href;
+      a.style.animationDelay = `${Math.min(i, 12) * 30}ms`;
+
+      const badge = lec.badge ? `<span class="${lec.badge}-badge">${lec.badge} priority</span>` : '';
+      const nDoubts = (doubts.get(lec.num) || []).length;
+      const doubtPill = nDoubts ? `<span class="card-doubts">${nDoubts} doubt${nDoubts !== 1 ? 's' : ''}</span>` : '';
+      const res = results && results.get(lec.name);
+
+      a.innerHTML = `
+        <div class="card-top"><span class="card-num">LEC ${lec.num}</span>${badge}</div>
+        <span class="card-label">${esc(lec.title || 'Lecture ' + lec.num)}</span>
+        ${res
+          ? `<span class="card-match-count">${res.count} match${res.count !== 1 ? 'es' : ''}</span><span class="card-snippet">${res.snippet}</span>`
+          : (lec.desc ? `<span class="card-desc">${esc(lec.desc)}</span>` : '')}
+        <div class="card-foot">${doubtPill}<span class="card-arrow">→</span></div>`;
+      grid.appendChild(a);
+    });
+  }
+
+  // ── 5. doubts_log.md ───────────────────────────────────────────
+  // Format:  ## lecN  →  **Q:** question  →  **A:** answer (A optional = unanswered)
+  function parseDoubts(text) {
+    const groups = new Map();
+    let lec = null, cur = null, field = null, m;
+
+    text.split(/\r?\n/).forEach(line => {
+      if ((m = line.match(/^##\s*lec(?:ture)?\s*0*(\d+)\s*$/i))) {
+        lec = pad(m[1]); cur = field = null;
+        if (!groups.has(lec)) groups.set(lec, []);
+        return;
+      }
+      if (!lec || /^-{3,}$/.test(line.trim())) return;
+      if ((m = line.match(/^\*\*Q:\*\*\s*(.*)$/))) { cur = { q: m[1], a: '' }; groups.get(lec).push(cur); field = 'q'; return; }
+      if ((m = line.match(/^\*\*A:\*\*\s*(.*)$/))) { if (cur) { cur.a = m[1]; field = 'a'; } return; }
+      if (cur && field) cur[field] += '\n' + line;   // multi-line answers
+    });
+
+    groups.forEach((items, k) => {
+      items.forEach(d => { d.q = d.q.trim(); d.a = d.a.trim(); });
+      if (!items.length) groups.delete(k);
+    });
+    return groups;
+  }
+
+  async function loadDoubts() {
+    try {
+      const res = await fetch(DOUBTS_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('not found');
+      doubts = parseDoubts(await res.text());
+      doubtsState = 'ready';
+    } catch (_) {
+      doubtsState = 'error';
+    }
+    renderDoubts();
+    if (lectures.length) applySearch();   // refresh "n doubts" pills on the cards
+  }
+
+  function renderDoubts() {
+    const stats = document.getElementById('doubts-stats');
+    const btn = document.getElementById('doubts-btn');
+    const filterEl = document.getElementById('doubts-filter');
+    const content = document.getElementById('doubts-content');
+    const isOpen = document.getElementById('doubts-panel').classList.contains('open');
+
+    if (doubtsState === 'loading') { stats.textContent = 'loading...'; return; }
+    if (doubtsState === 'error') {
+      stats.textContent = '';
+      content.innerHTML = `<div class="doubts-error">could not load ${esc(DOUBTS_URL)}. Make sure it sits next to index.html and that Pages has finished deploying.</div>`;
+      filterEl.innerHTML = '';
+      return;
+    }
+
+    let total = 0, pending = 0;
+    doubts.forEach(items => items.forEach(d => { total++; if (!d.a) pending++; }));
+
+    const qLower = doubtsQuery.toLowerCase();
+    const matchesQuery = d => !qLower || (d.q + ' ' + d.a).toLowerCase().includes(qLower);
+
+    let nMatch = 0;
+    if (qLower) doubts.forEach(items => items.forEach(d => { if (matchesQuery(d)) nMatch++; }));
+
+    stats.innerHTML = total
+      ? `<span class="count">${total}</span> doubt${total !== 1 ? 's' : ''} across ${doubts.size} lecture${doubts.size !== 1 ? 's' : ''} · ${pending} unanswered` +
+        (qLower ? ` · <span class="count">${nMatch}</span> match “${esc(doubtsQuery)}”` : '')
+      : 'no doubts logged yet';
+    btn.textContent = (isOpen ? '▾ close' : '▸ open') + ' doubts_log.md';
+
+    // lecture filter chips
+    const nums = [...doubts.keys()].sort((a, b) => a - b);
+    if (doubtsFilterLec !== 'all' && !nums.includes(doubtsFilterLec)) doubtsFilterLec = 'all';
+    filterEl.innerHTML = nums.length
+      ? ['all', ...nums].map(n => `<button class="chip${n === doubtsFilterLec ? ' active' : ''}" data-lec="${n}">${n === 'all' ? 'all' : 'lec ' + n}</button>`).join('')
+      : '';
+
+    // grouped Q&A cards
+    let html = '';
+    nums.filter(n => doubtsFilterLec === 'all' || n === doubtsFilterLec).forEach(n => {
+      const items = doubts.get(n).filter(matchesQuery);
+      if (!items.length) return;
+      const lec = lectures.find(l => l.num === n);
+      html += `<div class="doubt-group-title"><span>Lecture ${n}</span>${lec ? `<a href="${lec.href}">open notes →</a>` : ''}</div>`;
+      items.forEach(d => {
+        html += `<div class="doubt-card">
+          <div class="doubt-q"><span class="doubt-tag">Q</span>${md(d.q, true)}</div>
+          ${d.a ? `<div class="doubt-a"><span class="doubt-tag">A</span>${md(d.a)}</div>` : `<span class="doubt-pending">unanswered</span>`}
+        </div>`;
+      });
+    });
+    content.innerHTML = html || `<p class="state-sub">${total ? 'no doubts match that' : 'nothing here yet. Doubts you send get appended under their ## lecN heading.'}</p>`;
+  }
+
+  document.getElementById('doubts-btn').addEventListener('click', () => {
+    document.getElementById('doubts-panel').classList.toggle('open');
+    renderDoubts();
+  });
+  document.getElementById('doubts-filter').addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    doubtsFilterLec = chip.dataset.lec;
+    renderDoubts();
+  });
+
+  // ── go ─────────────────────────────────────────────────────────
+  grid.innerHTML = `<div class="state-box"><div class="spinner"></div><p class="state-msg">hitting the github api</p></div>`;
+  statusEl.textContent = 'fetching from repo...';
+  fetchLectures();
+  loadDoubts();
+</script>
 </body>
 </html>
-```
-
----
-
-## 1 · Navigation
-
-Substitute `(N-1)` and `(N+1)` based on the uploaded lecture number.
-For lecture 1, add `class="disabled"` to the prev link.
-For the final lecture of the course (lecture 60), add `class="disabled"` to the next link.
-
-```html
-<nav>
-  <a href="index.html" class="back-link">← all lectures</a>
-  <div class="nav-right">
-    <a href="lec(N-1).html" class="nav-lec">← prev</a>
-    <a href="lec(N+1).html" class="nav-lec">next →</a>
-  </div>
-</nav>
-```
-
----
-
-## 2 · Lecture header
-
-```html
-<div class="lec-header">
-  <span class="lec-tag">Lecture 0N</span>
-  <span class="PRIORITY-badge">PRIORITY priority</span>
-  <h1>[Lecture Title]</h1>
-  <p><strong>[Professor Name]</strong> · [Dept], [Institute]</p>
-  <p>[2–3 sentence plain-English summary of what this lecture covers and why it matters
-     in context of the course. Describe how technical it is and whether it is foundational
-     or applied.]</p>
-</div>
-```
-
-The index page reads the `h1`, the priority badge and the second `<p>` of `.lec-header`
-to build each lecture card, so keep that structure exactly as shown.
-
-**Priority badge class rules — pick exactly one:**
-
-| Content type | Badge class | When to use |
-|---|---|---|
-| Core theory, definitions, or architecture that everything else builds on | `high-badge` | Concepts guaranteed to appear in exams |
-| Important but secondary — elaboration, examples, or moderate theory | `med-badge` | Useful context, worth reading |
-| Overview, motivation, or repeated content with little new information | `skip-badge` | Skim or skip if pressed for time |
-
----
-
-## 3 · Content sections
-
-Every content block lives inside:
-```html
-<div class="section">
-  <div class="section-label">N · Section Title</div>
-  <!-- content -->
-</div>
-```
-
-### Timestamp hints
-
-**Only add a timestamp when the slide contains a diagram, graph, image, table, or
-live demonstration that cannot be fully reproduced in text.** If the slide content
-is entirely captured in the notes as text, do not add a timestamp — not even as
-optional. No exceptions.
-
-When a timestamp is warranted:
-
-```html
-<span class="ts">▶ MM:SS</span>
-<div class="callout yellow">Worth watching: [one line — what the visual shows and why watching helps]</div>
-```
-
-If the YouTube video ID is known, use a real link instead of `<span>`:
-```html
-<a class="ts" href="https://www.youtube.com/watch?v=VIDEO_ID&t=SECONDSs" target="_blank">▶ MM:SS</a>
-```
-
-Convert "Refer Slide Time: 17:07" to seconds for the URL: 17×60 + 7 = `t=1027s`.
-Place the timestamp + callout immediately before the content it refers to.
-
-### Component vocabulary — use the right element for the content
-
-**Use `.compare` (two-column comparison grid):**
-When contrasting exactly two things (A vs B, before vs after, two approaches).
-```html
-<div class="compare">
-  <div class="compare-col circuit-col">  <!-- use for the "older/worse/left" side -->
-    <div class="compare-col-header">Label</div>
-    <div class="compare-body">
-      <div class="compare-row"><span class="label">Attribute</span>Value</div>
-    </div>
-  </div>
-  <div class="compare-col packet-col">  <!-- use for the "newer/better/right" side -->
-    <div class="compare-col-header">Label</div>
-    <div class="compare-body">
-      <div class="compare-row"><span class="label">Attribute</span>Value</div>
-    </div>
-  </div>
-</div>
-```
-
-**Use `.stack` (vertical layer diagram):**
-When content is explicitly layered or sequential — protocol stacks, evolution
-timelines, hierarchies where order carries meaning. Use these layer classes from
-bottom to top of importance/abstraction: `layer-phys`, `layer-dl`, `layer-net`,
-`layer-trans`, `layer-app`.
-```html
-<div class="stack">
-  <div class="stack-layer layer-phys">
-    <span class="layer-name">Bottom Layer</span>
-    <span class="layer-desc">brief description</span>
-  </div>
-  <!-- ... -->
-</div>
-```
-
-**Use `.three-col` with `.concept-card`:**
-When explaining 3 parallel concepts, properties, or categories. nth-child coloring
-is automatic (blue, orange, green). Do not use for more than 3 or fewer than 3 items
-(use `.two-col` or a list for other counts).
-```html
-<div class="three-col">
-  <div class="concept-card">
-    <div class="concept-title">Title</div>
-    <div class="concept-desc">Description</div>
-  </div>
-</div>
-```
-
-**Use `.two-col` with `.proto-card`:**
-For 4–8 parallel items (properties, components, features) that don't need color
-distinction — course modules, resource types, protocol features.
-```html
-<div class="two-col">
-  <div class="proto-card">
-    <div class="proto-layer">category label</div>
-    <div class="proto-card-title">Title</div>
-    <div class="proto-card-desc">Description</div>
-  </div>
-</div>
-```
-
-**Use `.proto-grid` with `.proto-card`:**
-For compact 2-column grids of simple name/label pairs (e.g. resource types).
-```html
-<div class="proto-grid">
-  <div class="proto-card">
-    <div class="proto-layer">Category</div>
-    <div class="proto-names">Name</div>
-  </div>
-</div>
-```
-
-**Use `.port-table`:**
-For any actual tabular data — protocol tables, port numbers, parameter lists,
-comparison matrices with more than 2 columns.
-```html
-<table class="port-table">
-  <thead><tr><th>Col A</th><th>Col B</th><th>Col C</th></tr></thead>
-  <tbody>
-    <tr><td class="proto-name">value</td><td>value</td><td>value</td></tr>
-  </tbody>
-</table>
-```
-
-**Use `.domain-grid` with `.domain-card`:**
-For exactly two high-level contrasting domains or categories (provider vs consumer,
-client vs server) where each needs a heading and longer description.
-```html
-<div class="domain-grid">
-  <div class="domain-card">
-    <div class="domain-title">Domain A</div>
-    <div class="domain-desc">Description</div>
-  </div>
-  <div class="domain-card">
-    <div class="domain-title">Domain B</div>
-    <div class="domain-desc">Description</div>
-  </div>
-</div>
-```
-
-**Use `.callout` variants:**
-For key insights, warnings, examples, and analogies. Pick the variant by content type:
-
-| Variant | Class | Use for |
-|---|---|---|
-| Default (blue) | `callout` | Key definitions, important statements |
-| Green | `callout green` | Takeaways, conclusions, "key insight" moments |
-| Yellow | `callout yellow` | Examples, analogies, watch-the-video prompts |
-| Pink/orange | `callout pink` | Caveats, limitations, counter-intuitive points |
-
-**Use `.tag-row` with `.tag`:**
-For loose enumerations (examples of a category, list of technologies, features).
-Use `tag-good` for neutral/positive items, `tag-bad` for limitations/negatives.
-
-**Do not use plain `<ul>` or `<ol>` lists** unless the content is genuinely a
-sequential procedure with no better visual representation.
-
----
-
-## 4 · Concept summary (always last content section, before doubts)
-
-Use one `.callout` block per major concept covered in the lecture. Pick the callout
-color that best represents the concept's character (definition → default, conclusion →
-green, analogy/example → yellow, limitation → pink). Keep each to 1–2 sentences.
-
-```html
-<div class="section">
-  <div class="section-label">Summary</div>
-  <div class="callout"><strong>Concept A:</strong> one-sentence recap.</div>
-  <div class="callout green"><strong>Concept B:</strong> one-sentence conclusion.</div>
-  <div class="callout yellow"><strong>Analogy:</strong> the car analogy for cloudonomics — ...</div>
-  <div class="callout pink"><strong>Caveat:</strong> cloud is not always economical — ...</div>
-</div>
-```
-
----
-
-## 5 · Doubts placeholder (always include, never omit)
-
-```html
-<div class="section" id="doubts-placeholder"></div>
-```
-
-`doubts.js` injects doubts from `doubts_log.md` into this div at runtime. The index
-page also parses `doubts_log.md` (grouped by lecture, with filters and search), so the
-format below must be followed exactly. Both files sit in the repo root next to the
-lecture files.
-
-When I send follow-up doubts after reading a lecture, format each one for
-`doubts_log.md` as follows:
-
-```markdown
-## lecN
-**Q:** the question as I asked it, cleaned up for clarity
-**A:** concise answer — factual, no padding
-```
-
-`N` is the global lecture number (e.g. `## lec5`, `## lec23`).
-If a doubt is unanswered, include only the `**Q:**` line and omit `**A:**`.
-Append under the correct `## lecN` heading. If the heading doesn't exist yet,
-create it.
-
----
-
-## General rules
-
-- Source of truth is the transcript only. Do not add facts not present in the transcript.
-- Formal and concise — no filler phrases, no restating the same point twice.
-- Every major concept gets its own `<div class="section">` with a numbered `section-label`.
-- `<h3>` for sub-topics within a section, `<h4>` for further subdivision if needed.
-- `<strong>` for key terms on first use.
-- Timestamp hints are mandatory wherever the transcript says "Refer Slide Time" and the
-  slide clearly contains a diagram, graph, table, or demonstration. For plain text slides,
-  a timestamp is optional.
-- Do not invent analogies, examples, or explanations. If the professor gave an analogy,
-  include it in a `.callout.yellow`. If they didn't, don't fabricate one.
