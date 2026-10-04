@@ -8,6 +8,26 @@ inline styles, no new class names.
 
 ---
 
+## Repo structure (flat)
+
+Everything lives in the root of the `cc_nptel` repo. There are no week folders.
+
+```
+cc_nptel/
+├── index.html
+├── styles.css
+├── doubts.js
+├── doubts_log.md
+├── lec1.html
+├── lec2.html
+└── ... (lec60.html)
+```
+
+Lecture numbers are global (`lec1` to `lec60`) and never restart per week. All paths
+in lecture files are therefore plain relative paths with no `../`.
+
+---
+
 ## Page structure (required, always in this order)
 
 ```html
@@ -17,7 +37,7 @@ inline styles, no new class names.
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lecture N — [Topic] | [Course Name]</title>
-  <link rel="stylesheet" href="./../styles.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="container">
@@ -42,7 +62,7 @@ inline styles, no new class names.
 
 Substitute `(N-1)` and `(N+1)` based on the uploaded lecture number.
 For lecture 1, add `class="disabled"` to the prev link.
-For the final lecture of the course, add `class="disabled"` to the next link.
+For the final lecture of the course (lecture 60), add `class="disabled"` to the next link.
 
 ```html
 <nav>
@@ -69,6 +89,9 @@ For the final lecture of the course, add `class="disabled"` to the next link.
      or applied.]</p>
 </div>
 ```
+
+The index page reads the `h1`, the priority badge and the second `<p>` of `.lec-header`
+to build each lecture card, so keep that structure exactly as shown.
 
 **Priority badge class rules — pick exactly one:**
 
@@ -256,7 +279,11 @@ green, analogy/example → yellow, limitation → pink). Keep each to 1–2 sent
 <div class="section" id="doubts-placeholder"></div>
 ```
 
-`doubts.js` will inject doubts from `doubts_log.md` into this div at runtime.
+`doubts.js` injects doubts from `doubts_log.md` into this div at runtime. The index
+page also parses `doubts_log.md` (grouped by lecture, with filters and search), so the
+format below must be followed exactly. Both files sit in the repo root next to the
+lecture files.
+
 When I send follow-up doubts after reading a lecture, format each one for
 `doubts_log.md` as follows:
 
@@ -266,6 +293,7 @@ When I send follow-up doubts after reading a lecture, format each one for
 **A:** concise answer — factual, no padding
 ```
 
+`N` is the global lecture number (e.g. `## lec5`, `## lec23`).
 If a doubt is unanswered, include only the `**Q:**` line and omit `**A:**`.
 Append under the correct `## lecN` heading. If the heading doesn't exist yet,
 create it.

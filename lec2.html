@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 2 — Cloud Computing Overview (Contd.) | Cloud Computing</title>
+  <link rel="stylesheet" href="./../styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="../index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec1.html" class="nav-lec">← prev</a>
+      <a href="lec3.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 02</span>
+    <span class="high-badge">High priority</span>
+    <h1>Cloud Computing — Overview (Contd.)</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Continues the evolution of computing from distributed systems towards cloud computing. Covers why distributed computing is needed, distributed applications, grid computing, cluster computing and utility computing, and ends with the NIST definition of cloud computing. Mostly conceptual and definition-heavy; foundational for the rest of the course.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · Common Properties of Distributed Computing</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">property</div>
+        <div class="proto-card-title">Fault tolerance</div>
+        <div class="proto-card-desc">If one or some nodes fail, the whole system still works, except for reduced performance. The status of each node must be checked.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">property</div>
+        <div class="proto-card-title">Each node plays a partial role</div>
+        <div class="proto-card-desc">Each computer has only a limited, incomplete view of the system and may know only one part of the input.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">property</div>
+        <div class="proto-card-title">Resource sharing</div>
+        <div class="proto-card-desc">Each user can share computing power and storage resources in the system with other users.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">property</div>
+        <div class="proto-card-title">Load sharing</div>
+        <div class="proto-card-desc">Dispatching several tasks to the nodes helps share the load across the whole system.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">property</div>
+        <div class="proto-card-title">Easy to expand</div>
+        <div class="proto-card-desc">Adding nodes should take little time, ideally none.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">property</div>
+        <div class="proto-card-title">Performance</div>
+        <div class="proto-card-desc">Parallel computing can be considered a subset of distributed computing.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Why Distributed Computing?</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Nature of application</div>
+        <div class="concept-desc">The application itself is a driving force towards distribution.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Performance</div>
+        <div class="concept-desc"><strong>Computing intensive:</strong> task consumes a lot of computing time, e.g. computing the value of Pi using Monte Carlo simulation. <strong>Data intensive:</strong> task deals with large amounts of data or large files, e.g. Facebook, LHC (Large Hadron Collider) experimental data processing.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Robustness</div>
+        <div class="concept-desc">No <strong>SPOF (Single Point of Failure)</strong>. Other nodes can execute the task that was running on a failed node.</div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Centralized vs distributed:</strong> in a centralized system, if the system fails everything goes down. In a distributed system the application stays on, even at a lower performance level, because the failed node's task is executed or shared by other nodes.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Distributed Applications</div>
+    <div class="callout"><strong>Distributed application:</strong> an application consisting of a set of processes that are distributed across a network of machines and work together as an ensemble to solve a common problem.</div>
+    <div class="callout yellow"><strong>Analogy:</strong> like a group of people working together to address a particular problem. Mainly useful for large-scale application development or operational needs, where different operations are served separately and combine to realize one overall job.</div>
+    <div class="callout pink"><strong>Orchestration:</strong> beyond computing, such systems need orchestration of the processes and services (deciding who does what).</div>
+
+    <h3>Client-server vs peer-to-peer</h3>
+    <span class="ts">▶ 03:34</span>
+    <div class="callout yellow">Worth watching: client-server invocation/result diagram, then the peer-process diagram at 04:00.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Client-server</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Resource management</span>Centralized at the server</div>
+          <div class="compare-row"><span class="label">Interaction</span>Clients invoke individual servers; invocation and result</div>
+          <div class="compare-row"><span class="label">Chaining</span>A server can act as a client for another server</div>
+          <div class="compare-row"><span class="label">Status</span>Mostly used in the past and still in many applications</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Peer-to-peer</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Resource management</span>Not centralized</div>
+          <div class="compare-row"><span class="label">Interaction</span>Different peers run applications that talk to each other to realize a job</div>
+          <div class="compare-row"><span class="label">Significance</span>A movement towards "truly" distributed applications</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · Grid Computing</div>
+    <h3>Definitions</h3>
+    <table class="port-table">
+      <thead><tr><th>Source</th><th>Definition</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Pcwebopedia.com</td><td>A form of networking that, unlike conventional networks focused on communication among devices, harnesses unused processing cycles of all computers in a network to solve problems too intensive for any stand-alone machine.</td></tr>
+        <tr><td class="proto-name">IBM</td><td>Enables virtualization of distributed computing and data resources (processing, network bandwidth, storage capacity) to create a single system image, giving users and applications seamless access to vast IT capabilities. A grid user sees a single, large virtual computer.</td></tr>
+        <tr><td class="proto-name">Sun Microsystems</td><td>A computing infrastructure that provides dependable, consistent, pervasive and inexpensive access to computational capabilities.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">The grid is a more strongly coupled network of systems solving particular problems. A user can virtualize one or more virtual machines with defined resources over it, based on requirements.</div>
+
+    <h3>Electrical power grid analogy</h3>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Electrical power grid</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Access</span>Users or appliances get electricity through wall sockets, with no concern for where or how it is generated</div>
+          <div class="compare-row"><span class="label">Grid</span>Links together power plants of many different kinds</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Computing grid</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Access</span>Users or client applications gain access to computing resources (processors, storage, data, applications) as needed, with little or no knowledge of where they are located or the underlying technologies, hardware and OS</div>
+          <div class="compare-row"><span class="label">Grid</span>Links together computing resources (PCs, workstations, servers, storage elements) and provides the mechanism needed to access them</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout green"><strong>Takeaway:</strong> the user focuses on their own algorithm and resource requirement, hooks into the grid and runs their program. What the user needs is a mechanism to access the grid.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · Grid Characteristics</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 1</div>
+        <div class="proto-card-title">Share more than information</div>
+        <div class="proto-card-desc">Data, computing power and applications are shared in a dynamic, multi-institutional environment of virtual organizations.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 2</div>
+        <div class="proto-card-title">Efficient use of resources</div>
+        <div class="proto-card-desc">Resources at many institutes are used efficiently. People from many institutions work on a common problem (a virtual organization).</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 3</div>
+        <div class="proto-card-title">Join local communities</div>
+        <div class="proto-card-desc">Grid resources can serve communities such as biological sciences, arts sciences and genetic research, offering basic processes as well as computing.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">characteristic 4</div>
+        <div class="proto-card-title">Transparent, seamless interaction</div>
+        <div class="proto-card-desc">Interaction with the underlying layers must be transparent and seamless to the user.</div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Example:</strong> UG/PG computing labs are mostly underutilized. A computing grid of, say, 100 PCs can be formed during off-academic hours so other researchers can use them. A middleware layer virtualizes them; the end user does not care what happens at the other end as long as the program runs with the desired performance.</div>
+    <div class="callout green"><strong>User's view:</strong> resources are obtained without having to purchase, install or maintain them. Paying for utilization is acceptable, but the user does not want to handle how the provider maintains resources, network or services.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · Need, Users, Types and Components of Grids</div>
+    <h3>Need for grid computing</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Science and research based on computation, data analysis, visualization, collaboration</span>
+      <span class="tag tag-good">Simulation and modelling more cost effective than experiments</span>
+      <span class="tag tag-good">Increasingly complex problems needing accurate, precise solutions quickly</span>
+      <span class="tag tag-good">Data visualization growing in importance</span>
+      <span class="tag tag-good">Exploiting underutilized resources</span>
+    </div>
+    <div class="callout green"><strong>Key point:</strong> the scientific research community is a big user of grids, including collaboration across continents. Grid is a stepping stone towards cloud computing.</div>
+
+    <h3>Who uses grid computing</h3>
+    <div class="tag-row">
+      <span class="tag">Physics applications</span>
+      <span class="tag">Weather forecast</span>
+      <span class="tag">Reactor applications</span>
+      <span class="tag">Material characterization</span>
+      <span class="tag">Crystallography</span>
+      <span class="tag">Detection and modelling of natural disasters</span>
+    </div>
+
+    <h3>Types of grids</h3>
+    <table class="port-table">
+      <thead><tr><th>Type</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Computational grid</td><td>Secure access to a huge pool of shared processing power, suitable for high-throughput and computation-intensive applications.</td></tr>
+        <tr><td class="proto-name">Data grid</td><td>Infrastructure for data storage, discovery, handling, publication and manipulation of large volumes of data stored in heterogeneous databases and file systems.</td></tr>
+        <tr><td class="proto-name">Collaboration grid</td><td>Supports collaboration, e.g. persons from different companies in a virtual enterprise working on different components of a CAD project without disclosing proprietary technologies.</td></tr>
+        <tr><td class="proto-name">Network grid</td><td>Provides fault-tolerant, high-performance communication services.</td></tr>
+        <tr><td class="proto-name">Utility grid</td><td>Shares not only data and computation cycles but also software or just about any resource.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Grid components</h3>
+    <span class="ts">▶ 11:59</span>
+    <div class="callout yellow">Worth watching: Venn diagram of Users, Groups and Sites around the Grid.</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Users</div>
+        <div class="concept-desc">Large and dynamic population; different accounts at different sites; personal and confidential data; heterogeneous privileges (roles); desire single sign-on.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Groups</div>
+        <div class="concept-desc">Group data, access patterns and membership.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Sites</div>
+        <div class="concept-desc">Heterogeneous resources, access patterns, local policies and membership.</div>
+      </div>
+    </div>
+    <div class="callout">Policy issues also arise: what can be shared, what cannot be shared, and what can be computed where.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">7 · Cluster Computing</div>
+    <div class="callout"><strong>Cluster:</strong> a type of parallel or distributed computing platform consisting of a collection of interconnected stand-alone computers working together as a single integrated computing resource.</div>
+    <div class="callout green"><strong>Purpose:</strong> deployed to improve speed and/or reliability over a single computer, while typically being much more cost effective than a single computer of comparable speed or reliability.</div>
+
+    <h3>Key components</h3>
+    <div class="tag-row">
+      <span class="tag">Stand-alone computers (PCs, workstations or SMPs)</span>
+      <span class="tag">Operating systems</span>
+      <span class="tag">High-performance interconnects</span>
+      <span class="tag">Middleware</span>
+      <span class="tag">Parallel programming environments</span>
+      <span class="tag">Applications</span>
+    </div>
+
+    <h3>Typical cluster properties</h3>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Faster network</div>
+        <div class="concept-desc">Faster, closer connection than a typical LAN.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Low latency</div>
+        <div class="concept-desc">Low-latency communication protocols.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Loosely coupled</div>
+        <div class="concept-desc">More loosely coupled than an SMP.</div>
+      </div>
+    </div>
+
+    <h3>Types of clusters</h3>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">High availability / failover</div>
+        <div class="concept-desc">Resources stay highly available; if a cluster node fails, another takes over.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Load balancing</div>
+        <div class="concept-desc">The cluster balances the load of the processes.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Parallel / distributed processing</div>
+        <div class="concept-desc">Facilitates parallel and distributed processing.</div>
+      </div>
+    </div>
+
+    <h3>Cluster building blocks</h3>
+    <span class="ts">▶ 14:17</span>
+    <div class="callout yellow">Worth watching: topology of cluster nodes connected through a switch.</div>
+    <div class="tag-row">
+      <span class="tag">Cluster nodes</span>
+      <span class="tag">Cluster network (interconnect)</span>
+      <span class="tag">Network characterization (how nodes are connected, mechanisms used)</span>
+    </div>
+
+    <h3>Key operational benefits of clustering</h3>
+    <table class="port-table">
+      <thead><tr><th>Benefit</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">System availability</td><td>Inherent high availability due to redundancy of hardware, operating systems and applications.</td></tr>
+        <tr><td class="proto-name">Hardware fault tolerance</td><td>Redundancy for most system components (e.g. disk RAID), both hardware and software.</td></tr>
+        <tr><td class="proto-name">OS and application reliability</td><td>Multiple copies of the OS and applications run, giving reliability through redundancy.</td></tr>
+        <tr><td class="proto-name">Scalability</td><td>Add servers to the cluster, add more clusters to the network, or add CPUs to an SMP as the need arises.</td></tr>
+        <tr><td class="proto-name">High performance</td><td>Achieved by running cluster-enabled programs.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">8 · Utility Computing</div>
+    <div class="callout green"><strong>Motivation:</strong> distributed computing, grid, cluster and related paradigms motivated the realization of utility computing. It evolved from these, not suddenly.</div>
+    <div class="callout"><strong>Utility computing:</strong> a concept that cloud computing practically implements. It is a service provisioning model in which a provider makes computing resources and infrastructure management available to the customer as needed, and charges for specific usage rather than a flat rate. The term "utility" is an analogy to services like electrical power that meet fluctuating customer needs and charge based on usage. This is known as <strong>pay-per-use</strong> or pay-as-you-go. Advantage: low or no initial cost to acquire computer resources, since resources are essentially rented.</div>
+    <div class="callout">The user gets a resource as and when required and does not care how it is delivered, so the end user is least bothered about the nitty-gritty of maintaining the resources.</div>
+
+    <h3>Analogies given in the lecture</h3>
+    <div class="callout yellow"><strong>Travel booking:</strong> to book a railway or flight ticket, the user goes through an interface such as a broker or travel agent and does not care how it happens.</div>
+    <div class="callout yellow"><strong>Plumbing job:</strong> call the residential complex's utility office. The person taking the call may not know plumbing, but connects the user to someone who does.</div>
+    <div class="callout yellow"><strong>Electricity:</strong> a meter records consumption of lights, microwave, AC, computer; the user pays per consumption at rates set by the electricity authority, without knowing how power is generated or delivered.</div>
+    <div class="callout yellow"><strong>Telecom/mobile:</strong> postpaid or prepaid, pay as you use for calls, messages and data, without caring which other provider connects the call.</div>
+
+    <h3>Virtualization view</h3>
+    <span class="ts">▶ 19:54</span>
+    <div class="callout yellow">Worth watching: tap analogy picture, where IT resources "flow" from a tap when opened and stop when closed.</div>
+    <div class="callout">Utility computing is usually viewed as a form of virtualization, so that the amount of storage or computing power available is considerably larger than that of a single time-sharing computer. It appears as an effectively unlimited pool of computing, networking and applications; the user taps what is needed and pays for it. The resource can be hardware infrastructure, a platform, storage, or software such as a simulation tool.</div>
+
+    <h3>Characteristics</h3>
+    <table class="port-table">
+      <thead><tr><th>Feature</th><th>Explanation</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Pay-for-use pricing</td><td>Business model similar to the power grid.</td></tr>
+        <tr><td class="proto-name">Data centre virtualization and provisioning</td><td>A customized virtual instance (specified processor speed, RAM such as 8, 16 or 128 GB, disk) is carved from the whole pool; another user gets a different instance from the same pool.</td></tr>
+        <tr><td class="proto-name">Solves resource utilization problem</td><td>Surplus resources can be supplied to others.</td></tr>
+        <tr><td class="proto-name">Outsourcing</td><td>E.g. software maintenance or data storage can be outsourced.</td></tr>
+        <tr><td class="proto-name">Web services delivery</td><td>Service-level delivery through web services. Over the last decade there has been a shift from data-driven to service-driven architecture.</td></tr>
+        <tr><td class="proto-name">Automation</td><td>With many resources, workflows can be built to automate their use.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Example: on-demand cyber infrastructure</h3>
+    <span class="ts">▶ 24:19</span>
+    <div class="callout yellow">Worth watching: scientist requests an on-demand web service, which uses an ESXi server and a virtual machine repository to produce a virtual machine cluster.</div>
+    <div class="callout yellow"><strong>Uses given:</strong> examinations or recruitment tests for students at different physical locations; event management such as a conference (needed only for that period); disaster management, which is more real time. Institutions like IIT Kharagpur host such events once or twice a month and do not want to keep separate infrastructure permanently; they build it when required and pay for it.</div>
+
+    <h3>Consumer vs provider perspective</h3>
+    <span class="ts">▶ 25:41</span>
+    <div class="callout yellow">Worth watching: Venn diagram showing consumer-only, shared and provider-only concerns.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Consumer</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Concerns</span>Service procurement, service assurance, availability, contractor management, consultants</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Provider</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Concerns</span>Infrastructure procurement, equipment maintenance, resource utilization, technology refresh, system admins, capacity planning</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout"><strong>Shared concerns:</strong> pricing, security, SLA (Service Level Agreement) and application sizing.</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Pricing</div>
+        <div class="concept-desc">Consumers pick providers with favorable rates for the service they care about most (e.g. data over calling).</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">SLA and security</div>
+        <div class="concept-desc">Agreement on availability and downtime; data must not be accessed by others; protection against denial of service; access mechanisms.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Application sizing</div>
+        <div class="concept-desc">The application should be sized to the user's need, e.g. analysing megabytes of data does not need an application built for terabytes.</div>
+      </div>
+    </div>
+
+    <h3>Payment models</h3>
+    <div class="tag-row">
+      <span class="tag">Flat rate</span>
+      <span class="tag">Tiered</span>
+      <span class="tag">Subscription</span>
+      <span class="tag">Metered</span>
+      <span class="tag">Pay as you go</span>
+      <span class="tag">Standing charges</span>
+    </div>
+    <div class="callout">Same range of charging models as other utilities (gas, electricity, telecom, water, TV broadcasting). Pricing differs by customer based on scale, commitment and payment frequency. The principle remains the same: the pricing model is the provider's expression of the cost of provisioning resources plus a profit margin.</div>
+
+    <h3>Risks in a utility computing world</h3>
+    <table class="port-table">
+      <thead><tr><th>Risk</th><th>Concern</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Data backup</td><td>Data is stored with a third party; what if there is a crash or the provider goes out of business?</td></tr>
+        <tr><td class="proto-name">Data security</td><td>Whether someone else can read the data.</td></tr>
+        <tr><td class="proto-name">Partner competency</td><td>Whether the organization being used is competent enough.</td></tr>
+        <tr><td class="proto-name">Defining SLA</td><td>Each party wants terms in its favor and there is no very standard approach across providers and consumers.</td></tr>
+        <tr><td class="proto-name">Getting value from charge back</td><td>How the user gets value from charge backs.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout pink"><strong>Note:</strong> these issues are said to evolve as part of cloud computing.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">9 · Cloud Computing — NIST Definition</div>
+    <div class="callout"><strong>NIST (US National Institute of Standards and Technology) definition:</strong> cloud computing is a model for enabling ubiquitous, convenient, on-demand network access to a shared pool of configurable computing resources (e.g. networks, servers, storage, applications and services) that can be rapidly provisioned and released with minimal management effort or service provider interaction.</div>
+    <div class="callout green"><strong>Key idea:</strong> a huge pool of resources can be provisioned and de-provisioned seamlessly, whenever the user starts or finishes using them.</div>
+    <div class="callout yellow"><strong>Evolution:</strong> cloud computing did not appear suddenly. It evolved from earlier paradigms with basic models such as pricing, SLA and security management, aiming to provide computing as a service.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Distributed computing:</strong> driven by application nature, performance (computing- or data-intensive) and robustness (no single point of failure); properties include fault tolerance, load and resource sharing, and easy expansion.</div>
+    <div class="callout"><strong>Client-server vs P2P:</strong> client-server centralizes resource management at the server; peer-to-peer is a move towards truly distributed applications.</div>
+    <div class="callout"><strong>Grid computing:</strong> harnesses unused resources across institutes into a single virtual system with seamless access; types include computational, data, collaboration, network and utility grids.</div>
+    <div class="callout"><strong>Cluster computing:</strong> interconnected stand-alone computers acting as one resource, more closely connected than a LAN but more loosely coupled than an SMP; types are failover, load balancing and parallel/distributed processing.</div>
+    <div class="callout green"><strong>Utility computing:</strong> pay-per-use service provisioning with virtualization, outsourcing and automation; the concept that cloud computing practically implements.</div>
+    <div class="callout yellow"><strong>Analogy:</strong> electricity, telecom, travel agent and plumbing utility office, where the user gets the service on demand without caring how it is delivered.</div>
+    <div class="callout pink"><strong>Risks:</strong> data backup, data security, partner competency, defining SLA and charge-back value.</div>
+    <div class="callout green"><strong>Cloud computing (NIST):</strong> on-demand network access to a shared pool of configurable resources, rapidly provisioned and released with minimal management effort.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>
