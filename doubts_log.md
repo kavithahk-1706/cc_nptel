@@ -1,0 +1,23 @@
+## lec1
+**Q:** What does downtime tolerance mean in an SLA?
+**A:** The maximum downtime that is acceptable before the SLA counts as breached. It is the flip side of availability (99.9% availability is about 8.76 hours of downtime per year). Stricter guarantees cost more.
+**Q:** Why are under-provisioning and over-provisioning both bad, and how are they linked?
+**A:** Under-provisioning means demand cannot be served and the SLA is breached. Over-provisioning leaves resources idle, which is unnecessary cost for the provider. The pool is finite, so over-allocating to one consumer can cause under-provisioning for another.
+**Q:** Traditional DBMS avoids redundancy but cloud needs it. How do they reconcile?
+**A:** (Extra, not from transcript.) They mean different things. Normalization removes duplicate data within a schema to avoid update anomalies. Cloud uses deliberate replication across machines or locations for availability and fault tolerance, at the cost of keeping replicas consistent (often relaxed to eventual consistency). Traditional DBMS also scales poorly because strict ACID is built around a single machine.
+**Q:** What are cluster, grid and utility computing, and how do they differ from distributed and cloud?
+**A:** (Extra, not from transcript.) Distributed is the umbrella idea: autonomous nodes cooperating via messages. Cluster is tightly coupled machines in one location run as one system. Grid is loosely coupled, heterogeneous resources across different organizations pooled for a shared problem. Utility is a metered pay-per-use model, not an architecture. Cloud combines the utility model with internet delivery and on-demand self-service on top of distributed infrastructure.
+**Q:** How is fault tolerance in a distributed system different from a centralised one?
+**A:** A centralised system has a single point of failure: if the mainframe or server goes down, everything goes down. A distributed system has multiple nodes, so one failure degrades performance instead of causing a total outage, provided it is designed with redundancy.
+**Q:** How do partial role execution and load balancing fit together?
+**A:** Partial role execution splits a task into parts so no node does everything. Load balancing spreads work across nodes that can do the same part so none is overloaded. They operate at different levels, so they do not conflict.
+**Q:** Why is message passing important in distributed systems, and is it the same as IPC message passing?
+**A:** Nodes have local memory and share none, so messages over the network are the only way they coordinate. It is the same send/receive concept as IPC message passing in an OS, extended across a network, where latency, message loss and node failures make it harder.
+**Q:** Why doesn't ACID scale well for cloud computing?
+**A:** (Extra, not from transcript.) ACID needs coordination across nodes: atomic commit across machines (e.g. two-phase commit), distributed locking for isolation, and synchronous durable writes to replicas. These cost network round trips and block on failures, so throughput stops growing as nodes are added. Under network partitions (CAP theorem), strict consistency means giving up availability, so cloud systems often relax to eventual consistency (BASE) to meet availability SLAs.
+**Q:** What is eventual consistency?
+**A:** (Extra, not from transcript.) A consistency model where, if no new updates are made, all replicas eventually converge to the same value, with no guarantee of how soon. Replicas can return stale data in the meantime. It favours availability and speed over always reading the latest value, and suits things like feeds and like counts but not bank balances. Contrast with strong consistency, where every read after a completed write sees that write.
+**Q:** How is utility computing different from cloud computing?
+**A:** (Extra, not from transcript.) Utility computing is the metered pay-per-use business model, like electricity: you consume and pay by usage without owning infrastructure. Cloud builds on it and adds self-service provisioning, elasticity, resource pooling and internet delivery, running on distributed infrastructure. Utility is not defined by lacking on-demand access.
+**Q:** What makes cluster nodes different from grid nodes?
+**A:** (Extra, not from transcript.) Cluster nodes are typically near-identical, co-located, tightly coupled and managed as one unit, so they are interchangeable. Grid nodes are heterogeneous, geographically spread, independently managed and loosely coupled, so they are not interchangeable.
