@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 59 — Case Study II: Internet of Health Things (Part A) | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec58.html" class="nav-lec">← prev</a>
+      <a href="lec60.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 59</span>
+    <span class="skip-badge">SKIP priority</span>
+    <h1>Case Study II: Internet of Health Things (Part A)</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Case study demonstrating the cloud-fog-edge-IoT continuum applied to health monitoring applications. Covers the motivation for moving computation from cloud to edge/fog, the IoHT framework design, four-layer topology, workflow, and a comparison of cloud-only vs. fog-edge-cloud architectures. Uses iFogSim simulator. For demonstration only — no medical/clinical implications.</p>
+  </div>
+
+  <!-- Section 1: Cloud-Fog-Edge-IoT Continuum -->
+  <div class="section">
+    <div class="section-label">1 · The Cloud-to-Things Continuum</div>
+    <div class="callout"><strong>Cloud-to-things continuum:</strong> Rather than treating cloud, fog, edge, and IoT as separate isolated layers, the modern view treats them as an <em>integrated, hierarchical framework</em> — each layer processes what it can at its own level, and only passes what is necessary up the hierarchy. Orchestration across layers determines overall system efficiency.</div>
+
+    <div class="stack">
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">IoT / Body Sensor Layer</span>
+        <span class="layer-desc">Sensors, actuators — data originates here. Limited processing power, limited storage, no global view of the environment</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">Edge Layer (Mobile Device)</span>
+        <span class="layer-desc">Smartphone or embedded gateway. Collects data from one or a few sensors, performs real-time local processing, displays alerts to user. Minimum latency to source.</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Fog Layer (Area Gateway / ISP)</span>
+        <span class="layer-desc">Local network node (router, area gateway, Raspberry Pi). Aggregates from multiple edge nodes, performs data filtering, data processing, and event handling for a geographic region. Intermediate latency.</span>
+      </div>
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Cloud Layer</span>
+        <span class="layer-desc">Centralized data center (AWS, Google Cloud, IIT KGP Megamala). Business analytics, global-scale decisions, long-term storage, confirmatory processing. Highest latency, maximum resources.</span>
+      </div>
+    </div>
+
+    <div class="callout yellow"><strong>Temperature sensor example:</strong> A single corner sensor showing high temperature may report "normal" from its local view. A fog node seeing all 10–20 room sensors simultaneously can compute room-wide mean/variance and identify a hot zone caused by a nearby server — a decision impossible at the individual sensor level. Aggregation at fog gives a better global view than any individual IoT device can.</div>
+  </div>
+
+  <!-- Section 2: Why Not Cloud-Only? Why Not Edge-Only? -->
+  <div class="section">
+    <div class="section-label">2 · Cloud-Only vs. Edge-Only Limitations</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Cloud-only Challenges</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Latency</span>All data must travel to remote CDC and back — high round-trip time</div>
+          <div class="compare-row"><span class="label">Bandwidth</span>Massive IoT data volumes require constant high-bandwidth upstream links</div>
+          <div class="compare-row"><span class="label">Real-time</span>High latency makes true real-time response impractical for time-critical applications</div>
+          <div class="compare-row"><span class="label">Cost</span>All processing charged as cloud subscription — cost scales with volume</div>
+          <div class="compare-row"><span class="label">Advantage</span>Simple setup, near-infinite resources, management responsibility with provider</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Edge-only Limitations</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Resources</span>Limited processing power, memory, and storage at edge devices</div>
+          <div class="compare-row"><span class="label">Global view</span>Each edge device only sees its own sensors — no aggregate perspective</div>
+          <div class="compare-row"><span class="label">Analytics</span>Cannot perform complex analytics or model training</div>
+          <div class="compare-row"><span class="label">Storage</span>Cannot store historical data for trend analysis</div>
+          <div class="compare-row"><span class="label">Advantage</span>Minimum latency, no network cost for local decisions, privacy by default</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout green"><strong>Benefits of fog/edge-cloud hybrid:</strong> Reduced latency (processing closer to source), less network congestion (aggregation reduces upstream data volume), lower cloud subscription cost (fewer operations sent to cloud), better handling of location-aware real-time applications, improved data privacy (raw sensitive data never leaves local network).</div>
+  </div>
+
+  <!-- Section 3: IoHT Case Study — Design and Objective -->
+  <div class="section">
+    <div class="section-label">3 · IoHT Case Study — Design and Objective</div>
+    <div class="callout"><strong>Internet of Health Things (IoHT):</strong> Application of the IoT paradigm to health monitoring — body sensors collect health parameters (pulse, BP, activity) and feed them through a cloud-fog-edge pipeline for analysis, alerting, and logging. <strong>Disclaimer: for demonstration only; no medical or clinical implications.</strong></div>
+
+    <h3>Objectives</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Goal 1</div>
+        <div class="proto-card-title">Design fog-edge-cloud health model</div>
+        <div class="proto-card-desc">Design and simulate a fog-based healthcare model to reduce latency, network usage, and cloud cost compared to a cloud-only model.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Goal 2</div>
+        <div class="proto-card-title">Simulate with iFogSim</div>
+        <div class="proto-card-desc">Use iFogSim (open-source fog/edge simulator, developed jointly by IIT Kharagpur and University of Melbourne, now maintained by University of Melbourne) to evaluate feasibility before hardware implementation.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Goal 3</div>
+        <div class="proto-card-title">Build customized wearable device</div>
+        <div class="proto-card-desc">Fabricate a custom body sensor collecting health parameters (accelerometer for activity, pulse/BP sensors) and transmit data through the multi-tier pipeline: body sensor → mobile (edge) → fog (area gateway) → cloud.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Goal 4</div>
+        <div class="proto-card-title">Evaluate DEW computing integration</div>
+        <div class="proto-card-desc">Explore DEW (Dew) computing — on-premise computing that functions independently of cloud connectivity and syncs when reconnected — as an additional layer for resilience when cloud connectivity is unavailable.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: IoHT Topology and Workflow -->
+  <div class="section">
+    <div class="section-label">4 · IoHT Network Topology and Workflow</div>
+
+    <h3>Four-Layer Network Topology (latency decreases upward)</h3>
+    <table class="port-table">
+      <thead><tr><th>Layer</th><th>Component</th><th>Role</th><th>Relative Latency</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Cloud (Level 0)</td><td>AWS / Megamala CDC</td><td>Global analytics, confirmatory module, long-term storage</td><td>Maximum (ISP gateway → cloud hop = 100 units)</td></tr>
+        <tr><td class="proto-name">Fog (Level 1)</td><td>Area gateway / ISP node</td><td>Data filtering, data processing, event handling</td><td>Medium (area → ISP = 2 units)</td></tr>
+        <tr><td class="proto-name">Edge (Level 2)</td><td>Mobile smartphone</td><td>Client module, data collection from body sensors, display alerts</td><td>Low (mobile → area gateway = 2 units)</td></tr>
+        <tr><td class="proto-name">IoT (Level 3)</td><td>Body sensors</td><td>Pulse, BP, accelerometer data collection</td><td>Minimum (sensor → mobile = 1 unit)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Application Workflow</h3>
+    <div class="stack">
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Body Sensors</span>
+        <span class="layer-desc">Collect raw health parameter data (BP, pulse, accelerometer x/y/z axes)</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">Client Module (Mobile / Edge)</span>
+        <span class="layer-desc">Receives raw data; in fog-based model, placed at the mobile device (edge)</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Data Filtering Module (Fog)</span>
+        <span class="layer-desc">Cleans and pre-processes data at fog/area gateway; in cloud-only, this is pushed to cloud</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">Data Processing + Event Handler (Fog / Cloud)</span>
+        <span class="layer-desc">Processes filtered data; raises events/alerts; in cloud-only, both modules are in cloud</span>
+      </div>
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Confirmatory Module (Cloud) → Display (Mobile)</span>
+        <span class="layer-desc">Cloud confirms events against knowledge base; alert displayed on user's mobile device ("Normal" / "Visit doctor")</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Application Placement — Fog vs Cloud -->
+  <div class="section">
+    <div class="section-label">5 · Application Placement: Fog-Edge-Cloud vs. Cloud-Only</div>
+    <table class="port-table">
+      <thead><tr><th>Module</th><th>Fog-Edge-Cloud Placement</th><th>Cloud-Only Placement</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Client module</td><td>Mobile (edge)</td><td>Mobile</td></tr>
+        <tr><td class="proto-name">Data filtering</td><td>Area gateway (fog)</td><td>Cloud</td></tr>
+        <tr><td class="proto-name">Data processing</td><td>Area gateway (fog)</td><td>Cloud</td></tr>
+        <tr><td class="proto-name">Event handler</td><td>Area gateway (fog)</td><td>Cloud</td></tr>
+        <tr><td class="proto-name">Confirmatory module</td><td>Cloud</td><td>Cloud</td></tr>
+        <tr><td class="proto-name">Display</td><td>Mobile</td><td>Mobile</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout pink"><strong>Trade-off:</strong> Fog-edge-cloud distributes the processing load, reducing latency and cloud cost — but requires the organization to own, configure, and maintain the fog and edge infrastructure. Cloud-only is simpler to manage (provider's responsibility) but costlier and slower for real-time health monitoring applications.</div>
+  </div>
+
+  <!-- Section 6: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Cloud-to-things continuum:</strong> Not isolated layers — integrated, hierarchical, orchestrated framework where each level processes what it can to minimize latency, network usage, and cloud cost.</div>
+    <div class="callout green"><strong>Fog/edge benefits:</strong> Reduced round-trip latency, less upstream bandwidth, lower cloud subscription cost, better real-time response, enhanced data privacy (raw data stays within local network).</div>
+    <div class="callout yellow"><strong>iFogSim:</strong> Open-source fog/edge simulator, developed by IIT Kharagpur + University of Melbourne. Use it to validate a multi-tier IoT architecture before hardware implementation.</div>
+    <div class="callout pink"><strong>Cost of fog/edge:</strong> Organization must own, configure, and maintain fog/edge infrastructure. Proper orchestration across layers is complex. Cloud-only is simpler to manage but performs worse for real-time IoT applications.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

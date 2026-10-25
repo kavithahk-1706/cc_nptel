@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 16 — OpenStack Demo (Meghamala) | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec15.html" class="nav-lec">← prev</a>
+      <a href="lec17.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 16</span>
+    <span class="skip-badge">SKIP priority</span>
+    <h1>OpenStack Demo — Meghamala</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Live walkthrough of IIT Kharagpur's OpenStack installation (Meghamala). No new theoretical concepts — demonstrates VM creation, IP assignment, remote access via x2go, and VM termination. Skim the summary only; watch the video if you want a hands-on feel for OpenStack administration.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · Meghamala — IIT KGP's Cloud</div>
+    <div class="callout yellow"><strong>Meghamala</strong> is IIT Kharagpur's experimental OpenStack cloud, installed on blade servers. Used by faculty and research scholars. Also offers Meghadoop (Hadoop cluster on top of Meghamala) and Meghadata (personal cloud, Dropbox-like).</div>
+    <h3>Infrastructure specs (at demo time)</h3>
+    <table class="port-table">
+      <thead><tr><th>Resource</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Compute nodes</td><td>3 physical machines</td></tr>
+        <tr><td class="proto-name">vCPUs per node</td><td>48 vCPUs</td></tr>
+        <tr><td class="proto-name">RAM per node</td><td>~25 GB</td></tr>
+        <tr><td class="proto-name">Total in use</td><td>134 vCPUs, 316 GB RAM, 2945 GB disk (at demo time)</td></tr>
+      </tbody>
+    </table>
+    <h3>VM Flavors offered</h3>
+    <table class="port-table">
+      <thead><tr><th>Flavor</th><th>vCPU</th><th>RAM</th><th>Ephemeral</th><th>Persistent</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">IIT KGP Regular</td><td>2</td><td>4 GB</td><td>45 GB</td><td>20–60 GB</td></tr>
+        <tr><td class="proto-name">IIT KGP Large</td><td>More</td><td>More</td><td>More</td><td>—</td></tr>
+        <tr><td class="proto-name">IIT KGP Extra Large</td><td>More</td><td>More</td><td>More</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">Available OS images: <strong>Ubuntu, CentOS, Fedora</strong></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · VM Lifecycle — Key Practical Steps</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Create</div>
+        <div class="proto-card-title">Launch Instance</div>
+        <div class="proto-card-desc">Choose: availability zone, VM name, flavor, OS image, network (internal/external), security group. Click Launch. Status: Build → Active/Running.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Network</div>
+        <div class="proto-card-title">IP assignment</div>
+        <div class="proto-card-desc">Internal IP auto-assigned on launch. External (public) IP: allocate from pool and manually associate. External IP needed to access VM from outside the cloud.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Access</div>
+        <div class="proto-card-title">Remote desktop via x2go</div>
+        <div class="proto-card-desc">x2go client connects using public IP, login ID, and password. CentOS VMs use XFCE desktop. VM behaves like any standard Linux machine once accessed.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Terminate</div>
+        <div class="proto-card-title">Delete VM + release resources</div>
+        <div class="proto-card-desc">Terminating an instance deletes the VM and releases all associated resources (vCPU, RAM, ephemeral disk) back to the pool.</div>
+      </div>
+    </div>
+    <div class="callout"><strong>Security groups:</strong> Firewall rules at the cloud level — define which incoming/outgoing traffic (ports, protocols) is allowed. Assigned at VM creation; eliminates need to configure the VM's own firewall independently.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout yellow"><strong>Demo lecture — no new theory.</strong> Key takeaway: OpenStack administration (via Horizon) handles the full VM lifecycle: create → assign network → access → terminate. The component responsibilities from lec15 are exactly what's visible in the dashboard.</div>
+    <div class="callout green"><strong>Dashboard sections seen:</strong> Instances (Nova), Volumes (Cinder), Images (Glance), Access &amp; Security, Networking (Neutron), Hypervisors, Flavors — all covered in lec15 theory.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

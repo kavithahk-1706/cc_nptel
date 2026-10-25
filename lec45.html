@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 45 — VM Migration: Basics and Strategies | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec44.html" class="nav-lec">← prev</a>
+      <a href="lec46.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 45</span>
+    <span class="high-badge">HIGH priority</span>
+    <h1>VM Migration — Basics and Migration Strategies</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Covers the motivation for VM migration in cloud data centers, the two broad categories (cold/non-live vs. hot/live), what state must be moved (CPU, memory, disk, network, I/O), and the three memory migration primitives: push, stop-and-copy, and pull. Then details the pre-copy and post-copy live migration strategies. Foundational for understanding cloud resource management and SLA compliance.</p>
+  </div>
+
+  <!-- Section 1: Why Migrate VMs? -->
+  <div class="section">
+    <div class="section-label">1 · Why VM Migration?</div>
+    <div class="callout"><strong>VM migration:</strong> The process of moving a running application or VM from one physical host server to another — while optionally preserving continuity of service.</div>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Reason</div>
+        <div class="proto-card-title">Load Balancing</div>
+        <div class="proto-card-desc">Allocation and deallocation of VMs over time leaves some servers heavily loaded and others lightly loaded. Migration redistributes VMs for fair workload distribution across all servers.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Reason</div>
+        <div class="proto-card-title">Server Maintenance</div>
+        <div class="proto-card-desc">When a physical server requires maintenance or shutdown, all VMs running on it must be migrated to other servers transparently — the customer's SLA must still be respected and the application must keep running.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Reason</div>
+        <div class="proto-card-title">Power Consolidation</div>
+        <div class="proto-card-desc">If five VMs are spread across five servers but could run on one or two, migrate and consolidate them, then put underutilized servers into low-power mode. Reduces operational cost during low-demand periods.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Reason</div>
+        <div class="proto-card-title">QoS Violation</div>
+        <div class="proto-card-desc">When a CSP fails to meet the agreed SLA quality, the user may migrate their VM to another service provider — migration can cross provider boundaries, not just server-to-server within one DC.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Reason</div>
+        <div class="proto-card-title">Fault Tolerance</div>
+        <div class="proto-card-desc">In anticipation of or response to failure, VMs can be migrated from a failing or at-risk data center to another where they can continue executing safely.</div>
+      </div>
+    </div>
+
+    <div class="callout pink"><strong>Migration cost:</strong> Every migration has communication overhead (moving memory state across the network) and downtime cost. Excessive downtime violates SLA — the CSP pays a penalty and risks reputational damage.</div>
+  </div>
+
+  <!-- Section 2: Two Broad Categories -->
+  <div class="section">
+    <div class="section-label">2 · Cold vs. Live Migration</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Cold / Non-Live Migration</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">VM state during migration</span>Suspended or shut down — not providing service</div>
+          <div class="compare-row"><span class="label">Downtime</span>High — proportional to VM memory size</div>
+          <div class="compare-row"><span class="label">Implementation complexity</span>Low — simpler to implement and reason about</div>
+          <div class="compare-row"><span class="label">Suitability</span>Batch or offline workloads where downtime is acceptable</div>
+          <div class="compare-row"><span class="label">Risk for real-time apps</span>Severe service quality degradation — unacceptable for live services</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Hot / Live Migration</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">VM state during migration</span>Continues executing and providing service throughout</div>
+          <div class="compare-row"><span class="label">Downtime</span>Minimal — brief stop-and-copy phase only</div>
+          <div class="compare-row"><span class="label">Implementation complexity</span>High — requires careful state tracking and dirty page management</div>
+          <div class="compare-row"><span class="label">Suitability</span>Real-time applications, live broadcasts, online computation</div>
+          <div class="compare-row"><span class="label">User experience</span>Seamless — user is practically unaware migration occurred</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Non-live migration downtime:</strong> For a large VM, downtime is proportional to physical memory size. If the VM is serving live users, this downtime causes severe SLA degradation.</div>
+  </div>
+
+  <!-- Section 3: What Must Be Migrated -->
+  <div class="section">
+    <div class="section-label">3 · What Must Be Migrated?</div>
+
+    <h3>CPU Context and Main Memory</h3>
+    <div class="callout"><strong>CPU context</strong> (register state, process state) and <strong>main memory contents</strong> (RAM) are the two critical items that must always be migrated. Without these, the VM cannot resume execution at the destination.</div>
+
+    <h3>Disk Storage</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Disk scenario</div>
+        <div class="proto-card-title">Network-Attached Storage (NAS)</div>
+        <div class="proto-card-desc">If both source and destination hosts can access the same NAS server, disk migration is trivial — just reconnect the network path from the source server's port to the destination server's port. The data itself does not move.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Disk scenario</div>
+        <div class="proto-card-title">Local Disk</div>
+        <div class="proto-card-desc">If disk is local to the source host, disk data must be mirrored or moved to the destination. More challenging — disk data is large and copying it takes time and bandwidth.</div>
+      </div>
+    </div>
+
+    <h3>Network</h3>
+    <div class="callout">If source and destination are on the same LAN: migrate the IP, advertise the new MAC→IP mapping via ARP reply, and switches learn the new MAC location. Network packets are redirected to the new location with only transient losses. If different LANs, proxying and other mechanisms are needed.</div>
+
+    <h3>I/O Devices</h3>
+    <div class="callout"><strong>Virtual I/O devices</strong> are easier to migrate — they are software abstractions and can be re-instantiated on the destination. <strong>Physical device assignment</strong> (direct passthrough of a physical device to a VM) is harder — the physical device must now be connected to a different server, which may not always be possible.</div>
+  </div>
+
+  <!-- Section 4: Memory Migration Primitives -->
+  <div class="section">
+    <div class="section-label">4 · Memory Migration Primitives</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Push</div>
+        <div class="concept-desc">Source VM continues running. Memory pages are pushed to the destination across the network. Pages modified during pushing (dirty pages) must be re-sent in subsequent rounds. Source keeps running throughout — no suspension.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Stop-and-Copy</div>
+        <div class="concept-desc">Source VM is stopped (suspended). Remaining dirty pages and CPU state are then copied to the destination. VM execution is resumed at the destination. Simple, but downtime is proportional to total physical memory size.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Pull (on-demand)</div>
+        <div class="concept-desc">New VM starts executing at the destination with an empty memory. When it accesses a page not yet copied, it triggers a page fault — the missing page is pulled across the network from the source VM on demand. Only frequently accessed pages need to be transferred.</div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Pure stop-and-copy limitation:</strong> Downtime and total migration time are both proportional to the amount of physical memory allocated to the VM. For large VMs running live services, this outage is unacceptable.</div>
+  </div>
+
+  <!-- Section 5: Pre-Copy Live Migration -->
+  <div class="section">
+    <div class="section-label">5 · Pre-Copy Live Migration</div>
+    <div class="callout green"><strong>Core idea:</strong> Reduce downtime by copying most of memory while the source VM is still running, then perform only a brief stop-and-copy for the remaining dirty pages.</div>
+
+    <h3>Phases of Pre-Copy</h3>
+    <table class="port-table">
+      <thead><tr><th>Phase</th><th>What happens</th><th>Source VM state</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Pre-copy rounds</td><td>Active memory pages are copied iteratively to the destination, round by round. Pages modified during copying (dirty pages) are flagged and re-sent in the next round.</td><td>Running — still serving users</td></tr>
+        <tr><td class="proto-name">Pre-copy termination</td><td>Copying stops when a threshold is met: (a) number of rounds executed reaches N, (b) total memory transmitted exceeds a threshold, or (c) number of dirty pages in the previous round drops below a threshold (indicating convergence).</td><td>Running</td></tr>
+        <tr><td class="proto-name">Stop-and-copy</td><td>VM execution is suspended at source. Remaining dirty pages and CPU state are copied to the destination. This is the actual downtime window — kept short because most memory is already at the destination.</td><td>Suspended (downtime)</td></tr>
+        <tr><td class="proto-name">Restart</td><td>VM is restarted at the destination server and resumes normal execution.</td><td>Running at destination</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout yellow"><strong>Dirty pages:</strong> A "dirty page" is any memory page that was modified at the source after it was already copied to the destination. It must be re-transmitted to keep the destination copy consistent. If pages are modified faster than they can be copied (memory-intensive workloads), convergence may be slow.</div>
+    <div class="callout pink"><strong>Caveat:</strong> Network delay is assumed minimal in the standard pre-copy model. Migrating across geographically separated data centers — with high latency — significantly increases the challenge and overhead of live migration.</div>
+  </div>
+
+  <!-- Section 6: Post-Copy Live Migration -->
+  <div class="section">
+    <div class="section-label">6 · Post-Copy Live Migration</div>
+    <div class="callout"><strong>Core idea:</strong> Start the VM at the destination immediately with only CPU state copied. Copy memory pages on-demand (pull) as the destination VM accesses them. Only actually-needed pages are transferred.</div>
+
+    <h3>Post-Copy Phases</h3>
+    <table class="port-table">
+      <thead><tr><th>Phase</th><th>What happens</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Stop source VM</td><td>Source VM is stopped and CPU state is copied to the destination node. Unlike pre-copy, no memory is pre-transferred.</td></tr>
+        <tr><td class="proto-name">Restart at destination</td><td>Destination VM restarts with CPU state restored but with an empty memory image.</td></tr>
+        <tr><td class="proto-name">On-demand memory copy</td><td>As the destination VM executes, any memory page access that cannot be satisfied locally triggers a pull from the source VM across the network. Only required pages are fetched.</td></tr>
+        <tr><td class="proto-name">Background copy</td><td>Remaining pages can also be proactively pushed in the background (not strictly on-demand) to reduce future page faults.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout green"><strong>Post-copy advantage:</strong> Most pages of a VM are never accessed again after migration — post-copy avoids transferring unused pages entirely. Only the working set is truly moved.</div>
+    <div class="callout pink"><strong>Post-copy risk:</strong> If the source host fails before all demanded pages have been fetched, the destination VM cannot recover the missing pages. Pre-copy is safer because most state is already at the destination before the VM switches over.</div>
+  </div>
+
+  <!-- Section 7: Key Migration Metrics -->
+  <div class="section">
+    <div class="section-label">7 · Key Migration Metrics</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Metric</div>
+        <div class="proto-card-title">Downtime</div>
+        <div class="proto-card-desc">Total time during which the service is unavailable to users. Goal: minimize. In pre-copy live migration, only the stop-and-copy phase contributes to downtime. In non-live migration, the entire migration duration is downtime.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Metric</div>
+        <div class="proto-card-title">Total Migration Time</div>
+        <div class="proto-card-desc">Time from start of migration process to when the VM is fully operational at the destination and the source VM is released. Includes all pre-copy rounds + stop-and-copy + restart. Longer migration time = longer resource contention and overhead.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Metric</div>
+        <div class="proto-card-title">Resource Contention</div>
+        <div class="proto-card-desc">Migration consumes CPU and network bandwidth at both source and destination. This contention can degrade the performance of other VMs on those hosts and may itself trigger further SLA violations.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Metric</div>
+        <div class="proto-card-title">SLA Compliance</div>
+        <div class="proto-card-desc">If downtime or performance degradation during migration exceeds SLA thresholds, the CSP must pay a penalty. Poor migration management therefore has direct financial consequences beyond technical overhead.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 8: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>VM Migration:</strong> Moving a running VM from one physical host to another. Required for load balancing, maintenance, power consolidation, QoS enforcement, and fault tolerance.</div>
+    <div class="callout green"><strong>Two categories:</strong> Cold/non-live (VM suspended during migration — simple, high downtime) vs. hot/live (VM continues running — complex, minimal downtime).</div>
+    <div class="callout yellow"><strong>What moves:</strong> CPU context and main memory (always critical); disk (trivial if NAS, harder if local); network (straightforward on same LAN via ARP); I/O (virtual devices easy, physical passthrough hard).</div>
+    <div class="callout"><strong>Three memory primitives:</strong> Push (source running, copy pages, re-send dirty); Stop-and-copy (suspend source, copy all, restart — simple but high downtime); Pull (start at destination, fetch pages on demand).</div>
+    <div class="callout green"><strong>Pre-copy live migration:</strong> Iterative push rounds while source runs, then a short stop-and-copy for remaining dirty pages, then restart at destination. Converges when dirty page count drops below threshold.</div>
+    <div class="callout pink"><strong>Post-copy live migration:</strong> Stop source, copy only CPU state, restart destination VM immediately, fetch memory pages on-demand as needed. Efficient (only working set transferred) but risky if source fails during transfer.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

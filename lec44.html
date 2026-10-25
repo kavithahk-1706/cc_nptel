@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 44 — Cloud Federation | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec43.html" class="nav-lec">← prev</a>
+      <a href="lec45.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 44</span>
+    <span class="high-badge">HIGH priority</span>
+    <h1>Cloud Federation</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Introduces cloud federation — when and why multiple cloud service providers cooperate to deliver a unified service, the three coupling levels (loosely, partially, tightly), and the four major federation architectures (hybrid/bursting, broker, aggregated, multi-tier). Definition-heavy and architecture-focused; expect exam questions on federation motivations, coupling levels, and the four architectures with their characteristics.</p>
+  </div>
+
+  <!-- Section 1: What is Cloud Federation? -->
+  <div class="section">
+    <div class="section-label">1 · What is Cloud Federation?</div>
+    <div class="callout"><strong>Cloud federation (federated cloud):</strong> Deployment and management of multiple external and internal cloud services to match a business need. One or more Cloud Service Providers (CSPs) cooperate to deliver an integrated service — transparent to the end customer — that satisfies requirements neither could meet alone.</div>
+
+    <div class="callout yellow"><strong>IIT Kharagpur example:</strong> IIT KGP runs an internal private cloud (Meghalwala) inaccessible from outside. During a large-scale exam (2000+ students simultaneously), if internal capacity is insufficient, they federate with an external public cloud to absorb the load — the exam runs seamlessly despite crossing cloud boundaries.</div>
+
+    <h3>Why Federate? — Motivations</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Motivation</div>
+        <div class="proto-card-title">Maximize Resource Utilization</div>
+        <div class="proto-card-desc">One CSP may be resource-constrained while another has surplus. Federation creates a larger resource pool, enabling both to serve more customers at higher utilization.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Motivation</div>
+        <div class="proto-card-title">Load Balancing</div>
+        <div class="proto-card-desc">Distribute load across federated partners — a heavily loaded CSP can shed workload to a lightly loaded partner, improving response times for end users.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Motivation</div>
+        <div class="proto-card-title">Expand Service Catalog</div>
+        <div class="proto-card-desc">A federated CSP can offer services it doesn't host itself by routing to a partner. The collective federation catalog is broader than any individual member's.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Motivation</div>
+        <div class="proto-card-title">Expand Footprint and Reliability</div>
+        <div class="proto-card-desc">Each federated partner effectively gains the geographic and capacity footprint of all members, improving marketability and enabling fault tolerance across geographically separated sites.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Characteristics -->
+  <div class="section">
+    <div class="section-label">2 · Federation Characteristics</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Characteristic</div>
+        <div class="proto-card-title">Voluntary Participation</div>
+        <div class="proto-card-desc">Federation is voluntary — no regulatory body mandates which CSPs must federate. Individual CSPs choose partners based on business needs and mutual benefit.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Characteristic</div>
+        <div class="proto-card-title">Well-Defined Agreements</div>
+        <div class="proto-card-desc">Federation requires formal market agreements and SLA terms governing resource sharing, pricing, and obligations among partners. Without this, seamless operation is impossible.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Characteristic</div>
+        <div class="proto-card-title">Maximum Geographic Separation</div>
+        <div class="proto-card-desc">Federation partners should ideally be in different power zones, network zones, and seismic zones. If an environmental disaster affects one partner, the others keep serving the customer base — maximizing reliability.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Characteristic</div>
+        <div class="proto-card-title">Enhanced Interoperability</div>
+        <div class="proto-card-desc">Federation overcomes current cloud limitations — service interruptions, lack of interoperability, degradation — by allowing partner CSPs to handle each other's failures or overloads seamlessly.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Coupling Levels -->
+  <div class="section">
+    <div class="section-label">3 · Federation Coupling Levels</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Loosely Coupled</div>
+        <div class="concept-desc">Limited interoperation between CSPs. Each provider exposes minimal information about its infrastructure. The local CSP has little or no control over remote resources — only basic operations (provision/deprovision VMs). No support for advanced features like cross-site VM migration. Example: private cloud bursting to public cloud with no formal agreement beyond provisioning API.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Partially Coupled</div>
+        <div class="concept-desc">Partners establish a formal contract or framework agreement stating terms and conditions for resource sharing. Contract allows some control over remote resources — e.g., affinity rules for VM co-placement. More monitoring information is exchanged (host energy consumption, VM location). May enable some advanced networking across boundaries. More flexible and efficient than loosely coupled.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Tightly Coupled</div>
+        <div class="concept-desc">Usually governed by the same cloud administrator or all report to a single authority. Advanced control over remote resources — exact VM placement decisions, full monitoring information access. Supports: cross-site networks, cross-site VM migration, high availability techniques across remote cloud instances, virtual storage systems spanning boundaries. Typically within one corporation's multi-site deployments.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Federation Architectures -->
+  <div class="section">
+    <div class="section-label">4 · Four Federation Architectures</div>
+
+    <h3>1. Hybrid / Cloud Bursting Architecture</h3>
+    <div class="callout"><strong>Definition:</strong> Combines existing on-premise infrastructure (private cloud) with resources from one or more public clouds to satisfy peak demand. The local cloud is the primary; external clouds absorb overflow during demand spikes.</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Property</div>
+        <div class="proto-card-title">Coupling</div>
+        <div class="proto-card-desc">Loosely coupled — local cloud OS has no advanced control over virtual resources deployed in the external cloud beyond what the provider's basic API allows.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Property</div>
+        <div class="proto-card-title">Use case</div>
+        <div class="proto-card-desc">Organizations with predictable baseline load (own private cloud) but unpredictable or seasonal peak demand (exam season, product launches, tax period). Most existing cloud managers support hybrid architecture.</div>
+      </div>
+    </div>
+
+    <h3>2. Broker Architecture</h3>
+    <div class="callout"><strong>Definition:</strong> An intermediary (broker) has access to multiple cloud infrastructures and manages resource deployment on behalf of users. Users submit requests to the broker, which selects the most suitable cloud based on optimization criteria (cost, performance, energy). The broker may distribute a single service's components across multiple clouds.</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Property</div>
+        <div class="proto-card-title">Coupling</div>
+        <div class="proto-card-desc">Loosely coupled (or partially coupled). Public clouds typically do not expose advanced control over deployed virtual resources to third parties.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Property</div>
+        <div class="proto-card-title">Use case</div>
+        <div class="proto-card-desc">Most common federation scenario. Easiest to implement and maintain — broker preserves individual cloud provider privacy while enabling global load balancing and service selection.</div>
+      </div>
+    </div>
+
+    <h3>3. Aggregated Architecture</h3>
+    <div class="callout"><strong>Definition:</strong> Two or more partner clouds interoperate to aggregate their resources into a single large virtual pool presented to users as one unified infrastructure. Users see a single large virtual cloud; actual resources are distributed across partner sites.</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Property</div>
+        <div class="proto-card-title">Coupling</div>
+        <div class="proto-card-desc">Partially coupled — partners must share resource availability information for aggregation decisions. Partners may own their infrastructure independently but agree to cooperate and share resource metadata.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Property</div>
+        <div class="proto-card-title">Use case</div>
+        <div class="proto-card-desc">Multiple organizations or CSPs with separate ownership who agree to pool resources. Aggregation decisions may be pre-arranged rather than fully on-the-fly, due to the constraints of partial coupling.</div>
+      </div>
+    </div>
+
+    <h3>4. Multi-Tier Architecture</h3>
+    <div class="callout"><strong>Definition:</strong> Two or more cloud sites, usually belonging to the same corporation, each running their own cloud OS and managed by a third, hierarchically superior cloud OS instance. The root cloud OS has full control over all subordinate cloud sites' resources.</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Property</div>
+        <div class="proto-card-title">Coupling</div>
+        <div class="proto-card-desc">Tightly coupled — controlled by one administrative authority. Resources at all sites are exposed as if they were in a single cloud. Cross-site VM migration, cross-site networks, and high availability across sites are feasible.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Property</div>
+        <div class="proto-card-title">Use case</div>
+        <div class="proto-card-desc">Large corporations with geographically distributed cloud infrastructure (e.g., data centers in multiple cities). Hierarchical management provides uniform access, advanced management features (HA, load balancing, fault tolerance), and consistent policy enforcement across all sites.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Comparison Table -->
+  <div class="section">
+    <div class="section-label">5 · Architecture Comparison</div>
+    <table class="port-table">
+      <thead><tr><th>Architecture</th><th>Coupling Level</th><th>Cross-site VM Migration</th><th>VM Placement Control</th><th>Typical Ownership</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Hybrid / Bursting</td><td>Loosely coupled</td><td>Not supported</td><td>None over external cloud</td><td>Private + public (different owners)</td></tr>
+        <tr><td class="proto-name">Broker</td><td>Loosely to partially coupled</td><td>Generally not</td><td>Limited — via public API</td><td>Different CSPs via intermediary</td></tr>
+        <tr><td class="proto-name">Aggregated</td><td>Partially coupled</td><td>Possible with contract</td><td>Moderate — via agreement</td><td>Different CSPs cooperating</td></tr>
+        <tr><td class="proto-name">Multi-Tier</td><td>Tightly coupled</td><td>Yes — fully supported</td><td>Full control across all sites</td><td>Same corporation, multiple sites</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 6: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Cloud Federation:</strong> One or more CSPs cooperate to deliver a unified, integrated service — transparent to end users. Motivation: capacity constraints, load balancing, wider service catalog, geographic reach and reliability.</div>
+    <div class="callout green"><strong>Three coupling levels:</strong> Loosely (minimal information sharing, no advanced control), Partially (formal contract, some control and monitoring access), Tightly (same authority, full control, advanced cross-site features).</div>
+    <div class="callout yellow"><strong>Four architectures:</strong> Hybrid/Bursting (private + public for peak demand, loosely coupled) → Broker (intermediary across multiple clouds, loosely–partially coupled) → Aggregated (pooled resources from partner clouds, partially coupled) → Multi-Tier (hierarchical, same corporation, tightly coupled).</div>
+    <div class="callout pink"><strong>Multi-tier is the only architecture</strong> that fully supports advanced features like cross-site VM migration, cross-site virtual networks, and high availability across remote cloud instances — because it requires a single administrative authority.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

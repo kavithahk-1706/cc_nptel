@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 47 — Containers, Kubernetes, and Docker | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec46.html" class="nav-lec">← prev</a>
+      <a href="lec48.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 47</span>
+    <span class="high-badge">HIGH priority</span>
+    <h1>Containers, Kubernetes, and Docker</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Introduces container-based virtualization — a lightweight alternative to full VM virtualization that packages application code with all its dependencies into a portable, isolated unit. Covers why containers emerged, their key advantages, the three deployment eras (traditional → VM → container), and provides an overview of the two dominant open-source implementations: Kubernetes (orchestration) and Docker (container runtime). Foundation for the hands-on demos in subsequent lectures.</p>
+  </div>
+
+  <!-- Section 1: What is a Container? -->
+  <div class="section">
+    <div class="section-label">1 · What is a Container?</div>
+    <div class="callout"><strong>Container:</strong> A lightweight virtualization technique that packages application code together with all its dependencies (specific language runtime versions, libraries, settings) into a self-contained unit. The application runs quickly and reliably across any computing environment — laptop, VM, private data center, or public cloud — without reconfiguration.</div>
+
+    <div class="callout yellow"><strong>Physical analogy:</strong> A shipping container holds goods of any type in a standardized box. The shipping company doesn't care what's inside — only that the box fits the truck, ship, or crane. Similarly, the container runtime doesn't care what the app does — only that the image fits the container format.</div>
+
+    <h3>Key Properties</h3>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Self-Contained</div>
+        <div class="concept-desc">Everything the application needs — runtime, libraries, configuration — is packaged inside. No external dependencies on the host environment. The container image is the complete deployment unit.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">OS-Level Virtualization</div>
+        <div class="concept-desc">Containers virtualize at the OS level (not hardware level like VMs). They share the host OS kernel and use a fraction of the memory a full VM would require — making them extremely lightweight.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Run Anywhere</div>
+        <div class="concept-desc">Same container image runs identically on Linux, Windows, Mac, on a developer's laptop, a VM, on-premise data center, or any public cloud. No environment-specific reconfiguration needed.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Three Deployment Eras -->
+  <div class="section">
+    <div class="section-label">2 · Three Deployment Eras</div>
+    <div class="stack">
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Traditional Deployment</span>
+        <span class="layer-desc">Apps run directly on physical servers. No resource boundary between applications — resource-hungry apps starve others. No isolation, serious portability challenges.</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Virtualized Deployment</span>
+        <span class="layer-desc">Multiple VMs run on a physical server via a hypervisor. Each VM has its own full guest OS. Better isolation, scalability, resource utilization — but each VM is a full system with its own OS overhead.</span>
+      </div>
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Container Deployment</span>
+        <span class="layer-desc">Containers share the host OS kernel and run on a container runtime. Each container has its own filesystem, CPU/memory share, and process space — but no full guest OS. Extremely lightweight, highly portable, decoupled from underlying infrastructure.</span>
+      </div>
+    </div>
+
+    <div class="callout pink"><strong>Container trade-off:</strong> Containers have "relaxed isolation" compared to VMs — they share the OS kernel. This makes them lighter but means a kernel vulnerability can potentially affect all containers on that host. VMs offer stronger isolation because each has its own kernel.</div>
+  </div>
+
+  <!-- Section 3: Benefits -->
+  <div class="section">
+    <div class="section-label">3 · Key Benefits of Containerization</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Separation of Responsibilities</div>
+        <div class="concept-desc">Developers focus on application logic and dependencies; IT operations teams focus on deployment and management — neither needs to deeply understand the other's domain. The container boundary is the interface.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Workload Portability</div>
+        <div class="concept-desc">Containers run on Linux variants, Windows, Mac, VMs, physical machines, on-premise, and any public cloud. Enormously higher portability than traditional deployments — addressing one of the oldest challenges in IT.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Application Isolation</div>
+        <div class="concept-desc">Containers virtualize CPU, memory, and network at the OS level, giving each application a logically isolated view. Applications cannot accidentally interfere with each other's resources or files.</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Benefit</div>
+        <div class="proto-card-title">Agile Development</div>
+        <div class="proto-card-desc">Developers avoid environment dependency concerns entirely — the container image IS the environment. Speeds up development cycles and eliminates "works on my machine" problems.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Benefit</div>
+        <div class="proto-card-title">Efficient Resource Use</div>
+        <div class="proto-card-desc">Containers use only the computing resources the application actually needs. No guest OS overhead. More applications can run on the same hardware compared to VMs.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Containers vs VMs -->
+  <div class="section">
+    <div class="section-label">4 · Containers vs. Virtual Machines</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Virtual Machines</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Virtualization level</span>Hardware level — via hypervisor</div>
+          <div class="compare-row"><span class="label">Guest OS</span>Each VM has a full guest OS</div>
+          <div class="compare-row"><span class="label">Memory footprint</span>Large — full OS in RAM</div>
+          <div class="compare-row"><span class="label">Isolation</span>Strong — separate kernels</div>
+          <div class="compare-row"><span class="label">Startup time</span>Slow — full OS boot</div>
+          <div class="compare-row"><span class="label">Portability</span>Moderate</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Containers</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Virtualization level</span>OS level — shared kernel</div>
+          <div class="compare-row"><span class="label">Guest OS</span>Shares host OS kernel — no full guest OS</div>
+          <div class="compare-row"><span class="label">Memory footprint</span>Fraction of VM memory — very small</div>
+          <div class="compare-row"><span class="label">Isolation</span>Relaxed — shared kernel is a risk surface</div>
+          <div class="compare-row"><span class="label">Startup time</span>Fast — no OS boot needed</div>
+          <div class="compare-row"><span class="label">Portability</span>Very high — decoupled from infrastructure</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout green"><strong>Containers and VMs together:</strong> These are not mutually exclusive. In practice, containers often run inside VMs — the VM provides strong isolation between tenants, while containers provide lightweight, fast deployment within each tenant's VM.</div>
+  </div>
+
+  <!-- Section 5: Kubernetes -->
+  <div class="section">
+    <div class="section-label">5 · Kubernetes Overview</div>
+    <div class="callout"><strong>Kubernetes:</strong> A portable, extensible, open-source platform for managing containerized workloads and services that facilitates both declarative configuration and automation. Originally developed by Google, became open-source (~2014). Name means "helmsman" or "pilot" in Greek.</div>
+
+    <h3>Key Characteristics</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Property</div>
+        <div class="proto-card-title">Operates at Container Level</div>
+        <div class="proto-card-desc">Kubernetes manages containers and container groups (pods), not hardware. It provides PaaS-like features — deployment, scaling, auto-balancing, logging and monitoring integration — but is not a monolithic PaaS: these are optional and pluggable.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Property</div>
+        <div class="proto-card-title">Not Monolithic</div>
+        <div class="proto-card-desc">Default solutions in Kubernetes are optional and pluggable. It provides building blocks for developer platforms while preserving user choice and flexibility — a developer can plug in their own logging, monitoring, or alerting solution.</div>
+      </div>
+    </div>
+
+    <h3>Kubernetes Cluster Architecture</h3>
+    <div class="callout"><strong>Kubernetes cluster:</strong> A set of worker machines called <strong>nodes</strong> that run containerized applications. Every cluster has at least one worker node. Worker nodes host <strong>pods</strong> — the smallest deployable units, each containing one or more containers.</div>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Cluster component</div>
+        <div class="proto-card-title">Worker Nodes</div>
+        <div class="proto-card-desc">The machines (physical or virtual) that host pods containing application workload components. Multiple nodes provide the compute capacity of the cluster. Key node components: kubelet, kube-proxy.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Cluster component</div>
+        <div class="proto-card-title">Control Plane</div>
+        <div class="proto-card-desc">Manages the worker nodes and pods in the cluster — scheduling, scaling, fault detection, and overall cluster state. In production, the control plane runs across multiple computers for fault tolerance and high availability. Key components: scheduler, API server (kube API).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Docker -->
+  <div class="section">
+    <div class="section-label">6 · Docker Overview</div>
+    <div class="callout"><strong>Docker:</strong> An open platform for developing, shipping, and running applications. Provides a sandbox process isolated from all other processes on the host machine — the container.</div>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Docker concept</div>
+        <div class="proto-card-title">Container Image</div>
+        <div class="proto-card-desc">A lightweight, standalone, executable package that includes everything needed to run the application: code, runtime, system tools, libraries, settings. The image is the static blueprint; the container is its running instance.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Docker concept</div>
+        <div class="proto-card-title">Docker Engine</div>
+        <div class="proto-card-desc">The runtime that executes containers from images. Available for Linux and Windows. Container images become containers when run on the Docker Engine — same image, same behavior regardless of infrastructure.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Docker concept</div>
+        <div class="proto-card-title">Container Lifecycle</div>
+        <div class="proto-card-desc">A container is a runtime instance of an image. Containers can be created, started, stopped, moved, and deleted using the Docker API or CLI. Each container runs as an isolated process separate from the host and other containers.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Docker concept</div>
+        <div class="proto-card-title">Isolation and Security</div>
+        <div class="proto-card-desc">Docker provides strong default isolation capabilities — each container is an isolated sandbox. Applications inside containers are secured from each other and from the host environment.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 7: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Containers:</strong> Lightweight OS-level virtualization. Packages code + dependencies into a self-contained, portable unit. Shares host OS kernel — no full guest OS required.</div>
+    <div class="callout green"><strong>Three eras:</strong> Traditional (bare metal, no isolation) → Virtualized (VMs with hypervisor, full guest OS, strong isolation) → Container (shares kernel, OS-level isolation, extremely lightweight and portable).</div>
+    <div class="callout yellow"><strong>Three key benefits:</strong> Separation of responsibilities (developers vs. ops), workload portability (run anywhere), application isolation (logically separated process spaces).</div>
+    <div class="callout"><strong>Kubernetes:</strong> Open-source orchestration platform for containerized workloads. Cluster = control plane + worker nodes + pods. Provides scheduling, scaling, self-healing, and service discovery. Not monolithic — components are pluggable.</div>
+    <div class="callout green"><strong>Docker:</strong> Container runtime platform. Container image = static package (code + runtime + libraries). Docker Engine executes images as isolated container processes. Industry-standard container format and the most widely used runtime.</div>
+    <div class="callout pink"><strong>Containers vs. VMs:</strong> Containers share the OS kernel (lighter, faster, more portable) while VMs run full guest OSes (heavier, stronger isolation). Both are used together in production — VMs for tenant isolation, containers for application packaging.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

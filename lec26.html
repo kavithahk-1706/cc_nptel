@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 26 — Cloud Security I | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec25.html" class="nav-lec">← prev</a>
+      <a href="lec27.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 26</span>
+    <span class="med-badge">MED priority</span>
+    <h1>Cloud Security I — General Security Foundations</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Background lecture on computer/network security before the cloud-specific treatment. Covers the CIA triad, four attack categories, threat classes, policies vs mechanisms, passive vs active attacks, security services, and the network security lifecycle. Cloud-specific implications are deferred to the next lecture.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · CIA Triad — Core Security Properties</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Confidentiality</div>
+        <div class="concept-desc">Keep data and resources hidden from unauthorized parties. Addresses: who can see the data, where it is stored, and whether it is intercepted during transmission.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Integrity</div>
+        <div class="concept-desc">Guarantee that data is not altered in transit or storage, and that the origin/source is authentic. What is sent by A is exactly what B receives, unchanged.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Availability</div>
+        <div class="concept-desc">Ensure authorized users can access data and resources when needed. DoS and DDoS attacks specifically target availability — the resource exists but is made unreachable.</div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Cloud relevance:</strong> When data, applications, and processes run on a third-party provider, all three CIA properties become a concern — especially for mission-critical, financial, defense, or student-record data.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Four Attack Categories</div>
+    <table class="port-table">
+      <thead><tr><th>Attack type</th><th>CIA property violated</th><th>What happens</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Interruption</td><td>Availability</td><td>Communication path is blocked; destination never receives the message</td></tr>
+        <tr><td class="proto-name">Interception</td><td>Confidentiality</td><td>Intruder eavesdrops on S→D channel; both S and D are unaware</td></tr>
+        <tr><td class="proto-name">Modification</td><td>Integrity</td><td>Intruder intercepts message, alters it (m → m′), forwards m′ to D; D believes it received from S</td></tr>
+        <tr><td class="proto-name">Fabrication</td><td>Authenticity</td><td>Intruder pretends to be the source S and sends forged messages to D</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Threat Classes</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Disclosure threats</div>
+        <div class="proto-card-title">Snooping</div>
+        <div class="proto-card-desc">Unauthorized reading of data. Violated when an adversary can learn the content of transmissions.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Deception threats</div>
+        <div class="proto-card-title">Modification, spoofing, repudiation</div>
+        <div class="proto-card-desc">Data is altered or forged; origin is falsified; recipient denies receipt. Covers man-in-the-middle and replay scenarios.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Disruption threats</div>
+        <div class="proto-card-title">Service degradation / DoS</div>
+        <div class="proto-card-desc">Modification or flooding that prevents normal operation of services — includes DoS, DDoS, and resource exhaustion attacks.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Usurpation threats</div>
+        <div class="proto-card-title">Modification, spoofing, denial of service</div>
+        <div class="proto-card-desc">Unauthorized control of system components — attacker takes over a service or resource that should be controlled by a legitimate entity.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · Security Goals: Prevention, Detection, Recovery</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Prevention</div>
+        <div class="concept-desc">Stop attackers from violating security policies before any breach occurs. Implemented through firewalls, access control, encryption, authentication mechanisms.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Detection</div>
+        <div class="concept-desc">Identify when a security policy is being violated. Earlier detection = stronger security perimeter. After-the-fact detection leaves only forensics. IDS/IPS, logs, anomaly detection.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Recovery</div>
+        <div class="concept-desc">Restore system to pre-attack state: stop the attack, assess damage, repair, continue functioning. Requires redundancy, logging, backups. All recovery measures incur cost.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · Policies vs Mechanisms</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Policies</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Definition</span>What is and is not allowed</div>
+          <div class="compare-row"><span class="label">Formulation</span>Centralized (policy-making body)</div>
+          <div class="compare-row"><span class="label">Scope</span>Covers all system components, hierarchically</div>
+          <div class="compare-row"><span class="label">Risk</span>Conflicting sub-policies create security gaps</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Mechanisms</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Definition</span>How policies are enforced</div>
+          <div class="compare-row"><span class="label">Implementation</span>Distributed (across devices, nodes)</div>
+          <div class="compare-row"><span class="label">Scope</span>Firewalls, IDS, access control rules per device</div>
+          <div class="compare-row"><span class="label">Risk</span>Implementation may not perfectly mirror policy</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Key challenge:</strong> Verifying that distributed implementation conforms exactly to centralized policy is an open research problem. Conflicts between local and global policies create exploitable security vulnerabilities.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · Passive vs Active Attacks</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Passive attacks</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Nature</span>Eavesdropping — listen but don't modify</div>
+          <div class="compare-row"><span class="label">Types</span>Release of message content; traffic analysis</div>
+          <div class="compare-row"><span class="label">Detection</span>Very difficult — no direct harm is caused</div>
+          <div class="compare-row"><span class="label">Example</span>Inferring a video call from traffic volume patterns</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Active attacks</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Nature</span>Modify data stream or create false streams</div>
+          <div class="compare-row"><span class="label">Masquerade</span>One entity impersonates another</div>
+          <div class="compare-row"><span class="label">Replay</span>Captured packet retransmitted to cause unauthorized effect</div>
+          <div class="compare-row"><span class="label">Modification</span>Legitimate message portion altered</div>
+          <div class="compare-row"><span class="label">DoS</span>Prevents normal use of communication facilities</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">7 · Security Services</div>
+    <table class="port-table">
+      <thead><tr><th>Service</th><th>Protects against</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Confidentiality</td><td>Loss of privacy</td><td>Prevent unauthorized disclosure of data content</td></tr>
+        <tr><td class="proto-name">Integrity</td><td>Data alteration</td><td>Detect and prevent unauthorized modification or corruption of data</td></tr>
+        <tr><td class="proto-name">Availability</td><td>DoS, file deletion</td><td>Ensure resources remain accessible; defend against denial of service and virus attacks that erase data</td></tr>
+        <tr><td class="proto-name">Authentication</td><td>Masquerade, fabrication</td><td>Verify identity of legitimate users/processes before granting access</td></tr>
+        <tr><td class="proto-name">Authorization</td><td>Privilege misuse</td><td>Determine whether a specific operation is permitted for a given authenticated user</td></tr>
+        <tr><td class="proto-name">Non-repudiation</td><td>Denial of action</td><td>"The order is final" — users cannot deny having sent or authorized a transaction</td></tr>
+        <tr><td class="proto-name">Safety</td><td>Tampering, theft</td><td>Protect against physical or logical damage, unauthorized modification, or theft of assets</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">8 · Network Security Lifecycle</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Step 1</div>
+        <div class="proto-card-title">Policy determination</div>
+        <div class="proto-card-desc">Define the full security roadmap for the organization. Network design must reflect and conform to these policies.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Step 2</div>
+        <div class="proto-card-title">Implementation</div>
+        <div class="proto-card-desc">Install and configure firewalls, IDS/IPS, honeypots/honeynets. Encode policies as access rules in each device. Honeynet attracts attacks to build attack-signature databases for tuning IDS.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Step 3</div>
+        <div class="proto-card-title">Reconnaissance</div>
+        <div class="proto-card-desc">Learn the network topology: IP addresses, key servers, critical data locations. Passive (undetectable) or active (may trigger IDS). Required for both attackers and defenders.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Step 4</div>
+        <div class="proto-card-title">Vulnerability scanning</div>
+        <div class="proto-card-desc">Scan for open ports and known vulnerabilities using tools like nmap. More advanced scanners (e.g., Metasploit) test exploitability. Signatures must be kept current, like antivirus databases. Reference: NVD (National Vulnerability Database).</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Step 5</div>
+        <div class="proto-card-title">Penetration testing</div>
+        <div class="proto-card-desc">Controlled, safe self-attack to verify that known vulnerabilities are exploitable and to identify the appropriate patches before a real attacker does.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Step 6</div>
+        <div class="proto-card-title">Post-attack investigation</div>
+        <div class="proto-card-desc">Forensic analysis after an incident. Governed by law; requires retaining chain of evidence. Goal: understand attack pattern, update defenses, prevent recurrence.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>CIA triad:</strong> Confidentiality, Integrity, Availability — the three core properties any security system must protect. All cloud security concerns map back to one or more of these.</div>
+    <div class="callout green"><strong>Attack taxonomy:</strong> Interruption (availability) → Interception (confidentiality) → Modification (integrity) → Fabrication (authenticity). Each requires a different defensive mechanism.</div>
+    <div class="callout yellow"><strong>Policy vs mechanism gap:</strong> Policies are formulated centrally; mechanisms are deployed across distributed devices. Ensuring perfect conformance is an unsolved research problem — policy conflicts create exploitable gaps.</div>
+    <div class="callout pink"><strong>Passive attacks:</strong> Eavesdropping and traffic analysis are hard to detect because they cause no visible harm. Traffic patterns alone can reveal sensitive operational information without ever decrypting a packet.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

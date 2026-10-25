@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 40 — Course Summary and Research Areas | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec39.html" class="nav-lec">← prev</a>
+      <a href="lec41.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 40</span>
+    <span class="skip-badge">SKIP priority</span>
+    <h1>Course Summary and Research Areas</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Final lecture of the first half — a recap of all topics covered in lectures 1–39 and a survey of active cloud computing research directions. No new technical content; useful only as a high-level course map or for identifying research areas. Skim if pressed for time.</p>
+  </div>
+
+  <!-- Section 1: Course Topics Recap -->
+  <div class="section">
+    <div class="section-label">1 · Topics Covered in This Course</div>
+    <table class="port-table">
+      <thead><tr><th>Topic Area</th><th>Key Content</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Introduction</td><td>NIST definition, everything-as-a-service, properties (utility, metered, scalable, no local infrastructure), evolution from cluster → grid → distributed → cloud</td></tr>
+        <tr><td class="proto-name">Service Models</td><td>IaaS, PaaS, SaaS — the primary three; "anything as a service" framework; cloud stack architecture</td></tr>
+        <tr><td class="proto-name">Foundation Technologies</td><td>Service-Oriented Architecture (SOA), web services, XML — enabling interoperability</td></tr>
+        <tr><td class="proto-name">Service Management</td><td>SLAs — critical for loosely coupled heterogeneous services; availability guarantees (99%, 99.9%); differences between provider SLA formats</td></tr>
+        <tr><td class="proto-name">Cloudonomics</td><td>When cloud is economically justified; CV and statistical multiplexing; utility premium U &lt; P/A rule; hybrid cloud rationale; non-monetary constraints (security, privacy)</td></tr>
+        <tr><td class="proto-name">Resource Management</td><td>Provider-side resource management; energy consumption; profitability vs. environmental impact; major ongoing research area</td></tr>
+        <tr><td class="proto-name">Data Management</td><td>Google File System (GFS), HDFS, Hadoop; MapReduce for parallelizing big data; scalability, accessibility, bandwidth challenges</td></tr>
+        <tr><td class="proto-name">Cloud Security</td><td>Identity and access management; RBAC vs. risk-based access control; trust, reputation, risk; authentication protocols; data encryption and key management; side-channel attacks</td></tr>
+        <tr><td class="proto-name">Open Source / Commercial</td><td>OpenStack; IIT KGP Meghamala (experimental); Amazon AWS, Azure, Google Cloud, IBM Bluemix</td></tr>
+        <tr><td class="proto-name">Companion Technologies</td><td>Fog computing; sensor cloud; Docker containers; IoT cloud; green cloud / energy management</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 2: Research Areas -->
+  <div class="section">
+    <div class="section-label">2 · Cloud Computing Research Areas</div>
+
+    <h3>Infrastructure and Services</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Cloud architecture and storage</span>
+      <span class="tag tag-good">Distributed and cloud networking</span>
+      <span class="tag tag-good">IaaS / PaaS / SaaS evolution</span>
+      <span class="tag tag-good">Storage as a Service</span>
+      <span class="tag tag-good">Network as a Service</span>
+      <span class="tag tag-good">Information as a Service</span>
+    </div>
+
+    <h3>Management, Operations, and Monitoring</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Cloud composition and service orchestration</span>
+      <span class="tag tag-good">Cloud federation and cloud bursting</span>
+      <span class="tag tag-good">Cloud migration and hybrid integration</span>
+      <span class="tag tag-good">Green and energy management</span>
+      <span class="tag tag-good">Workload profiling and deployment control</span>
+      <span class="tag tag-good">Cloud metering, monitoring, auditing</span>
+    </div>
+
+    <h3>Security</h3>
+    <div class="tag-row">
+      <span class="tag tag-bad">Data privacy and access control</span>
+      <span class="tag tag-bad">Identity management</span>
+      <span class="tag tag-bad">Side-channel attacks</span>
+      <span class="tag tag-bad">Legal/jurisdictional data residency requirements</span>
+      <span class="tag tag-bad">Security as a Service</span>
+    </div>
+
+    <h3>Performance, Scalability, Reliability</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Performance measurement and maintenance</span>
+      <span class="tag tag-good">Microservice-based architecture</span>
+      <span class="tag tag-good">Virtualization technologies</span>
+      <span class="tag tag-good">Cloud provisioning and orchestration</span>
+      <span class="tag tag-good">Hardware architecture for cloud</span>
+    </div>
+
+    <h3>Data Analytics in Cloud</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Big data management and analytics</span>
+      <span class="tag tag-good">Analytics as a service</span>
+      <span class="tag tag-good">Scientific computing and data management</span>
+      <span class="tag tag-good">Cross-source data interoperability</span>
+    </div>
+
+    <h3>Service Management</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Service discovery and recommendation</span>
+      <span class="tag tag-good">Service composition</span>
+      <span class="tag tag-good">QoS management</span>
+      <span class="tag tag-good">Semantic services</span>
+      <span class="tag tag-good">Service-oriented software engineering</span>
+    </div>
+
+    <h3>Emerging / Companion Technologies</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Fog computing</span>
+      <span class="tag tag-good">IoT cloud</span>
+      <span class="tag tag-good">Sensor cloud</span>
+      <span class="tag tag-good">Container technology (Docker)</span>
+    </div>
+  </div>
+
+  <!-- Section 3: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout green"><strong>Course philosophy:</strong> Cloud computing is not a single new technology — it is the convergence of utility computing, SOA, virtualization, and scalable infrastructure into an "everything as a service" paradigm.</div>
+    <div class="callout"><strong>Core open problems:</strong> Energy/green management, security and privacy at scale, real-time big data analytics, and seamless IoT/sensor integration remain the most active research areas.</div>
+    <div class="callout yellow"><strong>Practical note:</strong> Cloud simulators (e.g., CloudSim) are available for experimentation without requiring actual cloud infrastructure — useful for research without access to commercial deployments.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 43 — Resource Management II | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec42.html" class="nav-lec">← prev</a>
+      <a href="lec44.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 43</span>
+    <span class="high-badge">HIGH priority</span>
+    <h1>Resource Management — II</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Deepens the resource management taxonomy from Lecture 42 with a focus on service placement, task offloading, and infrastructure for cloud-fog-edge. Introduces the service placement problem formally, taxonomy of placement strategies, a concrete vision-and-activity-recognition case study for application partitioning across edge/fog/cloud, and the two modes of offloading. Exam-relevant concepts: placement constraints, offloading types, centralized vs. distributed control.</p>
+  </div>
+
+  <!-- Section 1: Service Placement Problem -->
+  <div class="section">
+    <div class="section-label">1 · Service Placement Problem</div>
+    <div class="callout"><strong>Service placement problem:</strong> Given an application with multiple components and an infrastructure graph (edge nodes, fog nodes, cloud), find the <em>optimal mapping</em> of application components onto infrastructure nodes — satisfying resource constraints and optimization objectives (latency, cost, energy).</div>
+
+    <h3>Why placement is non-trivial</h3>
+    <p>Not all components need to run at the same tier. Some computations are best at the edge (low latency decisions), some at the fog (aggregation), and some at the cloud (global context, heavy ML inference). Fog computing is a <strong>highly virtualized</strong> platform — it must interoperate between end users / IoT devices and the cloud, and must support distributing the formerly centralized cloud workload to distributed edge nodes.</p>
+
+    <h3>Placement Constraints</h3>
+    <table class="port-table">
+      <thead><tr><th>Constraint Type</th><th>Description</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Resource-level</td><td>Infrastructure has finite CPU, RAM, storage, bandwidth — a component cannot be placed on a node that cannot meet its minimum requirements.</td><td>Face recognition requires ≥500MB free RAM — cannot run on a constrained gateway.</td></tr>
+        <tr><td class="proto-name">Network-level</td><td>Latency and bandwidth constraints between placement nodes must be satisfied.</td><td>A real-time video analytics component cannot tolerate 200ms cloud round-trip.</td></tr>
+        <tr><td class="proto-name">Application-level</td><td>Locality requirements — some components must execute in a specific geographic or administrative domain.</td><td>Patient data processing must stay within hospital network; delay-sensitive alarms must be handled locally.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Service Placement Taxonomy (four aspects)</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Taxonomy</div>
+        <div class="proto-card-title">Control Plane Design</div>
+        <div class="proto-card-desc">How the placement decision is made and enforced — centralized (single orchestrator) or distributed (collaborative fog nodes). Each has different scalability and failure characteristics.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Taxonomy</div>
+        <div class="proto-card-title">Placement Characteristics</div>
+        <div class="proto-card-desc">What properties the placement algorithm optimizes and enforces — latency bounds, resource fit, locality, SLA compliance.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Taxonomy</div>
+        <div class="proto-card-title">System Dynamicity</div>
+        <div class="proto-card-desc">How the placement adapts to changing conditions — static placement vs. dynamic re-placement triggered by resource fluctuations or mobility events.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Taxonomy</div>
+        <div class="proto-card-title">Mobility Support</div>
+        <div class="proto-card-desc">Whether the system tracks device movement and migrates services accordingly — critical for vehicular networks and ambulance scenarios; less so for static sensor deployments.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Case Study — Vision + Activity Recognition -->
+  <div class="section">
+    <div class="section-label">2 · Case Study — Vision & Activity Recognition Application</div>
+    <p>A multi-component application worn by a user (e.g., Google Glass) illustrates how different components map to different tiers:</p>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Component → Edge Device</div>
+        <div class="proto-card-title">Vision Capture</div>
+        <div class="proto-card-desc">Camera on the wearable device. Runs locally — no choice, sensor is at the edge.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Component → Edge Device</div>
+        <div class="proto-card-title">Coarse Feature Extraction</div>
+        <div class="proto-card-desc">Lightweight preprocessing of the raw image. Can run on the device itself (Google Glass) or a nearby connected device (laptop acting as edge compute).</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Component → Fog (Smart Wi-Fi Gateway)</div>
+        <div class="proto-card-title">Object Recognition</div>
+        <div class="proto-card-desc">Needs more resources than the wearable has; runs on a LAN router or smart Wi-Fi gateway acting as fog. Moderate compute but not heavy ML.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Component → Fog or Cloudlet</div>
+        <div class="proto-card-title">OCR (Character Recognition)</div>
+        <div class="proto-card-desc">Can run on smart gateway or a cloudlet (a small cloud instance near the edge). Requires more compute than object recognition.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Component → Cloud</div>
+        <div class="proto-card-title">Face Recognition</div>
+        <div class="proto-card-desc">Resource-intensive; requires comparing against large databases. Offloaded to cloud back-end. Cannot run on a simple fog gateway.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Component → Cloud</div>
+        <div class="proto-card-title">Learning-based Activity Inference</div>
+        <div class="proto-card-desc">Requires heavy ML models, possibly external datasets for inference. Must run at the cloud — may also need data from other sources not available at fog.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Component → Fog (Smart Gateway)</div>
+        <div class="proto-card-title">Rendering</div>
+        <div class="proto-card-desc">Assembles results and creates display output. Runs at the smart Wi-Fi gateway, which returns the rendered result to the wearable device for display.</div>
+      </div>
+    </div>
+
+    <div class="callout green"><strong>Insight from case study:</strong> Distributing components across edge/fog/cloud (rather than sending everything to the cloud) achieves lower latency, better scalability, and mobility support — if the user moves, a nearby fog node takes over rendering and local processing without re-establishing cloud connections for every component.</div>
+    <div class="callout pink"><strong>Caveat:</strong> Application partitioning and placement is application-specific. There is no universal mapping — it depends on compute requirements, resource availability at each tier, and latency constraints per component.</div>
+  </div>
+
+  <!-- Section 3: Task Offloading -->
+  <div class="section">
+    <div class="section-label">3 · Task Offloading</div>
+    <div class="callout"><strong>Offloading:</strong> Moving computation from where it would naturally execute to another tier that can perform it more efficiently. Brings cloud-side services closer to the data source to reduce latency and bandwidth usage.</div>
+
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">User Device → Edge (Augmentation)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Direction</span>From end device to nearest edge node</div>
+          <div class="compare-row"><span class="label">Hops</span>Typically single-hop (direct connection)</div>
+          <div class="compare-row"><span class="label">Purpose</span>Augment compute-limited user devices by offloading intensive tasks to nearby edge node</div>
+          <div class="compare-row"><span class="label">Mechanisms</span>Application partitioning; caching mechanisms</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Cloud → Edge (Server Offload)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Direction</span>From cloud to edge nodes at the network periphery</div>
+          <div class="compare-row"><span class="label">Hops</span>Multiple hops; requires coordination</div>
+          <div class="compare-row"><span class="label">Purpose</span>Move cloud-executed workloads closer to users/data sources for latency and bandwidth reduction</div>
+          <div class="compare-row"><span class="label">Mechanisms</span>Server replication, server partitioning across edge, content popularity-based or multi-layer caching</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout yellow"><strong>Partial vs. full offloading:</strong> A task can be fully offloaded (entire computation moves to edge/fog) or partially offloaded (split — some components stay on the device, some move to the fog). After partial offloading, results from both must be reassembled (ensembled/aggregated) before delivery to the user.</div>
+  </div>
+
+  <!-- Section 4: Control Mechanisms -->
+  <div class="section">
+    <div class="section-label">4 · Control Mechanisms — Centralized vs. Distributed</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Centralized Control</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Structure</span>Single orchestrator manages all fog/edge nodes</div>
+          <div class="compare-row"><span class="label">Algorithms</span>Solver-based approaches; graph matching; ILP</div>
+          <div class="compare-row"><span class="label">Best for</span>Small, static deployments; few fog nodes in controlled area</div>
+          <div class="compare-row"><span class="label">Risk</span>Single point of failure; scalability bottleneck at the controller</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Distributed Control</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Structure</span>Each fog node (or cluster) manages itself collaboratively</div>
+          <div class="compare-row"><span class="label">Algorithms</span>Game theory; genetic algorithms; blockchain-based; distributed optimization</div>
+          <div class="compare-row"><span class="label">Best for</span>Large-scale, mobile deployments; vehicular networks</div>
+          <div class="compare-row"><span class="label">Risk</span>Coordination overhead; consistency challenges across nodes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Infrastructure for Fog-Edge -->
+  <div class="section">
+    <div class="section-label">5 · Infrastructure: Hardware, System Software, Middleware</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Hardware</div>
+        <div class="concept-desc">Low-power, small form-factor devices: mobile devices, routers, gateways, home servers, edge ISP servers, vehicles, drones. Cloud has abundant resources; fog leverages <em>surplus resources</em> on existing network devices rather than dedicated infrastructure.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">System Software</div>
+        <div class="concept-desc">Runs on fog/edge hardware; manages compute, network, and storage resources. Must support <strong>multi-tenancy and isolation</strong> (multiple applications sharing a fog node). Includes: OS, virtualization (VMs and containers), network virtualization (SDN, NFV), and overlay networks.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Middleware</div>
+        <div class="concept-desc">Sits above the OS; provides what system software does not: performance monitoring, coordination of distributed computing nodes, orchestration, VM/container deployment across fog nodes, communication protocol support. Enables faithful, reliable, scalable fog operation.</div>
+      </div>
+    </div>
+
+    <h3>Virtualization at the Fog Layer</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">System Virtualization</div>
+        <div class="proto-card-title">VMs and Containers</div>
+        <div class="proto-card-desc">Standard virtualization techniques brought down to fog hardware. VM and container <strong>migration</strong> is a critical research area — moving a running computation to another fog node when a device is mobile or a node is overloaded.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Network Virtualization</div>
+        <div class="proto-card-title">SDN and NFV</div>
+        <div class="proto-card-desc">Software Defined Networking (SDN) separates control plane from data plane — enables flexible, programmatic network management across fog nodes. Network Function Virtualization (NFV) replaces dedicated network hardware with software running on commodity devices. Both are proliferating in modern networks.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Service Placement:</strong> Maps application components to infrastructure nodes under three constraint types — resource-level (capacity), network-level (latency/bandwidth), and application-level (locality/deadline). Requires an orchestration engine to manage placement decisions.</div>
+    <div class="callout green"><strong>Application Partitioning:</strong> A single application's components should be split across edge, fog, and cloud based on compute requirement and latency sensitivity — not all-or-nothing. The vision recognition case study demonstrates this clearly.</div>
+    <div class="callout yellow"><strong>Offloading:</strong> Two types — user device → edge (augments resource-limited devices) and cloud → edge (reduces cloud load and latency). Partial offloading splits a task and requires reassembly of results.</div>
+    <div class="callout pink"><strong>SDN and NFV:</strong> Both are key enablers for flexible fog/edge management — SDN for programmable network control, NFV for running network functions in software on commodity hardware rather than dedicated appliances.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

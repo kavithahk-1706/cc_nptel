@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 21 — SLA Tutorial | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec20.html" class="nav-lec">← prev</a>
+      <a href="lec22.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 21</span>
+    <span class="high-badge">HIGH priority</span>
+    <h1>SLA Tutorial — Numerical Problems &amp; Best Practices</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Worked numerical problems on SLA availability calculation and service credit computation, followed by Azure SLA terminology and the Cloud Standards Customer Council's 7-step SLA evaluation checklist. The two solved problems are direct exam targets — work through both from scratch.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · SLA Refresher</div>
+    <div class="callout"><strong>SLA (Service Level Agreement):</strong> Formal contract between cloud service provider (CSP) and consumer defining guaranteed service levels (uptime, performance) and remedies for violation.</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Metric-based SLA</div>
+        <div class="proto-card-title">Parameter-driven</div>
+        <div class="proto-card-desc">Quantifiable metrics: uptime %, CPU usage, disk throughput, bandwidth. Can be measured and compared against guaranteed values. Most common for IaaS/PaaS.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Policy-based SLA</div>
+        <div class="proto-card-title">Rule-driven</div>
+        <div class="proto-card-desc">Non-quantifiable clauses: where data resides geographically, backup policies, compliance with industry standards (HIPAA, PCI-DSS). Harder to measure but equally binding.</div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>No universal SLA standard</strong> yet exists across cloud providers. Each provider defines its own terms; standards are still evolving. The consumer must read provider-specific SLAs carefully.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Problem 1 — SLA Violation Check</div>
+    <div class="callout yellow">
+      <strong>Problem statement:</strong> A CSP guarantees 99% uptime. An application runs in the cloud for <strong>12 hours/day</strong>. At the end of one month (30 days), the total outage was <strong>10.75 hours</strong>. Has the provider violated the SLA?
+    </div>
+    <h3>Solution</h3>
+    <table class="port-table">
+      <thead><tr><th>Quantity</th><th>Calculation</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Total service hours</td><td>12 h/day × 30 days</td><td>360 hours</td></tr>
+        <tr><td class="proto-name">Total downtime</td><td>Given</td><td>10.75 hours</td></tr>
+        <tr><td class="proto-name">Actual uptime</td><td>360 − 10.75</td><td>349.25 hours</td></tr>
+        <tr><td class="proto-name">Availability %</td><td>(1 − 10.75/360) × 100</td><td><strong>96.92%</strong></td></tr>
+        <tr><td class="proto-name">Guaranteed availability</td><td>—</td><td>99%</td></tr>
+        <tr><td class="proto-name">Conclusion</td><td>96.92% &lt; 99%</td><td><strong>SLA VIOLATED</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="callout green"><strong>Formula:</strong> Availability % = (1 − downtime/total_time) × 100. Compare against the guaranteed %.</div>
+    <div class="callout yellow"><strong>Extension:</strong> Availability requirements can also vary by time window — e.g., banking SLAs guarantee 99.9% during peak hours (09:00–17:00), 99% during business hours, 97% overnight. Each window is evaluated separately.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Problem 2 — Service Credits &amp; Effective Cost</div>
+    <div class="callout yellow">
+      <strong>Problem statement:</strong> Company X purchases cloud service from Provider P.<br>
+      <strong>SLA terms:</strong> Availability = 99.95%, Service period = 30 days, Max hours/day = 12, Cost = $50/day.<br>
+      <strong>Penalty structure:</strong> If availability &lt; 99.95% but ≥ 99% → 10% credit. If availability &lt; 99% → 25% credit.<br>
+      <strong>Actual outages:</strong> 5h 30min + 1h 30min + 15min + 2h 25min (total 4 outage events, total downtime = 9h 25min).<br>
+      <strong>Find:</strong> Effective cost payable by Company X.
+    </div>
+    <h3>Solution</h3>
+    <table class="port-table">
+      <thead><tr><th>Quantity</th><th>Calculation</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Total service hours</td><td>12 h/day × 30 days</td><td>360 hours</td></tr>
+        <tr><td class="proto-name">Total downtime</td><td>5h30m + 1h30m + 0h15m + 2h25m</td><td>9 hours 25 min (≈ 9.417 h)</td></tr>
+        <tr><td class="proto-name">Availability %</td><td>(1 − 9.417/360) × 100</td><td><strong>97.385%</strong></td></tr>
+        <tr><td class="proto-name">Penalty tier</td><td>97.385% &lt; 99%</td><td>25% credit applies</td></tr>
+        <tr><td class="proto-name">Total cost (contracted)</td><td>$50 × 30 days</td><td>$1,500</td></tr>
+        <tr><td class="proto-name">Service credit</td><td>25% × $1,500</td><td>$375</td></tr>
+        <tr><td class="proto-name">Effective cost payable</td><td>$1,500 − $375</td><td><strong>$1,125</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="callout green"><strong>Key insight:</strong> Even though guaranteed uptime was 99.95%, the actual outage pushed availability below 99%, triggering the higher (25%) penalty tier — not the 10% tier.</div>
+    <div class="callout pink"><strong>Exam trap:</strong> First compute availability %; then determine which penalty tier it falls into (the lower the availability, the higher the credit). Don't confuse credit (what consumer gets back) with effective cost (what they actually pay).</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · Azure SLA Terminology</div>
+    <table class="port-table">
+      <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Monthly uptime %</td><td>(Max available minutes − downtime) / max available minutes × 100</td></tr>
+        <tr><td class="proto-name">Downtime</td><td>Cumulative minutes during a billing period where the service is unavailable</td></tr>
+        <tr><td class="proto-name">Error code</td><td>HTTP 5xx — indicates operation failed; used to detect and log service failure</td></tr>
+        <tr><td class="proto-name">Success code</td><td>HTTP 2xx — indicates successful operation</td></tr>
+        <tr><td class="proto-name">External connectivity</td><td>Bidirectional HTTP/HTTPS traffic to/from a public IP address</td></tr>
+        <tr><td class="proto-name">Availability set</td><td>2+ VMs deployed across different fault domains — prevents simultaneous failure (eliminates single point of failure)</td></tr>
+        <tr><td class="proto-name">Fault domain</td><td>Collection of servers sharing common power and network connectivity — all go down together on power/network failure</td></tr>
+        <tr><td class="proto-name">Update domain</td><td>Set of Azure instances to which platform updates are applied concurrently</td></tr>
+        <tr><td class="proto-name">Tenant</td><td>One or more role instances deployed in a single package (web role or worker role)</td></tr>
+        <tr><td class="proto-name">Service credit</td><td>The percentage of monthly fees refunded to consumer when SLA is violated</td></tr>
+        <tr><td class="proto-name">Support window</td><td>Period during which a specific service feature or version is officially supported</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · SLA Best Practices (CSCC 7 Steps)</div>
+    <div class="callout"><strong>Cloud Standards Customer Council (CSCC)</strong> recommends 7 steps when evaluating cloud SLAs:</div>
+    <table class="port-table">
+      <thead><tr><th>#</th><th>Step</th><th>Key considerations</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">1</td><td>Identify cloud actors</td><td>NIST 5 actors: Consumer, Provider, Carrier, Broker, Auditor</td></tr>
+        <tr><td class="proto-name">2</td><td>Evaluate business-level policies</td><td>Data residency, backup policy, sub-contracted services, licensing, industry standards (HIPAA, PCI-DSS), excess usage penalties</td></tr>
+        <tr><td class="proto-name">3</td><td>Understand service type</td><td>IaaS / PaaS / SaaS each have different control variables and measurement complexity</td></tr>
+        <tr><td class="proto-name">4</td><td>Identify metrics</td><td>Availability %, response time, throughput; frequency of collection; method of measurement</td></tr>
+        <tr><td class="proto-name">5</td><td>Consider security</td><td>Asset sensitivity, legal/regulatory requirements, geographic data boundary, CSP security capabilities</td></tr>
+        <tr><td class="proto-name">6</td><td>Service management requirements</td><td>What to monitor &amp; report (load, app performance); what to meter (billing); provisioning speed; resource change management</td></tr>
+        <tr><td class="proto-name">7</td><td>Prepare for failure</td><td>Remedy types (service credits, compute hours); liability caps; disaster recovery plan; <strong>exit clause</strong> for termination by either party</td></tr>
+      </tbody>
+    </table>
+    <div class="callout pink"><strong>Exit clause</strong> is mandatory in every SLA — either party must be able to terminate the relationship with defined obligations and data repatriation terms.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Availability formula:</strong> Availability % = (1 − downtime/total_time) × 100. Compare against guaranteed SLA value to determine violation.</div>
+    <div class="callout green"><strong>Service credits:</strong> Refund percentage applied to total contracted cost when availability falls below SLA threshold. Higher deviation → higher credit tier → lower effective cost paid.</div>
+    <div class="callout yellow"><strong>Availability set:</strong> Deploy 2+ VMs across different fault domains to eliminate single point of failure. Fault domain = servers sharing power/network (single failure point).</div>
+    <div class="callout pink"><strong>SLA complexity:</strong> Real SLAs span metrics (uptime, bandwidth), policies (data residency, licensing), security, and legal clauses — not just uptime calculation.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

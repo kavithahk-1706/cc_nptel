@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 52 — Serverless Computing I | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec51.html" class="nav-lec">← prev</a>
+      <a href="lec53.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 52</span>
+    <span class="high-badge">HIGH priority</span>
+    <h1>Serverless Computing — I</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Introduces Serverless Computing — an emerging paradigm where developers write business logic as functions without managing infrastructure. Covers the two core service models (FaaS and BaaS), how serverless works (event-driven, stateless containers, horizontal scaling), and its key challenges. High exam relevance: definitions, service model distinctions, and challenges are likely to appear.</p>
+  </div>
+
+  <!-- Section 1: What is Serverless Computing? -->
+  <div class="section">
+    <div class="section-label">1 · What is Serverless Computing?</div>
+    <div class="callout"><strong>Serverless Computing:</strong> A method of providing backend services on a used (pay-per-use) basis. The serverless provider allows users to write and deploy code without worrying about underlying infrastructure. Servers still exist — the term "serverless" means the developer has no visibility into or responsibility for the server layer.</div>
+
+    <div class="callout yellow"><strong>Core goal:</strong> Separate infrastructure management from application development. Developers focus exclusively on business logic; the cloud provider handles container creation, deployment, provisioning, orchestration, and scaling.</div>
+
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">No Infrastructure Management</div>
+        <div class="concept-desc">Developers do not provision VMs, configure OS, manage containers, or monitor infrastructure. The serverless provider handles all operational aspects including container orchestration — analogous to abstracting the server layer entirely.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Event-Driven Execution</div>
+        <div class="concept-desc">Applications are granular and triggered by events — client requests, data streams, external system events, or scheduled triggers. Functions are not constantly active; the FaaS platform listens for events and instantiates the function only when triggered.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Pay-Per-Use Billing</div>
+        <div class="concept-desc">Users are billed only for the resources consumed during function execution — not for idle infrastructure. A non-active serverless function costs nothing. This is a finer-grained billing model than IaaS/PaaS where you pay for provisioned capacity.</div>
+      </div>
+    </div>
+
+    <div class="callout pink"><strong>Key distinction from IaaS/PaaS/SaaS:</strong> In traditional cloud models, developers still manage server provisioning, OS selection, scaling configuration, and container orchestration. Serverless abstracts all of this — the developer only provides the function logic.</div>
+  </div>
+
+  <!-- Section 2: Two Service Models -->
+  <div class="section">
+    <div class="section-label">2 · Two Service Models of Serverless</div>
+    <div class="callout">Serverless computing encompasses two categories: <strong>Backend as a Service (BaaS)</strong> and <strong>Function as a Service (FaaS)</strong>. Both eliminate server management, but they differ in what the developer provides.</div>
+
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Backend as a Service (BaaS)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">What it replaces</span>Server-side components replaced with managed third-party services</div>
+          <div class="compare-row"><span class="label">Developer role</span>Writes and maintains all application logic in the frontend; all backend infrastructure is outsourced</div>
+          <div class="compare-row"><span class="label">What's managed</span>Remote authentication, database management, cloud storage, hosting — all at the backend</div>
+          <div class="compare-row"><span class="label">Example</span>Google Firebase — a fully managed database that connects seamlessly to web/mobile applications; manages data components on the user's behalf</div>
+          <div class="compare-row"><span class="label">Developer concern</span>Application logic and frontend only — backend services are consumed via APIs</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Function as a Service (FaaS)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">What it replaces</span>Full infrastructure management; developer submits code as discrete functions</div>
+          <div class="compare-row"><span class="label">Developer role</span>Writes small, stateless functions that each describe a part of the overall application workflow</div>
+          <div class="compare-row"><span class="label">What's managed</span>Resource lifecycle, event-driven execution, horizontal scaling, container creation, deployment, provisioning</div>
+          <div class="compare-row"><span class="label">Example</span>AWS Lambda, Google Cloud Functions, Microsoft Azure Functions — user submits function; provider runs it in a shared runtime when triggered</div>
+          <div class="compare-row"><span class="label">Developer concern</span>Business logic as functions and how functions interconnect in workflows; nothing about servers</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout green"><strong>Key insight:</strong> Serverless = BaaS + FaaS. BaaS replaces server-side components with managed services. FaaS allows developers to run event-driven code without managing the execution environment. Together they eliminate all infrastructure concerns from the developer's scope.</div>
+  </div>
+
+  <!-- Section 3: FaaS in Detail -->
+  <div class="section">
+    <div class="section-label">3 · Function as a Service — How It Works</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">FaaS concept</div>
+        <div class="proto-card-title">Small, Stateless Functions</div>
+        <div class="proto-card-desc">Each function describes a small part of the overall application. User provides these small stateless functions to the cloud provider, which manages the operational aspects of running them. Functions are composed together to realize complex application workflows.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">FaaS concept</div>
+        <div class="proto-card-title">Event-Triggered Execution</div>
+        <div class="proto-card-desc">Functions are not constantly active. The FaaS platform listens for events and instantiates the function only when triggered. Trigger types: client requests, events produced by external systems, data streams, scheduled timers. Example: a camera application function triggered by detected object movement, not by constant polling.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">FaaS concept</div>
+        <div class="proto-card-title">Horizontal Scaling by Provider</div>
+        <div class="proto-card-desc">The FaaS provider is responsible for horizontally scaling function execution in response to the number of incoming events. Provider runs multiple function instances in parallel as demand increases. Developer does not configure scaling — it is automatic and transparent.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">FaaS concept</div>
+        <div class="proto-card-title">Execution Time Limits</div>
+        <div class="proto-card-desc">Functions are not designed for long-running tasks. Execution time is typically limited — for example, AWS Lambda has a ~15-minute limit. Functions run in isolated, nearly stateless containers that may be ephemeral (lasting only for one invocation). Designed for short, discrete units of work.</div>
+      </div>
+    </div>
+
+    <div class="callout yellow"><strong>xCamera example:</strong> A video camera application that uses cloud functions and workflows to edit, transform, and encode videos with low latency and minimal cost. Many tasks (frame-by-frame processing, encoding, transmission) can be executed concurrently via parallel function invocations — improving performance through parallelization, managed by the FaaS provider.</div>
+  </div>
+
+  <!-- Section 4: Challenges -->
+  <div class="section">
+    <div class="section-label">4 · Challenges of Serverless Computing</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Asynchronous Calls</div>
+        <div class="proto-card-desc">Asynchronous calls to and between serverless functions increase system complexity. Remote API calls normally follow a synchronous request-response model and are easier to implement. Asynchronous function interactions require more complex coordination logic and are harder to debug.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Function Calling Function</div>
+        <div class="proto-card-desc">When one function synchronously calls another, you lose isolation between features, debugging becomes more complex, and billing increases (paying for two functions running simultaneously). The composition of functions into complex chains introduces overhead that negates some serverless benefits.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Shared Code Between Functions</div>
+        <div class="proto-card-desc">Code shared between multiple functions creates fragility. If shared code is changed, it may break existing serverless functions that depend on it — without clear visibility into what is affected. Managing shared code versioning across many functions is non-trivial.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Image Size Limits</div>
+        <div class="proto-card-desc">Platforms impose image size limits (AWS Lambda: 50 MB). Larger images take longer to boot (cold start / warmup time). Using too many libraries increases package size and risks hitting this limit. There is a tension between feature richness and startup performance.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Too Many Technologies</div>
+        <div class="proto-card-desc">The flexibility of serverless (any language, any framework, any library) can lead to adopting too many technologies within one project. This adds maintenance complexity and increases the skill requirements for team members — specialists in many different tech stacks may be needed.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Too Many Functions</div>
+        <div class="proto-card-desc">Since non-active functions cost nothing, there is a temptation to create new functions instead of updating existing ones when requirements change. This decreases maintainability and system understandability — especially problematic during project handovers. Function sprawl makes the overall application architecture hard to reason about.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Popular Platforms -->
+  <div class="section">
+    <div class="section-label">5 · Popular Serverless Platforms</div>
+    <div class="tag-row">
+      <span class="tag tag-good">AWS Lambda</span>
+      <span class="tag tag-good">Google Cloud Functions</span>
+      <span class="tag tag-good">Microsoft Azure Functions</span>
+      <span class="tag tag-good">Google Firebase (BaaS)</span>
+    </div>
+    <div class="callout">All three major cloud providers offer FaaS platforms. Open-source alternatives also exist. Google Cloud additionally offers virtual servers, managed databases, and storage services alongside Cloud Functions as a complete serverless ecosystem.</div>
+  </div>
+
+  <!-- Section 6: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Serverless Computing:</strong> A paradigm where the cloud provider manages all infrastructure — containers, deployment, provisioning, orchestration, scaling — so developers can focus purely on business logic. Servers still exist; the developer just doesn't see or manage them.</div>
+    <div class="callout green"><strong>Two models:</strong> BaaS (backend components replaced by managed third-party services; developer writes only frontend logic) and FaaS (developer submits small stateless functions; provider handles execution, scaling, and lifecycle).</div>
+    <div class="callout"><strong>FaaS mechanics:</strong> Functions are small, stateless, event-triggered (client requests, data streams, external events), not constantly active, with limited execution time (e.g., AWS Lambda: ~15 min). Provider horizontally scales by running multiple function instances in parallel.</div>
+    <div class="callout yellow"><strong>BaaS example — Google Firebase:</strong> A fully managed database directly usable from web/mobile applications without any server-side setup. The developer connects to it as a service; Firebase manages all backend data operations.</div>
+    <div class="callout pink"><strong>Key challenges:</strong> Asynchronous function composition complexity, function-calling-function costs and debugging difficulty, shared code fragility, image size limits (50 MB on Lambda), technology sprawl, and function proliferation reducing system understandability.</div>
+    <div class="callout green"><strong>Popular platforms:</strong> AWS Lambda, Google Cloud Functions, Microsoft Azure Functions — the three dominant FaaS implementations across major cloud providers.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

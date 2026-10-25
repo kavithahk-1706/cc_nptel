@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 13 — Managing Data in Cloud | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec12.html" class="nav-lec">← prev</a>
+      <a href="lec14.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 13</span>
+    <span class="high-badge">HIGH priority</span>
+    <h1>Managing Data in Cloud</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Covers why conventional relational databases don't scale to cloud workloads, then walks through the cloud-native alternatives: parallel DB architectures, Google File System (GFS) / HDFS, BigTable, Amazon Dynamo, and key-value data stores. Multiple distinct systems covered — each is individually exam-relevant.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · Why Traditional RDBMS Falls Short at Cloud Scale</div>
+    <p>At small scale, standard SQL databases work fine on a VM. At large scale — massive parallel read/write, enormous data volumes — they hit fundamental limits. Cloud data management requires different strategies.</p>
+    <h3>RDBMS Architecture (quick recap)</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Query Layer</div>
+        <div class="proto-card-title">RDBMS Parser + Optimizer</div>
+        <div class="proto-card-desc">Transforms SQL queries into disk/memory operations. Optimizes execution order — e.g., doing SELECT before JOIN on two large tables dramatically reduces rows being joined.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Storage Layer</div>
+        <div class="proto-card-title">Disk Space Management</div>
+        <div class="proto-card-desc">Stores records on contiguous memory pages to minimize disk seeks. Uses pre-fetching and page replacement policies. Data for a single query is stored physically close together.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">FS Layer</div>
+        <div class="proto-card-title">Database File System</div>
+        <div class="proto-card-desc">Independent of the OS file system — gives the DB full control over memory page management. Supports parallel I/O via RAID arrays (RAID 1, 2, 5, 6) across multiple disks. Files can span multiple disks for large storage.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Index Structure</div>
+        <div class="proto-card-title">B+ Tree</div>
+        <div class="proto-card-desc">Primary access method — records stored in B+ tree indexed by primary key on specific columns. Efficient for point lookups and range queries on structured data.</div>
+      </div>
+    </div>
+    <h3>Row-oriented vs Column-oriented storage</h3>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Row-oriented (traditional)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Stores</span>Complete tuples contiguously</div>
+          <div class="compare-row"><span class="label">Best for</span>Transaction processing — INSERT, UPDATE, DELETE of individual records</div>
+          <div class="compare-row"><span class="label">Indexes</span>B+ tree on primary/secondary keys</div>
+          <div class="compare-row"><span class="label">Examples</span>Oracle, DB2, SQL Server</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Column-oriented</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Stores</span>Each column family separately</div>
+          <div class="compare-row"><span class="label">Best for</span>Analytics / data warehouse — aggregation over millions of rows across specific columns</div>
+          <div class="compare-row"><span class="label">Indexes</span>Join indexes linking column projections</div>
+          <div class="compare-row"><span class="label">Examples</span>Vertica, Teradata, Netezza</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Parallel Database Architectures</div>
+    <span class="ts">▶ 12:16</span>
+    <div class="callout yellow">Worth watching: The three architecture diagrams (shared memory / shared disk / shared nothing) are much clearer visually than described in text.</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Shared Memory</div>
+        <div class="concept-desc">Multiple CPUs share a single memory address space. Managed by SMP OS. Best for multi-CPU servers with compact, frequently accessed data. Limited scalability — memory becomes a bottleneck.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Shared Disk</div>
+        <div class="concept-desc">Independent servers each with their own CPU, connected to shared storage (NAS or SAN) over high-speed Ethernet/fiber. Hybrid approach — processors work independently but share the data layer.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Shared Nothing</div>
+        <div class="concept-desc">Fully independent servers, each with own CPU and disk, connected by a high-speed backbone network. Maximum scalability — no shared resource bottlenecks. Tables partitioned and distributed across nodes. Used in large cloud deployments.</div>
+      </div>
+    </div>
+    <div class="callout green"><strong>Parallel RDBMS features:</strong> SQL optimizer handles distributed joins. Distributed 2-phase commit locking for transaction isolation. Fault tolerance via standby systems. Tables partitioned across nodes for parallel execution.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Google File System (GFS) and HDFS</div>
+    <div class="callout"><strong>Purpose:</strong> Manage very large files (potentially terabytes) on large distributed clusters of commodity Linux servers connected by high-speed networks. Designed to handle failures during read/write as a normal operating condition, not an exception.</div>
+    <div class="callout yellow"><strong>HDFS</strong> (Hadoop Distributed File System) is the open-source implementation of GFS architecture, available on Amazon EC2.</div>
+    <h3>Key design points</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Large files on commodity servers</span>
+      <span class="tag tag-good">Fault tolerant by design</span>
+      <span class="tag tag-good">Parallel reads, writes, appends</span>
+      <span class="tag tag-good">Multiple simultaneous clients</span>
+    </div>
+    <div class="callout pink"><strong>Why commodity servers?</strong> P(system failure) = 1 − (1 − P(component failure))^N. With large N, individual failures are statistically certain — so the system must tolerate them, not try to prevent them with expensive hardware.</div>
+    <h3>Architecture components</h3>
+    <table class="port-table">
+      <thead><tr><th>GFS term</th><th>HDFS term</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Master</td><td>NameNode</td><td>Single logical master. Controls the namespace (metadata — where data is stored, replica locations). Does not store data itself.</td></tr>
+        <tr><td class="proto-name">Chunk Server</td><td>DataNode</td><td>Commodity Linux servers that store the actual data chunks. Each chunk replicated 3× on different physical racks.</td></tr>
+        <tr><td class="proto-name">Chunk</td><td>Block</td><td>Large files split into fixed-size chunks, stored across chunk servers. Each chunk identified by an offset.</td></tr>
+      </tbody>
+    </table>
+    <h3>Read operation</h3>
+    <div class="stack">
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">1. Client → Master</span>
+        <span class="layer-desc">Client sends full file path + offset to master/NameNode</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">2. Master → Client</span>
+        <span class="layer-desc">Master replies with metadata for one replica of the relevant chunk</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">3. Client caches metadata</span>
+        <span class="layer-desc">Client caches the chunk metadata for faster subsequent access</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">4. Client → Chunk Server</span>
+        <span class="layer-desc">Client reads data directly from the designated chunk server (any replica will do)</span>
+      </div>
+    </div>
+    <h3>Write / Append operation</h3>
+    <div class="stack">
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">1. Client → Master</span>
+        <span class="layer-desc">Client sends file path; master replies with metadata for ALL replicas of the chunk</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">2. Client → All Chunk Servers</span>
+        <span class="layer-desc">Client pushes data to ALL chunk servers simultaneously</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">3. Chunk servers acknowledge</span>
+        <span class="layer-desc">Each chunk server acknowledges receipt of data</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">4. Master assigns Primary</span>
+        <span class="layer-desc">Master designates one chunk server as the primary</span>
+      </div>
+      <div class="stack-layer layer-app">
+        <span class="layer-name">5. Primary appends + propagates offset</span>
+        <span class="layer-desc">Primary appends data at a chosen offset, sends that offset to replicas. All replicas must write at the same offset. If any fail, client retries. Append can go beyond EOF to handle simultaneous writers.</span>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Why same offset across all replicas?</strong> Reads are served by any replica. If replicas have data at different offsets, a read would return inconsistent results depending on which replica answers. Consistent offsets ensure all replicas are identical.</div>
+    <h3>Fault tolerance</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Heartbeat Messages</div>
+        <div class="proto-card-title">Master monitors chunk servers</div>
+        <div class="proto-card-desc">Master maintains regular "are you alive?" communication with all chunk servers. On failure detection, chunk server metadata is updated to mark it as failed — future requests won't be routed there.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Primary Failover</div>
+        <div class="proto-card-title">Master assigns new primary</div>
+        <div class="proto-card-desc">If the primary chunk server fails, master assigns a new primary from the remaining replicas. Clients periodically retry failed chunk servers and update their cached metadata from the master.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · BigTable</div>
+    <div class="callout"><strong>BigTable</strong> is a distributed structured storage system built on top of GFS. It is not a relational database — it is a sparse, distributed, persistent multi-dimensional sorted map.</div>
+    <h3>Data model</h3>
+    <p>Data is accessed by three keys: <strong>row key + column key + timestamp</strong>. Multiple versions of the same cell are stored in decreasing timestamp order.</p>
+    <div class="callout yellow"><strong>Column families:</strong> Each column stores arbitrary name-value pairs grouped into a <em>column family</em>. The set of column families is fixed when the table is created. Labels within a column family can be added dynamically at any time.</div>
+    <h3>Architecture</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Master Server</div>
+        <div class="proto-card-title">Metadata registry</div>
+        <div class="proto-card-desc">Acts as a metadata repository — not a data server. Each large table is split into ranges called <strong>tablets</strong>. If the metadata itself becomes too large, it is also broken into tablets with a root tablet acting as coordinator.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Tablet Server</div>
+        <div class="proto-card-title">Data manager</div>
+        <div class="proto-card-desc">Each tablet is managed by a tablet server. Stores each column family for a given row range in a separate distributed file called an <strong>SSTable</strong>. Supports large parallel reads and inserts, even simultaneously on the same table.</div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Insert vs Append:</strong> Insertions require finding the right sorted position and shifting data — more expensive than appends, which always add to the end. BigTable minimizes this overhead by storing insertions in sorted order using SSTables.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · Amazon Dynamo</div>
+    <div class="callout"><strong>Dynamo</strong> is Amazon's key-value store designed for high-volume concurrent updates (each potentially small). Unlike BigTable, it does NOT depend on an underlying distributed file system.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">BigTable</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Model</span>Structured (row+column+timestamp)</div>
+          <div class="compare-row"><span class="label">Best for</span>Bulk reads/writes, analytics</div>
+          <div class="compare-row"><span class="label">Depends on</span>GFS for storage</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Dynamo</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Model</span>Simple key-value pairs</div>
+          <div class="compare-row"><span class="label">Best for</span>High-concurrency small updates (e-commerce)</div>
+          <div class="compare-row"><span class="label">Depends on</span>Self-contained (own failure handling)</div>
+        </div>
+      </div>
+    </div>
+    <h3>Architecture — consistent hashing on a ring</h3>
+    <p>Dynamo uses <strong>MD5</strong> to generate a 128-bit hash for each key. The hash space is arranged as a ring. Virtual nodes are mapped onto this ring; each physical server hosts multiple virtual nodes at distributed positions on the ring.</p>
+    <div class="callout"><strong>Replication:</strong> Each object is replicated to the primary virtual node plus N−1 additional virtual nodes (where N = number of physical nodes). A write to one virtual node is forwarded to all replicas.</div>
+    <h3>Quorum protocol &amp; eventual consistency</h3>
+    <table class="port-table">
+      <thead><tr><th>Operation</th><th>Quorum rule</th><th>Trade-off</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Read (R)</td><td>Must read from R replicas</td><td>Higher R = stronger consistency, more overhead</td></tr>
+        <tr><td class="proto-name">Write (W)</td><td>Must write to W replicas</td><td>Higher W = stronger consistency, more overhead</td></tr>
+        <tr><td class="proto-name">Quorum condition</td><td>R + W &gt; N</td><td>Guarantees at least one node in common — ensures reads see latest write</td></tr>
+      </tbody>
+    </table>
+    <div class="callout green"><strong>Eventual consistency:</strong> Under high concurrent read/write load, Dynamo guarantees that all replicas will eventually converge to the same value — not necessarily immediately. Vector clocks / version tracking handles conflict resolution.</div>
+    <div class="callout yellow"><strong>Implementation:</strong> Storage engines used at node level include BerkeleyDB (used by Amazon) and can also use MySQL.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · Cloud Data Stores (Google App Engine Datastore / Amazon SimpleDB)</div>
+    <div class="callout"><strong>Data stores</strong> are simple traditional key-value pair databases offered by cloud providers — Google App Engine Datastore (built on BigTable) and Amazon SimpleDB.</div>
+    <p>All entities/objects in the datastore reside in one big table. They use <strong>column-oriented storage</strong> (column families), unlike traditional row-oriented RDBMS.</p>
+    <h3>Key features</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Sharding</div>
+        <div class="proto-card-title">Horizontal partitioning</div>
+        <div class="proto-card-desc">BigTable is horizontally sharded across disks. Data stored lexicographically by key — enables efficient prefix and range queries. Queries never need to scan the whole dataset.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Indexes</div>
+        <div class="proto-card-title">Multiple index tables</div>
+        <div class="proto-card-desc">Multiple index tables support varied query types. Query execution automatically picks the index with highest selectivity. Automatically creates single-property indexes and kind indexes for efficient lookups.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Transactions</div>
+        <div class="proto-card-title">Entity groups</div>
+        <div class="proto-card-desc">Entities that are frequently accessed together are grouped for transactional purposes — reduces cross-shard transaction overhead.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Query types</div>
+        <div class="proto-card-title">Prefix + range queries</div>
+        <div class="proto-card-desc">Lexicographic key ordering enables both prefix queries (all keys starting with X) and range queries (all keys between A and B) efficiently.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Row vs Column:</strong> Row-oriented storage is optimal for transactional workloads; column-oriented is optimal for analytics and data warehouses.</div>
+    <div class="callout"><strong>Parallel DB Architectures:</strong> Shared memory (tight coupling, limited scale) → Shared disk (moderate coupling) → Shared nothing (fully independent, max scale — standard for cloud).</div>
+    <div class="callout green"><strong>GFS / HDFS:</strong> Large files split into replicated chunks (3×) across commodity servers. Master manages metadata only. Fault tolerance via heartbeats and automatic primary reassignment.</div>
+    <div class="callout green"><strong>BigTable:</strong> Structured storage on GFS. Access by row key + column key + timestamp. Column families. Tables split into tablets managed by tablet servers.</div>
+    <div class="callout yellow"><strong>Dynamo:</strong> Key-value store with consistent hashing ring, virtual nodes, replication. Eventual consistency via quorum protocol (R + W &gt; N).</div>
+    <div class="callout"><strong>Cloud Data Stores:</strong> Key-value, column-oriented, sharded, lexicographic key ordering, multiple index tables for query efficiency.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

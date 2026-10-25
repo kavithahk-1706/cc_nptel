@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 17 — Microsoft Azure Case Study | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec16.html" class="nav-lec">← prev</a>
+      <a href="lec18.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 17</span>
+    <span class="skip-badge">SKIP priority</span>
+    <h1>Case Study — Microsoft Azure</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Overview of Azure's architecture and a demo walkthrough deploying a Python Flask app. Primarily a PaaS platform demo — the Web Role / Worker Role distinction is the only concept not covered elsewhere. Skim the component table and roles section; skip the demo steps.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · Azure Overview</div>
+    <div class="callout"><strong>Microsoft Azure</strong> is a growing collection of integrated cloud services used by developers and IT professionals to build, deploy, and manage applications through a global network of Microsoft-owned data centers. Primarily a <strong>PaaS</strong> (Platform as a Service) offering.</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Primary focus</div>
+        <div class="proto-card-title">Development platform</div>
+        <div class="proto-card-desc">Developers build and deploy apps without managing underlying infrastructure. Tools, frameworks, and languages of the developer's choice. Rapid develop → deploy → manage cycle.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Hybrid cloud</div>
+        <div class="proto-card-title">Cloud + on-premises</div>
+        <div class="proto-card-desc">Apps can run on Azure cloud or on-premises. App Fabric connects both. Useful for legacy or proprietary systems that can't be fully moved to the cloud.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Azure Architecture Components</div>
+    <table class="port-table">
+      <thead><tr><th>Component</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Microsoft Azure</td><td>Core Windows-based environment for running applications and storing data on Microsoft's data center servers</td></tr>
+        <tr><td class="proto-name">SQL Azure</td><td>Cloud-hosted SQL Server — relational data services in the cloud</td></tr>
+        <tr><td class="proto-name">App Fabric</td><td>Connects applications running in the cloud with applications running on-premises. Acts as middleware between cloud and legacy on-premise systems.</td></tr>
+        <tr><td class="proto-name">Azure Fabric</td><td>Infrastructure management layer — sits above bare metal hardware, manages virtualization and resource allocation across all data center nodes</td></tr>
+      </tbody>
+    </table>
+    <h3>Storage types in Azure</h3>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Blobs</div>
+        <div class="concept-desc">Unstructured binary data (files, images, media). Simple blob storage accessible via REST API.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Tables</div>
+        <div class="concept-desc">Structured NoSQL storage for large amounts of semi-structured data.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Queues</div>
+        <div class="concept-desc">Message queues used for communication between Web Roles and Worker Roles.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Compute Roles — Web Role vs Worker Role</div>
+    <div class="callout"><strong>Key concept:</strong> Azure defines two types of computational role. Every Azure service must have at least one; a service may have multiple of either type.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Web Role</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Purpose</span>User-facing environment — web applications and services accessible over the internet</div>
+          <div class="compare-row"><span class="label">Access</span>Directly accessible by users via internet/load balancer</div>
+          <div class="compare-row"><span class="label">Example</span>Web server, REST API endpoint, web application frontend</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Worker Role</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Purpose</span>Backend processing environment — handles complex, distributed, or long-running tasks</div>
+          <div class="compare-row"><span class="label">Access</span>Not directly user-facing; receives work from Web Role via Azure Storage Queues</div>
+          <div class="compare-row"><span class="label">Example</span>Background computation, data processing, batch jobs</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Communication:</strong> Worker Role cannot directly communicate with Web Role — messages pass through Azure Storage Queues. Each VM also has an agent that communicates with the Azure Fabric for resource management.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · Python Flask App Demo — Steps (Summary)</div>
+    <div class="callout yellow"><strong>Demo lecture — skim only.</strong> Steps shown: clone sample Flask app → run locally (port 5000) → configure deployment credentials → create Azure resource group + App Service plan + web app → push via Git → browse the deployed URL → update code → push again.</div>
+    <div class="callout pink"><strong>Platform note:</strong> Azure free tier allows experimenting without a paid subscription. Azure Cloud Shell (portal.azure.com) provides a terminal pre-configured for Azure CLI commands.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Azure</strong> is Microsoft's PaaS cloud — compute (Web/Worker Roles), storage (Blobs, Tables, Queues), SQL Azure, and App Fabric for hybrid cloud connectivity, all managed by the Azure Fabric layer above bare metal.</div>
+    <div class="callout green"><strong>Web Role vs Worker Role:</strong> Web Role = user-accessible web app; Worker Role = backend processor. They communicate via Azure Storage Queues — this is the key conceptual distinction from this lecture.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

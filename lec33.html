@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 33 — Fog Computing I | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec32.html" class="nav-lec">← prev</a>
+      <a href="lec34.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 33</span>
+    <span class="med-badge">MED priority</span>
+    <h1>Fog Computing – I</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Introduces fog computing as an extension of cloud toward the network edge — motivation from IoT and real-time applications, the 3-tier architecture (devices → fog → cloud), CISCO's origin of the term, enabling technologies, and security challenges. Core concept lecture for understanding edge vs. cloud processing trade-offs.</p>
+  </div>
+
+  <!-- Section 1: Motivation -->
+  <div class="section">
+    <div class="section-label">1 · Motivation — Limits of Cloud-Only Computing</div>
+
+    <div class="callout"><strong>Core observation:</strong> Intermediate network devices and edge nodes are becoming increasingly capable. Instead of transmitting all raw data to the cloud, processing can be pushed toward the network edge — reducing bandwidth, latency, and cloud load.</div>
+
+    <h3>Problems with cloud-only computing</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Bandwidth</div>
+        <div class="proto-card-title">Massive data volumes</div>
+        <div class="proto-card-desc">IoT, sensor networks, smart devices generate enormous volumes of data. Transmitting everything to the cloud saturates backbone networks — much of this data is redundant or decidable locally.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Latency</div>
+        <div class="proto-card-title">Real-time requirements</div>
+        <div class="proto-card-desc">Applications like accident prevention, smart traffic lights, autonomous vehicles need <strong>immediate</strong> response. Waiting for round-trip to a distant cloud datacenter is unacceptable.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Congestion</div>
+        <div class="proto-card-title">Core network overload</div>
+        <div class="proto-card-desc">Centralized datacenters receiving data from all regions causes core network congestion — especially during exigencies (disasters, mass events) when volume spikes.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Redundancy</div>
+        <div class="proto-card-title">Unnecessary transmission</div>
+        <div class="proto-card-desc">If 10 temperature sensors all read ~20°C, there is no need to send all 10 readings to the cloud. A local sink node can aggregate and send one value (or a yes/no threshold result).</div>
+      </div>
+    </div>
+
+    <div class="callout yellow"><strong>Example (from lecture):</strong> A lab with 10 temperature sensors sending raw readings to the cloud for threshold checking is wasteful. The local sink node can compute the average and send a single "in range / out of range" flag — identical outcome, fraction of the bandwidth.</div>
+  </div>
+
+  <!-- Section 2: What is Fog Computing -->
+  <div class="section">
+    <div class="section-label">2 · Fog Computing — Definition and Origin</div>
+    <div class="callout"><strong>Fog computing (also: fogging, edge computing):</strong> A model in which data, processes, and applications are concentrated in devices at the <strong>network edge</strong> rather than existing almost entirely in the cloud. Computing is pushed from centralized datacenters toward the periphery.</div>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Origin</div>
+        <div class="proto-card-title">CISCO coined "fog computing"</div>
+        <div class="proto-card-desc">Introduced as a new model to ease wireless data transfer to distributed devices in IoT networks. CISCO's vision: run applications directly on network-edge devices (routers, switches, gateways) using open-source Linux + network OS on existing hardware.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Relationship to cloud</div>
+        <div class="proto-card-title">Extension, not replacement</div>
+        <div class="proto-card-desc">Fog does <strong>not</strong> replace cloud. It offloads appropriate workloads to edge devices. Cloud retains its role for large-scale data mining, ML algorithms, big data analytics. Fog + Cloud together provide better service than either alone.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: 3-Tier Architecture -->
+  <div class="section">
+    <div class="section-label">3 · 3-Tier Fog–Cloud Architecture</div>
+
+    <div class="stack">
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Cloud (Top)</span>
+        <span class="layer-desc">Massive parallel processing, big data mining, ML algorithms, virtually unlimited storage. Handles global, non-real-time workloads.</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Fog Layer (Middle)</span>
+        <span class="layer-desc">Intermediate network devices (routers, switches, Wi-Fi gateways, cellular base stations). Real-time data processing, caching, computation offloading, local decision-making.</span>
+      </div>
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Edge / End Devices (Bottom)</span>
+        <span class="layer-desc">Sensors, smart vehicles, cameras, mobile devices, smart meters. Data capture, basic pre-processing, compression; HCI for users.</span>
+      </div>
+    </div>
+
+    <div class="callout green"><strong>Data flow principle:</strong> Edge devices capture and pre-process → fog aggregates and handles real-time decisions → cloud receives only aggregated/filtered data for deeper analysis. Each layer processes only what it needs to.</div>
+  </div>
+
+  <!-- Section 4: Characteristics and Benefits -->
+  <div class="section">
+    <div class="section-label">4 · Key Characteristics and Benefits</div>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Latency</div>
+        <div class="proto-card-title">Low latency, location awareness</div>
+        <div class="proto-card-desc">Processing close to the device reduces round-trip time. Enables real-time and streaming applications. Location-aware processing handles regional decisions locally.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Bandwidth</div>
+        <div class="proto-card-title">Reduced core network load</div>
+        <div class="proto-card-desc">Aggregating at fog nodes means only aggregated/essential data reaches the cloud. Lowers bandwidth consumption and core network congestion.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Distribution</div>
+        <div class="proto-card-title">Widespread geographic presence</div>
+        <div class="proto-card-desc">Fog nodes are distributed across regions — closer to users than centralized cloud datacenters. Distinct from cloud in proximity, density of distribution, and support for mobility.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Mobility</div>
+        <div class="proto-card-title">Mobility support</div>
+        <div class="proto-card-desc">Mobile devices changing location change their path through fog nodes. Fog handles re-synchronization and path re-establishment locally, without cloud involvement.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Heterogeneity</div>
+        <div class="proto-card-title">Device heterogeneity handling</div>
+        <div class="proto-card-desc">Different sensor types, different sink nodes, different protocols — fog layer can aggregate into standardized format, hiding heterogeneity from the cloud layer.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Scale</div>
+        <div class="proto-card-title">Very large node count</div>
+        <div class="proto-card-desc">IoT deployments involve billions of devices. Fog inherently scales to this by distributing processing across the edge rather than funneling everything to a central point.</div>
+      </div>
+    </div>
+
+    <div class="callout pink"><strong>Cloud properties preserved:</strong> Fog must retain cloud's core advantages — dynamic scalability, minimal client-side infrastructure management, and metered service. A fog model that compromises these loses the original motivation for cloud adoption.</div>
+  </div>
+
+  <!-- Section 5: Enabling Technologies -->
+  <div class="section">
+    <div class="section-label">5 · Enabling Technologies for Fog</div>
+
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Virtualization / Containers</div>
+        <div class="concept-desc">VMs and container services (e.g., <strong>Docker</strong>) reduce resource management overhead using lightweight virtualization. Containers carry their own dependencies — portable across edge devices without reinstallation.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Service-Oriented Architecture (SOA)</div>
+        <div class="concept-desc">Services provided through communication protocols across loosely coupled components. Three roles: <strong>service provider, service consumer, service registry</strong>. Enables heterogeneous parties to interoperate at the fog layer.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Software Defined Networking (SDN)</div>
+        <div class="concept-desc">Uses open protocols (e.g., OpenFlow) for globally aware software control at network edges. Decouples control plane from data plane. Enables dynamic, programmable routing — critical for fog traffic management.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Security Challenges -->
+  <div class="section">
+    <div class="section-label">6 · Security Challenges in Fog</div>
+
+    <div class="callout pink"><strong>Dispersion problem:</strong> Cloud centralizes security enforcement at a few datacenters — easier to harden. Fog distributes processing across many edge devices at different locations — maintaining consistent security protocols across all of them is a serious challenge.</div>
+
+    <table class="port-table">
+      <thead><tr><th>Threat</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Man-in-the-middle attack</td><td>Data processed at distributed edge nodes creates more attack surfaces for interception or tampering compared to centralized cloud</td></tr>
+        <tr><td class="proto-name">Privacy leakage</td><td>Intermediate processing at fog nodes may expose private data (location, usage patterns) before it reaches the cloud</td></tr>
+        <tr><td class="proto-name">Smart meter spoofing</td><td>In smart grids, each smart meter/appliance has an IP address. Malicious users can tamper with meters, report false readings, or spoof IP addresses</td></tr>
+        <tr><td class="proto-name">Mobility tracking</td><td>Fog processing of vehicle data or smart grid consumption can inadvertently reveal individual movement or usage patterns</td></tr>
+        <tr><td class="proto-name">Standard network attacks</td><td>All typical network security issues (DoS, eavesdropping, injection) apply to fog nodes — extended to a much larger, more distributed attack surface</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 7: Application Drivers -->
+  <div class="section">
+    <div class="section-label">7 · Application Drivers for Fog</div>
+    <div class="tag-row">
+      <span class="tag tag-good">Smart grid / smart meters</span>
+      <span class="tag tag-good">Smart traffic light management</span>
+      <span class="tag tag-good">Connected / autonomous vehicles</span>
+      <span class="tag tag-good">Software Defined Networks</span>
+      <span class="tag tag-good">IoT sensor networks</span>
+      <span class="tag tag-good">Real-time surveillance / smart cameras</span>
+      <span class="tag tag-good">Environmental monitoring</span>
+      <span class="tag tag-good">Disaster response systems</span>
+    </div>
+    <div class="callout yellow"><strong>Traffic light example (from lecture):</strong> Road cameras detect traffic flow → fog node (local controller) adjusts signal timing dynamically → only aggregated city-level stats go to cloud. Local decision; no cloud round-trip needed for individual light changes.</div>
+  </div>
+
+  <!-- Section 8: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Fog computing:</strong> Extends cloud to the network edge — data, compute, and applications distributed across fog nodes rather than all in centralized datacenters. Coined by CISCO for IoT contexts.</div>
+    <div class="callout green"><strong>3-tier model:</strong> Edge devices (capture + pre-process) → Fog layer (aggregate, real-time decisions) → Cloud (big data, ML, global analytics).</div>
+    <div class="callout green"><strong>Key benefits:</strong> Low latency, reduced bandwidth, real-time capability, mobility support, heterogeneity handling.</div>
+    <div class="callout pink"><strong>Not a replacement:</strong> Fog complements cloud — it offloads latency-sensitive and bandwidth-heavy workloads to the edge; cloud retains global, compute-intensive tasks.</div>
+    <div class="callout pink"><strong>Security caveat:</strong> Distributing processing to many edge nodes vastly increases the attack surface. Maintaining security across dispersed fog devices is a major open challenge.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

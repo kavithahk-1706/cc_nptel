@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 57 — CPS and Cloud Computing | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec56.html" class="nav-lec">← prev</a>
+      <a href="lec58.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 57</span>
+    <span class="skip-badge">SKIP priority</span>
+    <h1>CPS and Cloud Computing</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Overview of Cyber-Physical Systems (CPS) and how cloud computing serves as the platform for realizing them. Covers the CPS definition, feedback loop model, key applications, and the emerging paradigm of Cyber-Physical Cloud Computing (CPCC). Conceptual and application-focused; skim for the definition of CPS, CPCC, and the layered architecture model.</p>
+  </div>
+
+  <!-- Section 1: What is CPS? -->
+  <div class="section">
+    <div class="section-label">1 · What is a Cyber-Physical System (CPS)?</div>
+    <div class="callout"><strong>CPS:</strong> An <strong>orchestration of computing and physical systems</strong> where embedded computers monitor and control physical processes — usually with a feedback loop in which physical processes affect computation and vice versa. Term coined around 2006 by Helen Gill at NSF (National Science Foundation), USA.</div>
+
+    <div class="callout pink"><strong>CPS is about interaction, not just union:</strong> Physical and software components are deeply and strongly intertwined — not detachable. The system operates across different spatial and temporal scales, exhibits multiple behavioral modes, and changes behavior with context.</div>
+
+    <h3>What CPS Combines</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Cyber (computation + algorithms)</span>
+      <span class="tag tag-good">Physical (sensors + actuators)</span>
+      <span class="tag tag-good">Dynamics (real-time, context-dependent behavior)</span>
+      <span class="tag tag-good">Communication (network backbone)</span>
+      <span class="tag tag-good">Security and Safety</span>
+      <span class="tag tag-good">Human in the Loop</span>
+    </div>
+
+    <div class="callout yellow"><strong>Modern car as CPS example:</strong> Embedded computers manage acceleration, braking, lighting, and airbag deployment. Braking triggers brake lights instantly; airbag deployment activates on impact. The car can also send SVA (Slow Vehicle Alerts) to nearby vehicles via V2V communication, and cloud-connected navigation can suggest detours based on congestion — a CPS spanning the vehicle, edge, and cloud.</div>
+
+    <div class="callout yellow"><strong>Air traffic control as CPS example:</strong> Thousands of aircraft managed simultaneously by ATCs and pilots with extensive embedded software. Unless human error, maintenance failure, or extreme weather occurs, the probability of a problem is extremely low — CPS achieves reliability through tight integration of sensing, computing, and actuation.</div>
+  </div>
+
+  <!-- Section 2: CPS Applications -->
+  <div class="section">
+    <div class="section-label">2 · CPS Applications</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Automotive</div>
+        <div class="proto-card-title">Collision Avoidance and Autonomous Vehicles</div>
+        <div class="proto-card-desc">V2V communication, automatic braking, airbag systems, lane assist. Modern EVs extend this further with continuous battery and motor monitoring. Future autonomous vehicles are the full realization of vehicular CPS.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Medical</div>
+        <div class="proto-card-title">Precision Robotic Surgery and Healthcare Monitoring</div>
+        <div class="proto-card-desc">Nano-level precision during robotic surgery. Wearable health bands that sense vitals and actuate alerts or communicate with cloud/fog for analysis. Remote patient monitoring via telehealth — CPS enables physical diagnostics to be processed in cyber-space.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Infrastructure</div>
+        <div class="proto-card-title">Air Traffic Control and Traffic Management</div>
+        <div class="proto-card-desc">Real-time coordination of thousands of aircraft or vehicles. Seamless operation requiring tight integration of sensing (radar, GPS), computation (routing algorithms), and actuation (pilot instructions, signal systems).</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Buildings</div>
+        <div class="proto-card-title">Net-Zero Energy Buildings</div>
+        <div class="proto-card-desc">Automated lighting (switches off when corridor is empty), daylight-sensing (lights off when sunlight is sufficient), AC control — all coordinated to minimize energy use. A building as a CPS that continuously senses occupancy and environment and actuates to maintain comfort at minimal energy cost.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Industrial</div>
+        <div class="proto-card-title">Manufacturing and Robotic Process Control</div>
+        <div class="proto-card-desc">CNC machines with embedded sensors feeding data to local servers for preprocessing, then cloud for advanced signal processing and cognitive decision-making. Intelligent monitoring of machining processes — cloud diagnoses, local servers actuate.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Emergency and Defense</div>
+        <div class="proto-card-title">Search and Rescue, Firefighting, Deep Sea Exploration</div>
+        <div class="proto-card-desc">Operation in dangerous or inaccessible environments where human presence is impractical. CPS enables remote sensing, decision-making, and actuation. Wartime coordination also a key application domain.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: CPS and Cloud – Cyber-Physical Cloud Computing -->
+  <div class="section">
+    <div class="section-label">3 · Cloud as Platform for CPS — Cyber-Physical Cloud Computing (CPCC)</div>
+    <div class="callout"><strong>Definition:</strong> A <strong>Cyber-Physical Cloud Computing (CPCC) system</strong> is a system environment that can rapidly build, modify, and provision a CPS composed of a set of cloud computing-based sensors, processes, control, and data services. Cloud provides the scalable, on-demand platform that CPS needs for its computational and storage demands.</div>
+
+    <div class="callout green"><strong>Why cloud is a good fit for CPS:</strong> CPS needs massive compute (for real-time analytics, learning, and simulation), ubiquitous presence (CPS spans physical locations), scalability (IoT growth is exponential), and storage for sensor data used in future model improvement. Cloud delivers all of these. CPCC = cloud benefits + physical-system interaction.</div>
+
+    <h3>CPCC Layered Architecture</h3>
+    <div class="stack">
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Physical Layer</span>
+        <span class="layer-desc">Sensors, actuators, user interfaces, CNC machines, vehicles — the physical world being monitored and controlled</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">Edge / Local Server Layer</span>
+        <span class="layer-desc">Local servers accumulate sensor data, perform preprocessing, make time-critical local decisions, and actuate physical systems directly</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Fog Layer</span>
+        <span class="layer-desc">Intermediate processing — aggregates data from multiple edge nodes, handles domain-specific analysis for a geographic region</span>
+      </div>
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Cloud Layer</span>
+        <span class="layer-desc">Advanced signal processing, cognitive decision-making, feature extraction, global-scale analysis, model training on historical CPS data, service catalog provisioning via Cloud Service APIs</span>
+      </div>
+    </div>
+
+    <div class="callout yellow"><strong>Local vs. Global decision split:</strong> Local CPS issues (a single vehicle's collision avoidance) are handled at the edge/vehicle itself. City-wide issues (overall traffic congestion, priority routing for ambulances) are aggregated at the cloud and pushed back as decisions. The architecture is always multi-layer.</div>
+  </div>
+
+  <!-- Section 4: Benefits and Applications of CPCC -->
+  <div class="section">
+    <div class="section-label">4 · Benefits of Cyber-Physical Cloud Computing</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Benefit</div>
+        <div class="proto-card-title">Efficient Resource Use</div>
+        <div class="proto-card-desc">Provision resources only when needed — not always-on. Cloud's on-demand model means CPS services scale with actual physical-system demand rather than being permanently provisioned for peak.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Benefit</div>
+        <div class="proto-card-title">Modular Composition and Rapid Development</div>
+        <div class="proto-card-desc">CPS services (sensor service, actuator service, data service, processor service) are modular and composable. New CPS applications can be built by assembling existing cloud services rather than building from scratch.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Benefit</div>
+        <div class="proto-card-title">Scalability and Interoperability</div>
+        <div class="proto-card-desc">Scales in number of users, devices, components, and service types. Supports heterogeneous devices (different sensors, IoT types, communication protocols) — interoperability is built in through standard cloud APIs.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Benefit</div>
+        <div class="proto-card-title">Data for Future Model Improvement</div>
+        <div class="proto-card-desc">Historical sensor and actuation data stored in cloud can be analyzed to improve CPS models over time. Machine learning on real-world physical data improves future decisions — a self-improving loop.</div>
+      </div>
+    </div>
+
+    <h3>CPCC Application Domains</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Smart City — traffic management, emergency routing</span>
+      <span class="tag tag-good">Smart Home — energy management, security</span>
+      <span class="tag tag-good">Smart Factory — CNC machines, intelligent machining monitoring</span>
+      <span class="tag tag-good">Smart Health — remote patient monitoring, precision surgery</span>
+      <span class="tag tag-good">Smart Vehicular — autonomous cars, ITS</span>
+      <span class="tag tag-good">Smart Grid — energy distribution, net-zero buildings</span>
+    </div>
+  </div>
+
+  <!-- Section 5: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>CPS:</strong> Orchestration of computing and physical systems via a feedback loop — embedded computers monitor and control physical processes. Physical and cyber components are strongly coupled. Coined 2006 by Helen Gill at NSF.</div>
+    <div class="callout yellow"><strong>CPS ≈ IoT-driven ecosystem:</strong> Sensors and actuators at the physical layer + edge/fog/cloud layers for processing = a CPS. IoT devices are the sensing/actuating components; cloud/fog/edge are the computing components of a CPS.</div>
+    <div class="callout green"><strong>CPCC:</strong> Cyber-Physical Cloud Computing — cloud as the flexible, scalable platform for rapidly building and provisioning CPS. Combines cloud benefits (elasticity, ubiquity, storage) with physical-system interaction (sensors, actuators, real-time feedback). Win-win paradigm.</div>
+    <div class="callout"><strong>Modeling challenge:</strong> Modeling a single CPS component is manageable. Modeling multiple interacting CPS components (e.g., all subsystems in a car) is a serious, open research challenge — especially ensuring correctness across all context combinations and scales.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

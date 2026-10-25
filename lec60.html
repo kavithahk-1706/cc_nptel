@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 60 — Case Study II: Internet of Health Things (Part B) | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec59.html" class="nav-lec">← prev</a>
+      <a href="lec60.html" class="nav-lec disabled">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 60</span>
+    <span class="skip-badge">SKIP priority</span>
+    <h1>Case Study II: Internet of Health Things (Part B)</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Continuation of the IoHT case study — simulation results comparing cloud-only vs. fog-edge-cloud, hardware implementation details (custom body sensor, Raspberry Pi fog node, AWS cloud), activity detection using accelerometer, heart-attack alarm module, and DEW computing for offline resilience. Closes with a summary of the full 60-lecture course. Final lecture.</p>
+  </div>
+
+  <!-- Section 1: Simulation Results -->
+  <div class="section">
+    <div class="section-label">1 · Simulation Results — iFogSim Performance Evaluation</div>
+    <div class="callout"><strong>Simulation setup:</strong> Two configurations tested — Cloud-only (all modules in cloud) vs. Cloud-Fog-Edge (distributed modules). Varied number of users (4, 8, …) and number of area gateways across five configurations. Evaluated: average latency, network usage (kbps), cost of execution, energy consumption.</div>
+
+    <h3>Results Summary</h3>
+    <table class="port-table">
+      <thead><tr><th>Metric</th><th>Cloud-Only</th><th>Fog-Edge-Cloud</th><th>Observation</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Average Latency</td><td>Increases substantially as configuration scales (more users, more gateways)</td><td>Remains near-constant — modules at area gateway, not dependent on cloud round-trip</td><td>Fog-edge dramatically better for real-time health alerts</td></tr>
+        <tr><td class="proto-name">Network Usage (kbps)</td><td>High — all data travels to cloud upstream</td><td>Much lower — filtering/processing at fog reduces upstream volume</td><td>Fog-edge significantly reduces bandwidth requirement</td></tr>
+        <tr><td class="proto-name">Cost of Execution</td><td>Higher — all processing billed as cloud subscription</td><td>Lower — fog/edge resources owned by organization, only confirmatory module uses cloud</td><td>On-premise fog resources reduce cloud subscription cost</td></tr>
+        <tr><td class="proto-name">Mobile Energy</td><td>Same as fog-based</td><td>Same as cloud-only</td><td>Client module workload unchanged at mobile regardless of architecture</td></tr>
+        <tr><td class="proto-name">Cloud/Fog Energy</td><td>Increases with configuration (more load on cloud)</td><td>Much lower cloud energy — fog handles most processing</td><td>Fog-edge offloads energy cost from cloud infrastructure</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout green"><strong>Key simulation finding:</strong> Fog-edge-cloud architecture consistently outperforms cloud-only on latency, network usage, execution cost, and cloud energy — at the cost of more complex local infrastructure setup and orchestration.</div>
+
+    <div class="callout pink"><strong>Cloud-only's advantage:</strong> Simple management — all infrastructure responsibility lies with the cloud provider. The organization does not need to own, configure, or maintain fog/edge nodes. For organizations without surplus on-premise resources, cloud-only may be the practical choice despite higher latency and cost.</div>
+  </div>
+
+  <!-- Section 2: Hardware Implementation -->
+  <div class="section">
+    <div class="section-label">2 · Hardware Implementation</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Sensor Layer (IoT)</div>
+        <div class="proto-card-title">Custom Body Sensor Band</div>
+        <div class="proto-card-desc">Customized band with BP sensor (diastolic + systolic), pulse sensor, and accelerometer (3-axis: x, y, z). Data transmitted via Wi-Fi or Bluetooth to mobile device. Custom hardware chosen to allow raw data extraction — commercial health bands restrict data access and customization.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Sensor Layer (IoT)</div>
+        <div class="proto-card-title">Node MCU Module Board</div>
+        <div class="proto-card-desc">Low-cost microcontroller board (Node MCU / ESP8266) used alongside sensors for data acquisition and wireless transmission. Connects to mobile via Wi-Fi/Bluetooth.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Fog Layer</div>
+        <div class="proto-card-title">Raspberry Pi as Fog Node</div>
+        <div class="proto-card-desc">Raspberry Pi used as the intermediate fog device — collects data from mobile edge, runs data filtering and processing modules locally before pushing to cloud. Acts as area gateway for the health monitoring pipeline.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Cloud Layer</div>
+        <div class="proto-card-title">AWS + IIT KGP Megamala</div>
+        <div class="proto-card-desc">Amazon Web Services (public cloud) used for external cloud testing. IIT Kharagpur's in-house Megamala private cloud also tested. Both used to show end-to-end IoT-to-cloud realization. AWS preferred for richer managed services (no need to implement service-level procedures from scratch).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Activity Detection and Heart Attack Alarm -->
+  <div class="section">
+    <div class="section-label">3 · Activity Detection and Heart Attack Alarm</div>
+    <div class="callout pink"><strong>Disclaimer:</strong> The following algorithms are for demonstration purposes only. They have no medical or clinical implication, have not been clinically tested, and should not be used for actual health decisions.</div>
+
+    <h3>Activity Detection via Accelerometer</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Step 1</div>
+        <div class="proto-card-title">Data Extraction</div>
+        <div class="proto-card-desc">Accelerometer produces 3-axis readings (x, y, z). Resultant magnitude computed: √(x² + y² + z²). This single value captures overall movement intensity regardless of device orientation.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Step 2</div>
+        <div class="proto-card-title">5-Point Smoothing</div>
+        <div class="proto-card-desc">Noise reduction: each smoothed signal value = average of (signal[t-2] + signal[t-1] + signal[t] + signal[t+1] + signal[t+2]). Reduces transient noise from sensor jitter while preserving actual activity patterns.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Step 3</div>
+        <div class="proto-card-title">Feature Extraction</div>
+        <div class="proto-card-desc">From filtered signal: minimum amplitude, mean amplitude, standard deviation, energy in time domain, energy in frequency domain. These features capture the statistical signature of different activity types.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Step 4</div>
+        <div class="proto-card-title">K-Nearest Neighbor Classification</div>
+        <div class="proto-card-desc">kNN classifier trained on extracted features to classify activity type (walking, sitting, running, falling, etc.). Alternative classifiers (SVM, neural networks) can be used if the fog/edge hardware supports them.</div>
+      </div>
+    </div>
+
+    <h3>Heart Attack Alarm (Demonstration)</h3>
+    <div class="callout yellow"><strong>Simple threshold rule:</strong> If diastolic BP &gt; 170 AND systolic BP ≥ 180 → alarm = TRUE → alert displayed on mobile. Otherwise alarm = FALSE. This is a simple if-then rule, not a clinical diagnostic — actual heart attack prediction requires validated clinical algorithms and domain expert involvement.</div>
+  </div>
+
+  <!-- Section 4: DEW Computing -->
+  <div class="section">
+    <div class="section-label">4 · DEW Computing — Resilience Against Connectivity Loss</div>
+    <div class="callout"><strong>DEW (Dew) Computing:</strong> An on-premise computing paradigm where local computers provide functionality <em>independent of cloud services</em> while also being <em>collaborative with the cloud</em> when connected. Think of it like Dropbox — you work locally even when offline; the system syncs with the cloud when connectivity is restored.</div>
+
+    <div class="callout green"><strong>Why DEW matters for IoHT:</strong> If the network connection to the cloud/fog is lost, health monitoring should not fail. DEW server provides a local fallback — continues processing and storing data on-premise. When connectivity returns, data syncs with cloud. Result: system remains functional even during network outages.</div>
+
+    <div class="callout yellow"><strong>Assumption:</strong> DEW works best when connectivity outages are short — the DEW server can handle the interim load until the connection restores. If outages are prolonged and data is mutable/high-volume, DEW faces challenges in keeping up with full cloud capabilities.</div>
+  </div>
+
+  <!-- Section 5: Cloud vs Fog-Edge vs Fog-Edge+DEW Comparison -->
+  <div class="section">
+    <div class="section-label">5 · Cloud vs. Fog-Edge-Cloud vs. Fog-Edge-Cloud+DEW</div>
+    <table class="port-table">
+      <thead><tr><th>Dimension</th><th>Cloud-Only</th><th>Fog-Edge-Cloud</th><th>Fog-Edge-Cloud + DEW</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">On-premise utilization</td><td>Low — all at cloud</td><td>Sub-optimal — some on-premise</td><td>Optimal — DEW maximizes local use</td></tr>
+        <tr><td class="proto-name">Connectivity required</td><td>Always</td><td>Mostly</td><td>Not always — offline capable</td></tr>
+        <tr><td class="proto-name">Network bandwidth</td><td>High</td><td>Low</td><td>Low</td></tr>
+        <tr><td class="proto-name">Latency</td><td>High</td><td>Low</td><td>Low</td></tr>
+        <tr><td class="proto-name">Processing power</td><td>Ideally infinite (cloud)</td><td>Limited (fog/edge)</td><td>Moderate (DEW supplements fog/edge)</td></tr>
+        <tr><td class="proto-name">Data storage</td><td>Ideally infinite</td><td>Limited</td><td>Moderate</td></tr>
+        <tr><td class="proto-name">Infrastructure complexity</td><td>Low (provider manages)</td><td>High (org manages fog/edge)</td><td>Higher (org manages fog/edge/DEW)</td></tr>
+        <tr><td class="proto-name">Resilience</td><td>Depends on cloud uptime</td><td>Depends on connectivity</td><td>High — works offline</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 6: Course Conclusion -->
+  <div class="section">
+    <div class="section-label">6 · Course Conclusion</div>
+    <div class="callout green"><strong>What this course covered (end-to-end):</strong> Started with cloud computing basics (subscription model, SLA, economics, CV and utility pricing) → cloud architecture (IaaS/PaaS/SaaS) + deployment models → distributed programming models (MapReduce, Spark) → cloud storage and databases → resource management and scheduling → containers and microservices → cloud security → fog, edge, and IoT → sustainable computing → 5G, CPS, and emerging paradigms → case studies (spatial cloud, IoHT).</div>
+
+    <div class="callout"><strong>The paradigm is here:</strong> Cloud-fog-edge-IoT is no longer experimental — it is the de facto computing paradigm for large-scale, distributed, resource-constrained environments. Understanding when to use cloud-only vs. hybrid architectures, how to optimize across layers, and how to build SLA-aware systems is the core competency this course targets.</div>
+  </div>
+
+  <!-- Section 7: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Fog-edge-cloud results:</strong> Consistently lower latency, network usage, execution cost, and cloud energy than cloud-only. Trade-off: more complex on-premise infrastructure. Use fog/edge when surplus on-premise resources exist and real-time response is required.</div>
+    <div class="callout yellow"><strong>Activity detection pipeline:</strong> 3-axis accelerometer → √(x²+y²+z²) magnitude → 5-point smoothing → feature extraction (mean, std, energy) → kNN classifier. Fog node processes this pipeline locally for near-real-time response.</div>
+    <div class="callout green"><strong>DEW computing:</strong> On-premise server that operates independently of cloud when offline and syncs when connected. Adds resilience to the fog-edge-cloud continuum — critical for health applications where connectivity disruptions must not cause system failure.</div>
+    <div class="callout"><strong>Cloud-to-things continuum:</strong> The dominant modern computing paradigm. Not a disjoint set of layers — a hierarchically orchestrated, integrated system where the right computation happens at the right level for optimal latency, cost, bandwidth, and resilience.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 18 — Azure Demo (Python Web App) | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec17.html" class="nav-lec">← prev</a>
+      <a href="lec19.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 18</span>
+    <span class="skip-badge">SKIP priority</span>
+    <h1>Azure Demo — Python Web App Deployment</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Live demo deploying a Python Flask "Hello World" app to Microsoft Azure via Azure Cloud Shell and local Git. No new conceptual content — purely a practical walkthrough. The deployment sequence is the only exam-relevant takeaway and is captured below.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · Azure Key Concepts from Demo</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Resource Group</div>
+        <div class="proto-card-title">Logical container</div>
+        <div class="proto-card-desc">A resource group is a logical container in which Azure resources (web apps, databases, storage accounts) are deployed and managed together.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">App Service Plan</div>
+        <div class="proto-card-title">Hosting configuration</div>
+        <div class="proto-card-desc">Specifies the location, size, and features of the web server that hosts the application. Determines the pricing tier and compute resources available.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Web App</div>
+        <div class="proto-card-title">Hosting space + URL</div>
+        <div class="proto-card-desc">A Web App provides the hosting space for code and a public URL (<code>&lt;name&gt;.azurewebsites.net</code>) to access the deployed application.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Deployment User</div>
+        <div class="proto-card-title">FTP/Git credentials</div>
+        <div class="proto-card-desc">A deployment user provides authentication for FTP and local Git deployment to a web application. Required before pushing code.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Deployment Sequence (Flask App to Azure)</div>
+    <div class="callout yellow"><strong>Demo walkthrough:</strong> Deployed a Python Flask "Hello World" app using local Git as the deployment method. Azure supports alternatives: FTP, GitHub, Visual Studio Online.</div>
+    <table class="port-table">
+      <thead><tr><th>Step</th><th>Command / Action</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">1. Clone app</td><td>git clone &lt;github-url&gt;</td><td>Get sample Flask app code locally in Azure Cloud Shell</td></tr>
+        <tr><td class="proto-name">2. Run locally</td><td>pip install flask → python main.py → localhost:5000</td><td>Verify app works before deploying</td></tr>
+        <tr><td class="proto-name">3. Deployment user</td><td>az webapp deployment user set</td><td>Create username/password for Git push authentication</td></tr>
+        <tr><td class="proto-name">4. Resource group</td><td>az group create --name --location</td><td>Create logical container for all Azure resources</td></tr>
+        <tr><td class="proto-name">5. App Service plan</td><td>az appservice plan create</td><td>Define hosting server size and location</td></tr>
+        <tr><td class="proto-name">6. Web app</td><td>az webapp create --name</td><td>Create the app → get &lt;name&gt;.azurewebsites.net URL</td></tr>
+        <tr><td class="proto-name">7. Configure Python</td><td>az webapp config appsettings set</td><td>Tell Azure this is a Python app (set Python version)</td></tr>
+        <tr><td class="proto-name">8. Local git config</td><td>az webapp deployment source config-local-git</td><td>Enable Git-based deployment, get remote URL</td></tr>
+        <tr><td class="proto-name">9. Add remote</td><td>git remote add azure &lt;url&gt;</td><td>Connect local Git repo to Azure deployment endpoint</td></tr>
+        <tr><td class="proto-name">10. Deploy</td><td>git push azure master</td><td>Push code to Azure → app goes live</td></tr>
+        <tr><td class="proto-name">11. Update</td><td>Edit code → git commit → git push azure master</td><td>Redeploy updated code; changes reflect immediately</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout yellow"><strong>Demo lecture — no new theory.</strong> Azure PaaS deployment: Resource Group → App Service Plan → Web App → configure runtime → local Git push to deploy. This workflow is the same pattern for any PaaS cloud platform.</div>
+    <div class="callout"><strong>Resource Group</strong> = logical container for Azure resources. <strong>App Service Plan</strong> = server spec. <strong>Web App</strong> = hosted app + public URL. All managed together.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

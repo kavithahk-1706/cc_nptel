@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 55 — Sustainable Cloud Computing II | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec54.html" class="nav-lec">← prev</a>
+      <a href="lec56.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 55</span>
+    <span class="med-badge">MED priority</span>
+    <h1>Sustainable Cloud Computing — II</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Continues from lec54 with a complete taxonomy of sustainable cloud computing, covering eight research categories: application design, sustainability metrics, capacity planning, energy management, virtualization, thermal-aware scheduling, cooling management, renewable energy, and waste heat utilization. Good for enumeration-style exam questions — know the eight areas and what falls under each.</p>
+  </div>
+
+  <!-- Section 1: Taxonomy Overview -->
+  <div class="section">
+    <div class="section-label">1 · Taxonomy of Sustainable Cloud Computing</div>
+    <div class="callout"><strong>Core goal (reiterated):</strong> Cloud computing must be energy efficient and sustainable to fulfill ever-increasing user needs driven by IoT devices, live streaming, video conferencing, drone operations, and real-time sensor data. Sustainability research falls into eight taxonomy areas.</div>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Area 1</div>
+        <div class="proto-card-title">Application Design</div>
+        <div class="proto-card-desc">How the structure of an application affects energy efficiency. Includes application models (data-parallel, function-parallel, message-parallel), workload type, QoS, cost aspects, and workload management. Green ICT-based applications required.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Area 2</div>
+        <div class="proto-card-title">Sustainability Metrics</div>
+        <div class="proto-card-desc">The metrics used to evaluate how sustainable a CDC is — covering performance (throughput, response time, reliability), waste heat utilization, thermal scheduling, energy management, virtualization, capacity planning, and renewable energy metrics.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Area 3</div>
+        <div class="proto-card-title">Capacity Planning</div>
+        <div class="proto-card-desc">Efficient, organized capacity planning for CSPs — covering IT infrastructure, cooling, power infrastructure; workload and application models; auto-scaling; utility functions. Must include predictive models for future demand growth.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Area 4</div>
+        <div class="proto-card-title">Energy Management</div>
+        <div class="proto-card-desc">Managing energy across processor, memory, storage, cooling, and network resources. Includes static management (system-level, CPU-level) and dynamic management (resource consolidation, configuration). Goal: minimize energy without violating SLAs.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Area 5</div>
+        <div class="proto-card-title">Virtualization</div>
+        <div class="proto-card-desc">VM-level energy and heat management: VM migration, VM elasticity, VM load balancing, VM consolidation, fault tolerance, and scheduling — all made energy-aware to minimize thermal impact and energy consumption.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Area 6</div>
+        <div class="proto-card-title">Thermal-Aware Scheduling</div>
+        <div class="proto-card-desc">Scheduling mechanisms designed to minimize heat generation during workload execution. Involves architecture (single-core, multi-core), heat modeling, thermometers, scheduling algorithms, monitoring, and simulation.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Area 7</div>
+        <div class="proto-card-title">Renewable Energy</div>
+        <div class="proto-card-desc">Using near-zero CO₂ sources (solar, wind, hydro) to power CDCs. Requires location-aware deployment, workload scheduling aligned with energy availability, energy storage devices, and smart switching between renewable and grid sources.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Area 8</div>
+        <div class="proto-card-title">Waste Heat Utilization</div>
+        <div class="proto-card-desc">Reusing heat generated by CDC servers instead of simply dissipating it. Vapor absorption-based free cooling uses waste heat to evaporate and cool — can make PUE (Power Usage Effectiveness) approach its ideal value and neutralize cooling expenses.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Application Design -->
+  <div class="section">
+    <div class="section-label">2 · Application Design</div>
+    <div class="callout"><strong>Principle:</strong> The structure and design of an application plays a vital role in energy efficiency. Different application types demand different design strategies. Green ICT requires energy-aware and thermally-aware application models.</div>
+
+    <h3>Application Parallelism Models</h3>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Data Parallel</div>
+        <div class="concept-desc">Same operation applied to different data partitions simultaneously. Common in big data processing. Energy footprint depends on how data is distributed and how much compute is idle between batches.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Function Parallel</div>
+        <div class="concept-desc">Different functions of the application execute in parallel. Each function may run on different resources with different power profiles. Scheduling must align function execution with energy-efficient resources.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Message Parallel</div>
+        <div class="concept-desc">Tasks communicate via message passing. Common in distributed computing models. Scheduling affects network energy overhead as well as CPU usage. Message-passing granularity impacts energy efficiency.</div>
+      </div>
+    </div>
+
+    <div class="callout green"><strong>Key implication:</strong> A resource manager and scheduler must adapt their approach to the application model — same workload handled differently (streaming vs. batch vs. interactive) has very different energy and thermal profiles. The application design decision happens before deployment — energy awareness must be built in, not added on.</div>
+  </div>
+
+  <!-- Section 3: Sustainability Metrics -->
+  <div class="section">
+    <div class="section-label">3 · Sustainability Metrics</div>
+    <div class="callout"><strong>Purpose:</strong> Metrics are needed to evaluate the effectiveness of any sustainable cloud mechanism deployed. They span from user-facing performance metrics to infrastructure-level energy and thermal metrics.</div>
+
+    <div class="domain-grid">
+      <div class="domain-card">
+        <div class="domain-title">Performance Metrics (User-Facing)</div>
+        <div class="domain-desc">
+          <strong>Throughput</strong> — rate of work completed.<br>
+          <strong>Response time</strong> — latency experienced by the user.<br>
+          <strong>Correctness</strong> — accuracy of computation results.<br>
+          <strong>Reliability</strong> — consistent service without failure.<br>
+          <strong>Security</strong> — protection of user data and workloads.<br>
+          These reflect the cloud user's satisfaction and must not be degraded by energy-saving measures.
+        </div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-title">Infrastructure Metrics (Sustainability-Facing)</div>
+        <div class="domain-desc">
+          <strong>Waste heat utilization</strong> — fraction of generated heat reused.<br>
+          <strong>Cooling mechanism efficiency</strong> — how well and cheaply heat is removed.<br>
+          <strong>Thermal-aware scheduling metrics</strong> — heat distribution across servers.<br>
+          <strong>Energy management metrics</strong> — total consumption vs. optimal target.<br>
+          <strong>Virtualization metrics</strong> — migration overhead, consolidation ratio.<br>
+          <strong>Capacity planning metrics</strong> — CPU/GPU/memory/storage utilization forecasts.<br>
+          <strong>Renewable energy metrics</strong> — carbon use efficiency (CUI), renewable fraction.
+        </div>
+      </div>
+    </div>
+
+    <div class="callout pink"><strong>Carbon Use efficiency (CUI):</strong> CUI can be reduced by adding more renewable energy — but renewable sources may not keep up with huge sudden demand. Smart switching between renewable and grid is essential.</div>
+  </div>
+
+  <!-- Section 4: Energy Management -->
+  <div class="section">
+    <div class="section-label">4 · Energy Management</div>
+    <div class="callout"><strong>Energy breakdown in CDCs</strong> (from reported literature): Processor consumes the largest share, followed by cooling. Knowing this breakdown guides where energy optimization effort is most valuable.</div>
+
+    <table class="port-table">
+      <thead>
+        <tr><th>Component</th><th>Energy Share</th><th>Management implication</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="proto-name">Processor (CPU/GPU)</td><td>45%</td><td>DVFS, thermal-aware scheduling — highest leverage point</td></tr>
+        <tr><td class="proto-name">Cooling systems</td><td>20%</td><td>Cooling management; waste heat utilization reduces this</td></tr>
+        <tr><td class="proto-name">Memory</td><td>15%</td><td>Managed through consolidation and sleep/idle policies</td></tr>
+        <tr><td class="proto-name">Storage</td><td>10%</td><td>Spin-down policies; avoid power cycling for reliability</td></tr>
+        <tr><td class="proto-name">Networking</td><td>10%</td><td>Traffic-aware switch power management</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Static vs. Dynamic Energy Management</h3>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Static Management</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Scope</span>System level and CPU level</div>
+          <div class="compare-row"><span class="label">When</span>Fixed policies set at deployment</div>
+          <div class="compare-row"><span class="label">Flexibility</span>Low — cannot adapt to workload changes</div>
+          <div class="compare-row"><span class="label">Overhead</span>Low — no runtime decision-making</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Dynamic Management</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Scope</span>Resource management, consolidation, configuration</div>
+          <div class="compare-row"><span class="label">When</span>Runtime, adapts to current load</div>
+          <div class="compare-row"><span class="label">Flexibility</span>High — DVFS, VM migration, sleep/wake on demand</div>
+          <div class="compare-row"><span class="label">Overhead</span>Higher — requires monitoring and decision logic</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout pink"><strong>Caveat:</strong> Power regulation approaches (DVFS, sleep modes) increase energy efficiency but can affect resource utilization and performance. Too many switching events can adversely affect SLA compliance — balance is required.</div>
+  </div>
+
+  <!-- Section 5: Virtualization for Sustainability -->
+  <div class="section">
+    <div class="section-label">5 · Virtualization for Sustainability</div>
+    <div class="callout"><strong>Virtualization is the core of cloud computing</strong> and also one of the major levers for sustainability. Making VM operations energy-aware directly reduces energy consumption and thermal output.</div>
+
+    <div class="tag-row">
+      <span class="tag tag-good">VM Migration — move workloads to energy-efficient servers or remote CDCs</span>
+      <span class="tag tag-good">VM Elasticity — scale VM resources up/down to match load, avoiding idle waste</span>
+      <span class="tag tag-good">VM Load Balancing — spread load to prevent hotspots and overloading</span>
+      <span class="tag tag-good">VM Consolidation — pack multiple VMs onto fewer servers, power off idle ones</span>
+      <span class="tag tag-good">Fault Tolerance — redundancy without over-replication</span>
+      <span class="tag tag-good">Energy-Aware Scheduling — assign VMs to servers with best energy profile for the workload</span>
+    </div>
+
+    <div class="callout green"><strong>VM migration enables renewable energy use:</strong> When renewable energy is available at one location but not another, workloads can be migrated to the green-powered site. This requires secure migration protocols and an understanding of migration overhead (network, downtime).</div>
+  </div>
+
+  <!-- Section 6: Thermal-Aware Scheduling and Cooling -->
+  <div class="section">
+    <div class="section-label">6 · Thermal-Aware Scheduling and Cooling Management</div>
+    <h3>Thermal-Aware Scheduling</h3>
+    <div class="callout"><strong>Problem:</strong> Heat generated during workload execution reduces the efficiency of CDCs. CDCs consist of chassis with racks of servers. The processor is the single largest heat source in a server (45% of energy → heat). Thermal scheduling designs mechanisms to manage heat distribution.</div>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Component</div>
+        <div class="proto-card-title">Architecture Awareness</div>
+        <div class="proto-card-desc">Single-core vs. multi-core server architectures have different thermal profiles. Multi-core servers with parallel workloads can distribute heat more evenly — or concentrate it if all cores run hot simultaneously.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Component</div>
+        <div class="proto-card-title">Heat Modeling</div>
+        <div class="proto-card-desc">Building models that predict how much heat a given workload will generate at a given server. Used by schedulers to place workloads in a thermally optimal way — avoiding hot servers, distributing heat across the CDC.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Component</div>
+        <div class="proto-card-title">Monitoring and Simulation</div>
+        <div class="proto-card-desc">Real-time temperature monitoring (thermometers/sensors in chassis) and simulation of thermal behavior. Enables the cooling manager to respond proactively rather than reactively.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Caveat</div>
+        <div class="proto-card-title">PUE Reduction ≠ Total Cost Reduction</div>
+        <div class="proto-card-desc">PUE (Power Usage Effectiveness) reduction from thermal scheduling is important, but reducing PUE does not always reduce total cost of ownership (TCO). Overall energy cost, infrastructure investment, and operational overhead must all be considered.</div>
+      </div>
+    </div>
+
+    <h3>Cooling Management</h3>
+    <div class="callout"><strong>Challenge:</strong> Increasing computation, networking, and storage demand expands CDC size and energy density exponentially — generating more heat. A sophisticated cooling management system is essential to maintain temperatures and keep all components working faithfully.</div>
+    <div class="callout green"><strong>Efficient cooling → energy savings:</strong> If waste heat is successfully reused (e.g., for nearby building heating or via vapor absorption cooling), the energy burden of cooling the CDC itself is reduced, improving the overall sustainability equation.</div>
+  </div>
+
+  <!-- Section 7: Renewable Energy and Waste Heat Utilization -->
+  <div class="section">
+    <div class="section-label">7 · Renewable Energy and Waste Heat Utilization</div>
+    <h3>Renewable Energy</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Sources</div>
+        <div class="proto-card-title">Solar, Wind, Hydro</div>
+        <div class="proto-card-desc">Near-zero CO₂ emission sources. Solar and wind require large land areas for installation. Placement must be location-aware — CDCs near renewable sources save transmission losses and reduce cost.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Demand–Supply Mismatch</div>
+        <div class="proto-card-desc">Carbon Use Efficiency (CUI) improves with more renewables, but renewable output can be insufficient during peak demand. Smart workload scheduling — aligning deadline-flexible jobs with periods of high renewable availability — is the solution.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Infrastructure</div>
+        <div class="proto-card-title">Energy Storage Devices</div>
+        <div class="proto-card-desc">Storage devices (batteries) allow renewable energy captured during off-peak generation to be used during peak demand — decoupling renewable generation time from consumption time.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Control</div>
+        <div class="proto-card-title">Smart Switching (ATS)</div>
+        <div class="proto-card-desc">Automatic Transfer Switch (ATS) manages transitions between renewable sources and conventional grid electricity. Switching strategy must account for SLA requirements — critical workloads may require grid reliability.</div>
+      </div>
+    </div>
+
+    <h3>Waste Heat Utilization</h3>
+    <div class="callout"><strong>Principle:</strong> Reuse of waste heat (heat generated by servers) is becoming a viable solution for energy conservation. Rather than dissipating all generated heat via air conditioning, mechanisms that capture and repurpose that heat reduce net energy consumption.</div>
+    <div class="callout yellow"><strong>Vapor Absorption Based Free Cooling:</strong> Waste heat is used to drive a vapor absorption cooling system. The heat vaporizes a refrigerant, which cools on evaporation — effectively using the CDC's own waste to cool itself. This technique can make PUE approach its ideal value by neutralizing cooling expenses. Zero additional energy input needed for the cooling cycle itself.</div>
+    <div class="callout green"><strong>PUE (Power Usage Effectiveness):</strong> PUE = total facility energy / IT equipment energy. Ideal PUE = 1.0 (all energy goes to computation, none to cooling/overhead). Vapor absorption cooling drives PUE toward the ideal by eliminating or reducing cooling energy that would otherwise count as overhead.</div>
+  </div>
+
+  <!-- Section 8: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Taxonomy — 8 areas:</strong> Application design, sustainability metrics, capacity planning, energy management, virtualization, thermal-aware scheduling, cooling management, renewable energy + waste heat utilization. These eight areas structure all sustainable cloud computing research.</div>
+    <div class="callout"><strong>Energy breakdown:</strong> Processor = 45%, cooling = 20%, memory = 15%, storage = 10%, networking = 10%. Processor and cooling are the highest-leverage targets for energy management.</div>
+    <div class="callout yellow"><strong>Application design matters:</strong> Data-parallel, function-parallel, and message-parallel models have different energy and heat profiles. The design choice made before deployment determines the energy ceiling.</div>
+    <div class="callout green"><strong>Vapor absorption free cooling:</strong> Uses CDC waste heat to drive a cooling cycle via evaporation. Makes PUE approach ideal by turning overhead heat into a useful cooling input — one of the most elegant sustainability techniques in the taxonomy.</div>
+    <div class="callout pink"><strong>CUI trade-off:</strong> More renewable energy reduces CUI (Carbon Use Intensity), but renewable sources may not meet sudden peak demand. Workload scheduling must align deadline-flexible jobs with renewable availability, and use grid power for SLA-critical workloads.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

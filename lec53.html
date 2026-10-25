@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 53 — Serverless Computing II | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec52.html" class="nav-lec">← prev</a>
+      <a href="lec54.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 53</span>
+    <span class="med-badge">MED priority</span>
+    <h1>Serverless Computing — II</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Dives into the three dominant serverless platforms — AWS Lambda, Google Cloud Functions, and Microsoft Azure Functions. Covers the key concepts, components, event triggers, and billing model of each. Useful for platform-specific exam questions; the core serverless theory is in Lecture 52.</p>
+  </div>
+
+  <!-- Section 1: Serverless Focus Shift -->
+  <div class="section">
+    <div class="section-label">1 · The Serverless Focus Shift</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Traditional Cloud (Serverfull)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Target user</span>System administrators</div>
+          <div class="compare-row"><span class="label">Developer concern</span>VM provisioning, OS, network config, scaling, patching, container orchestration</div>
+          <div class="compare-row"><span class="label">Billing</span>Provisioned capacity — paying for idle time</div>
+          <div class="compare-row"><span class="label">Focus</span>System administration and infrastructure management</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Serverless</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Target user</span>Programmers / developers</div>
+          <div class="compare-row"><span class="label">Developer concern</span>Business logic only — functions and their workflows</div>
+          <div class="compare-row"><span class="label">Billing</span>Per-invocation — paying only when function executes</div>
+          <div class="compare-row"><span class="label">Focus</span>Application code; no server provisioning or management</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout green"><strong>Key shift:</strong> Cloud computing changed how operators work; serverless changes how programmers work — just as dramatically.</div>
+  </div>
+
+  <!-- Section 2: Platform Comparison Overview -->
+  <div class="section">
+    <div class="section-label">2 · Platform Comparison Overview</div>
+    <table class="port-table">
+      <thead><tr><th>Resource type</th><th>AWS</th><th>Google Cloud</th><th>Microsoft Azure</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Virtual Machines</td><td>EC2 instances / AWS instances</td><td>Google Compute Engine (VM instances)</td><td>Azure VM instances</td></tr>
+        <tr><td class="proto-name">FaaS Platform</td><td>AWS Lambda</td><td>Google Cloud Functions</td><td>Azure Functions</td></tr>
+        <tr><td class="proto-name">Primary Database</td><td>Amazon DynamoDB</td><td>Google Cloud Datastore</td><td>Azure Cosmos DB</td></tr>
+        <tr><td class="proto-name">Object Storage</td><td>Amazon S3</td><td>Google Cloud Storage</td><td>Azure Blob / S3 fallback</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 3: AWS Lambda -->
+  <div class="section">
+    <div class="section-label">3 · AWS Lambda</div>
+    <div class="callout"><strong>AWS Lambda:</strong> An event-driven serverless computing platform provided by Amazon as part of AWS. Developers upload code in any supported language; Lambda handles execution. No need to provision, launch, or manage AWS resources — put code on Lambda and it runs. <strong>Billed only when Lambda executes code</strong> — never for idle time.</div>
+
+    <h3>Lambda Components</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Component</div>
+        <div class="proto-card-title">Function</div>
+        <div class="proto-card-desc">A program or script that runs in AWS Lambda. Lambda passes invocation events into the function; the function processes the event and returns a response. The developer uploads and maintains only this function code.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Component</div>
+        <div class="proto-card-title">Runtime</div>
+        <div class="proto-card-desc">Allows functions in various languages (Java, Python, Go, C#, others) to run on the same base execution environment. Configures functions to match the selected programming language — the developer picks the language; Lambda picks the runtime.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Component</div>
+        <div class="proto-card-title">Event Source</div>
+        <div class="proto-card-desc">An AWS service (SNS, S3, API Gateway, DynamoDB, etc.) or custom service that triggers Lambda function execution. Lambda code is executed in response to events from these services — e.g., file added/deleted in S3, HTTP request from Amazon API Gateway.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Component</div>
+        <div class="proto-card-title">Lambda Layers</div>
+        <div class="proto-card-desc">A distribution mechanism for libraries, custom runtimes, and other function dependencies. Layers allow shared code to be packaged separately from the function, keeping function packages small and reusing dependencies across functions.</div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Log stream:</strong> Developers annotate function code with custom logging statements. The log stream lets you analyze execution flow and performance of AWS Lambda functions — useful for debugging without access to underlying infrastructure.</div>
+  </div>
+
+  <!-- Section 4: Google Cloud Functions -->
+  <div class="section">
+    <div class="section-label">4 · Google Cloud Functions</div>
+    <div class="callout"><strong>Google Cloud Functions:</strong> A serverless execution environment for building and connecting cloud services. Developers write simple, single-purpose functions attached to events emitted from Google Cloud infrastructure and services. Code executes in a fully managed environment — no provisioning or server management required.</div>
+
+    <h3>Core Concepts</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Concept</div>
+        <div class="proto-card-title">Events</div>
+        <div class="proto-card-desc">Occur in cloud platform services — e.g., file uploaded to Cloud Storage, message published in Pub/Sub, direct HTTP invocation, new object in a bucket, metadata updated. Multiple event occurrences → multiple function invocations, handled automatically by Cloud Functions infrastructure.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Concept</div>
+        <div class="proto-card-title">Triggers</div>
+        <div class="proto-card-desc">The event plus associated metadata. A Cloud Function is configured to be triggered by a specific event type. When the event fires, the trigger is activated and the cloud function is invoked. The function can be configured to respond to one event type or multiple.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Concept</div>
+        <div class="proto-card-title">Event Data</div>
+        <div class="proto-card-desc">Data passed to the Cloud Function when a trigger fires. The function uses this data to determine what caused the event (source, metadata) and performs the appropriate processing. The function can also call external APIs and write back to cloud services as part of its execution.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Concept</div>
+        <div class="proto-card-title">Stateless Execution</div>
+        <div class="proto-card-desc">Functions model their execution in a stateless fashion. State must be maintained outside the Cloud Functions framework — e.g., in a cache like Memcached, or in a database like Cloud Firestore. The function itself does not persist state between invocations.</div>
+      </div>
+    </div>
+
+    <h3>Google Cloud Event Providers</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">HTTP (direct invocation)</span>
+      <span class="tag tag-good">Cloud Storage</span>
+      <span class="tag tag-good">Cloud Pub/Sub</span>
+      <span class="tag tag-good">Firebase</span>
+      <span class="tag tag-good">Stackdriver Logging</span>
+      <span class="tag tag-good">Cloud Firestore</span>
+      <span class="tag tag-good">Google Compute Engine</span>
+      <span class="tag tag-good">BigQuery</span>
+    </div>
+  </div>
+
+  <!-- Section 5: Azure Functions -->
+  <div class="section">
+    <div class="section-label">5 · Microsoft Azure Functions</div>
+    <div class="callout"><strong>Azure Functions:</strong> A serverless solution that allows developers to write less code, maintain less infrastructure, and save on cost. Same fundamental philosophy as Lambda and Cloud Functions — focus on code; Azure handles the rest. A <strong>function</strong> in Azure consists of two parts: (1) the code in a supported language, and (2) configuration stored in function.json.</div>
+
+    <div class="callout pink"><strong>Config generation:</strong> For compiled languages (C#, Java), the function.json configuration is auto-generated from annotations in the code. For scripting languages (JavaScript, Python), the developer must provide the configuration file manually.</div>
+
+    <h3>Azure Functions Key Features</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Feature</div>
+        <div class="proto-card-title">Language Support</div>
+        <div class="proto-card-desc">Supports C#, Java, JavaScript, Python, and others. Custom handlers allow using virtually any other language — the developer uses their preferred language without platform lock-in.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Feature</div>
+        <div class="proto-card-title">Flexible Pricing</div>
+        <div class="proto-card-desc">Consumption plan: pay only when functions are running (same pay-per-execution model as Lambda and Cloud Functions). Premium and App Service plans offer features for specialized needs with more predictable pricing for high-throughput workloads.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Feature</div>
+        <div class="proto-card-title">Automated Deployment</div>
+        <div class="proto-card-desc">Large range of deployment options: tool-based approach or external pipelines (CI/CD). Integrates with standard DevOps toolchains for continuous delivery of function updates.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Feature</div>
+        <div class="proto-card-title">Monitoring and Testing</div>
+        <div class="proto-card-desc">Monitor tools and testing strategies provide insight into application execution — useful for troubleshooting without direct server access.</div>
+      </div>
+    </div>
+
+    <h3>Common Azure Serverless Architecture Patterns</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Serverless APIs</span>
+      <span class="tag tag-good">Mobile and web backends</span>
+      <span class="tag tag-good">Event and stream processing</span>
+      <span class="tag tag-good">IoT data processing</span>
+      <span class="tag tag-good">Big data and ML pipelines</span>
+      <span class="tag tag-good">Enterprise service bus (pub/sub)</span>
+      <span class="tag tag-good">Process automation</span>
+    </div>
+  </div>
+
+  <!-- Section 6: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Serverless focus shift:</strong> Cloud computing targets system administrators; serverless targets programmers. The programmer writes only business logic — the provider handles all infrastructure, scaling, and orchestration.</div>
+    <div class="callout green"><strong>AWS Lambda:</strong> Event-driven FaaS by Amazon. Components: Function (code), Runtime (language env), Event Source (AWS services like S3, API Gateway), Lambda Layers (shared libraries), Log Stream (debugging). Charged only on execution.</div>
+    <div class="callout"><strong>Google Cloud Functions:</strong> Functions triggered by events from cloud services. Core concepts: Events (triggers in cloud services), Triggers (event + config), Event Data (passed to function on invocation), Stateless execution (state stored externally, e.g., Memcached).</div>
+    <div class="callout yellow"><strong>Azure Functions:</strong> Function = code + function.json config. Compiled languages auto-generate config from annotations; scripting languages require manual config. Consumption plan: pay-per-execution. Supports C#, Java, JavaScript, Python, and custom handlers.</div>
+    <div class="callout pink"><strong>Platform billing — common rule across all three:</strong> You are charged only when the function executes. A non-running function costs nothing — unlike IaaS where you pay for provisioned capacity regardless of utilization.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

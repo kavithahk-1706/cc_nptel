@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 30 — Broker for Cloud Marketplace | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec29.html" class="nav-lec">← prev</a>
+      <a href="lec31.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 30</span>
+    <span class="med-badge">MED priority</span>
+    <h1>Broker for Cloud Marketplace</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Introduces the cloud marketplace broker concept — an intelligent middleman that selects the best provider for a customer from multiple competing CSPs. Covers the broker architecture (monitoring, migration, trust calculation, selection modules) and applies a fuzzy inference engine for provider selection and migration decisions. Simulation results show fuzzy outperforms crisp broking on QoS metrics.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · Why a Broker?</div>
+    <div class="callout"><strong>Cloud marketplace problem:</strong> Many competing IaaS/PaaS/SaaS providers exist, each with different QoS promises, SLAs, trustworthiness, and pricing. A customer must select the best match — but lacks the tools, history, and monitoring capability to do this alone.</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Flexible selection</div>
+        <div class="concept-desc">Customer requirements are often fuzzy (not crisply defined). A broker translates vague needs into a quantitative match with provider offerings.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Trustworthiness evaluation</div>
+        <div class="concept-desc">Trust is not binary — different trust values can be assigned per QoS parameter (availability, bandwidth, security). The broker aggregates these into a suitability score.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Vendor lock-in mitigation</div>
+        <div class="concept-desc">A broker can trigger migration from one provider to another if experienced QoS falls below threshold — reducing dependency on any single vendor.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Broker Architecture</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Monitoring module</div>
+        <div class="proto-card-title">Continuously tracks provider performance</div>
+        <div class="proto-card-desc">Monitors experienced QoS (availability, bandwidth) per VM per provider against promised values. Computes SLA satisfaction scores for each service instance at each provider: <em>SLA satisfaction = experienced value / promised value</em> per parameter.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Provider trust calculator</div>
+        <div class="proto-card-title">Historical trust per QoS parameter</div>
+        <div class="proto-card-desc">Uses monitoring history to compute trust values per provider, per parameter (e.g., trust on availability = 0.8, trust on bandwidth = 0.6). Trust values are kept independent per parameter — they are not collapsed into a single number.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Provider selection (FIS)</div>
+        <div class="proto-card-title">Fuzzy matching of requirement to offering</div>
+        <div class="proto-card-desc">Input: provider's offered QoS + trustworthiness. Output: suitability score for this customer's requirements. Customer request is dispatched to the provider with maximum suitability.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Migration decider (FIS)</div>
+        <div class="proto-card-title">Triggers provider switch when needed</div>
+        <div class="proto-card-desc">Continuously evaluates degree of SLA satisfaction for the running service instance. If satisfaction &lt; threshold, triggers migration to the next-best provider — selected through the same provider selection procedure.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Fuzzy Inference Engine — How It Works</div>
+    <div class="callout"><strong>Why fuzzy?</strong> Customer requirements and provider offerings are not crisply defined — they involve linguistic terms like "good availability" or "acceptable latency." A crisp (binary yes/no) broker discards too many valid options; a fuzzy system handles partial membership.</div>
+    <div class="stack">
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Step 1: Fuzzification</span>
+        <span class="layer-desc">Convert crisp QoS inputs (provider offerings, customer requirements, trust values) into fuzzy membership values. Membership levels: extremely poor, very poor, medium, good, very good, excellent.</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">Step 2: Rule evaluation</span>
+        <span class="layer-desc">Apply rule set derived from customer requirements. E.g., IF availability is "good" AND trust is "very good" THEN suitability is "very good".</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Step 3: Defuzzification</span>
+        <span class="layer-desc">Convert the fuzzy output (suitability) back to a crisp score for comparison across providers. Provider with highest suitability score is selected.</span>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Crisp broker comparison:</strong> A conventional minimum-cost crisp broker makes binary decisions based solely on cost threshold. Simulation shows fuzzy broker tracks user requirements more closely on availability, bandwidth, cost, and response time — especially when some providers exhibit performance degradation.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · Simulation Results (Summary)</div>
+    <table class="port-table">
+      <thead><tr><th>Scenario</th><th>Setup</th><th>Fuzzy vs. Crisp broker result</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">IaaS marketplace</td><td>10 providers, 500 VM requests, 365-day simulation; Gaussian QoS degradation</td><td>Fuzzy better tracks user requirement on availability, bandwidth, cost per VM/hour</td></tr>
+        <tr><td class="proto-name">SaaS marketplace</td><td>10 providers, 500 service requests, 365 days; Gaussian QoS degradation</td><td>Fuzzy better on average response time, cost; follows user requirement more closely than crisp</td></tr>
+      </tbody>
+    </table>
+    <div class="callout green"><strong>Key takeaway:</strong> Fuzzy inference for provider selection and migration decisions is more robust than crisp (min-cost) brokering — especially under dynamic conditions where some providers periodically degrade.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Cloud broker role:</strong> An intelligent middleman that matches customer QoS requirements to provider offerings, monitors performance continuously, and migrates workloads when satisfaction drops below threshold.</div>
+    <div class="callout green"><strong>Trust is per-parameter:</strong> Provider trust is evaluated separately for each QoS parameter (availability, bandwidth, etc.) — not as a single aggregate trust score.</div>
+    <div class="callout yellow"><strong>Fuzzy inference:</strong> Fuzzification → Rule evaluation → Defuzzification. Handles the inherent vagueness of both customer requirements and provider descriptions better than binary crisp brokering.</div>
+    <div class="callout pink"><strong>Migration trigger:</strong> If experienced SLA satisfaction &lt; predefined threshold for the current provider, the migration decider selects a new provider using the same fuzzy selection procedure and migrates the service instance.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

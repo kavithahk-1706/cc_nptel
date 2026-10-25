@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 46 — VM Migration: Analysis and Strategies | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec45.html" class="nav-lec">← prev</a>
+      <a href="lec47.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 46</span>
+    <span class="med-badge">MED priority</span>
+    <h1>VM Migration — Analysis and Strategies</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Develops a mathematical model for estimating total migration time (T<sub>MIG</sub>) and downtime (T<sub>down</sub>) for both non-live and pre-copy live migration. Extends the model to multiple-VM scenarios: serial migration (one at a time) vs. parallel migration (all simultaneously). Quantitative — expect formula-level understanding of how dirty paging rate and transmission rate determine migration overhead.</p>
+  </div>
+
+  <!-- Section 1: Non-Live Migration Model -->
+  <div class="section">
+    <div class="section-label">1 · Non-Live Migration: Time Model</div>
+    <div class="callout"><strong>Key assumption:</strong> Transmission rate R (bytes/s) remains constant throughout the migration process. Memory size V<sub>m</sub> (bytes) is the dominant factor in migration time — other state transfers (CPU registers etc.) are one-time, negligible operations.</div>
+
+    <table class="port-table">
+      <thead><tr><th>Metric</th><th>Formula</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Total migration time T<sub>MIG</sub></td><td>V<sub>m</sub> / R</td><td>Time to transmit the full VM memory at rate R</td></tr>
+        <tr><td class="proto-name">Downtime T<sub>down</sub></td><td>≈ T<sub>MIG</sub> = V<sub>m</sub> / R</td><td>VM is suspended for the entire migration — downtime ≈ migration time</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout pink"><strong>Implication:</strong> For a large VM (e.g., 64 GB RAM) on a 1 Gbps link, T<sub>MIG</sub> ≈ 64 × 8 / 1 = 512 seconds — over 8 minutes of downtime. This is why live migration is necessary for real-time services.</div>
+  </div>
+
+  <!-- Section 2: Pre-Copy Live Migration — Analysis -->
+  <div class="section">
+    <div class="section-label">2 · Pre-Copy Live Migration: Time Model</div>
+
+    <h3>Variables</h3>
+    <table class="port-table">
+      <thead><tr><th>Symbol</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">V<sub>m</sub></td><td>Total memory size of the VM being migrated (bytes)</td></tr>
+        <tr><td class="proto-name">R</td><td>Constant transmission rate (bytes/s)</td></tr>
+        <tr><td class="proto-name">r = P × d / R</td><td>Dirty page factor — P = page size, d = dirty page generation rate. r controls how quickly dirty pages accumulate relative to transmission capacity (r &lt; 1 for convergence)</td></tr>
+        <tr><td class="proto-name">N</td><td>Total number of pre-copy iterations actually executed</td></tr>
+        <tr><td class="proto-name">N<sub>max</sub></td><td>Maximum allowed iterations (threshold)</td></tr>
+        <tr><td class="proto-name">V<sub>th</sub></td><td>Dirty page threshold — stop pre-copy when remaining dirty pages &lt; V<sub>th</sub></td></tr>
+        <tr><td class="proto-name">T<sub>res</sub></td><td>Time to restart the VM at the destination server</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Per-Iteration Time</h3>
+    <div class="callout">
+      Round 0: T<sub>0</sub> = V<sub>m</sub> / R &nbsp; (full memory transmitted)<br>
+      Round 1: T<sub>1</sub> = r × T<sub>0</sub> &nbsp; (only dirty pages from round 0)<br>
+      Round j: T<sub>j</sub> = r<sup>j</sup> × (V<sub>m</sub> / R) &nbsp; (dirty pages accumulate geometrically with factor r)
+    </div>
+
+    <h3>Total Migration Time (pre-copy)</h3>
+    <div class="callout green">
+      <strong>T<sub>MIG</sub>(i)</strong> = &sum; T<sub>j</sub> (j=0 to N) + T<sub>res</sub><br>
+      = (V<sub>m</sub> / R) × (1 − r<sup>N+1</sup>) / (1 − r) + T<sub>res</sub><br><br>
+      <strong>Downtime T<sub>down</sub></strong> = r<sup>N</sup> × (V<sub>m</sub> / R) + T<sub>res</sub><br>
+      (Only the final stop-and-copy round plus restart contributes to actual downtime)
+    </div>
+
+    <h3>Number of Rounds</h3>
+    <div class="callout">
+      The pre-copy phase terminates when either condition is met first:<br>
+      N = min ( N<sub>max</sub> , &lceil; log(V<sub>th</sub> / V<sub>m</sub>) / log(r) &rceil; )<br><br>
+      — N<sub>max</sub>: hard limit on iterations<br>
+      — The log expression: number of rounds until dirty pages fall below V<sub>th</sub>
+    </div>
+
+    <div class="callout yellow"><strong>Why this matters:</strong> Knowing T<sub>MIG</sub> and T<sub>down</sub> in advance allows the CSP to plan maintenance windows, inform consumers of expected service interruption duration, and decide whether serial or parallel migration is better for a given scenario.</div>
+  </div>
+
+  <!-- Section 3: Multiple VM Migration -->
+  <div class="section">
+    <div class="section-label">3 · Multiple VM Migration Strategies</div>
+    <div class="callout"><strong>Context:</strong> System maintenance typically requires migrating all VMs on a server, not just one. If a server hosts m VMs, the CSP must choose a migration strategy.</div>
+
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Serial Migration</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">How it works</span>Migrate VMs one at a time using the full pre-copy cycle for the first VM; (m−1) VMs continue serving users</div>
+          <div class="compare-row"><span class="label">Stop-and-copy coordination</span>When VM<sub>1</sub> enters stop-and-copy phase, remaining (m−1) VMs are suspended — prevents them from dirtying their own memory during VM<sub>1</sub>'s critical phase</div>
+          <div class="compare-row"><span class="label">Transmission rate per VM</span>Full rate R — the migrating VM gets all available bandwidth</div>
+          <div class="compare-row"><span class="label">Downtime</span>Longer — includes stop-and-copy phase for VM<sub>1</sub> + migration time for (m−1) VMs + resume time at destination</div>
+          <div class="compare-row"><span class="label">Best for</span>When minimizing per-VM downtime is more important than total elapsed time</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Parallel Migration</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">How it works</span>All m VMs start their pre-copy cycles simultaneously — bandwidth is shared equally</div>
+          <div class="compare-row"><span class="label">Stop-and-copy coordination</span>If all VMs are the same size and have equal transmission rates, all enter stop-and-copy at approximately the same time — and all complete it at the same time</div>
+          <div class="compare-row"><span class="label">Transmission rate per VM</span>Effective rate ≈ R/m — each VM shares the link equally</div>
+          <div class="compare-row"><span class="label">Downtime</span>Shorter — stop-and-copy phase is simultaneous for all VMs; downtime = stop-and-copy duration + resume time (not multiplied by m)</div>
+          <div class="compare-row"><span class="label">Best for</span>When minimizing total downtime across all VMs matters more than per-VM efficiency</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout pink"><strong>Parallel migration caveat:</strong> With m VMs sharing a link at R/m, each VM's pre-copy takes longer (dirty pages accumulate faster relative to effective throughput). The R factor in the dirty-page formula becomes R/m — affecting convergence and the number of rounds required.</div>
+  </div>
+
+  <!-- Section 4: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Non-live model:</strong> T<sub>MIG</sub> = V<sub>m</sub>/R; downtime ≈ T<sub>MIG</sub>. Memory size is the bottleneck — large VMs have unacceptably long downtime without live migration.</div>
+    <div class="callout green"><strong>Pre-copy model:</strong> T<sub>MIG</sub> = (V<sub>m</sub>/R) × (1−r<sup>N+1</sup>)/(1−r) + T<sub>res</sub>; T<sub>down</sub> = r<sup>N</sup>×(V<sub>m</sub>/R) + T<sub>res</sub>. Dirty page factor r = P×d/R must be &lt;1 for pre-copy to converge.</div>
+    <div class="callout yellow"><strong>Serial vs. parallel for m VMs:</strong> Serial gives each VM full bandwidth but longer total window; parallel minimizes total downtime but each VM gets R/m throughput and pre-copy takes longer per VM.</div>
+    <div class="callout pink"><strong>Planning value:</strong> These models allow CSPs to pre-estimate migration duration, set maintenance windows accurately, and select serial vs. parallel strategies based on SLA constraints.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

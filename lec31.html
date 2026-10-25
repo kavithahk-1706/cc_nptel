@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 31 — Mobile Cloud Computing I | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec30.html" class="nav-lec">← prev</a>
+      <a href="lec32.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 31</span>
+    <span class="med-badge">MED priority</span>
+    <h1>Mobile Cloud Computing – I</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Introduces mobile cloud computing (MCC): the motivation for offloading computation from resource-constrained mobile devices to the cloud, the MBaaS paradigm, system architecture with profiler/solver/synchronizer components, key advantages, and open challenges. Survey-level lecture; good for short-answer exam questions on MCC definition, runtime offloading issues, and challenge areas.</p>
+  </div>
+
+  <!-- Section 1: What is MCC and Why -->
+  <div class="section">
+    <div class="section-label">1 · What is Mobile Cloud Computing (MCC)</div>
+    <div class="callout"><strong>Definition:</strong> MCC is a combination of cloud computing, mobile computing, and wireless networks that brings rich computational resources to mobile users — providing data storage and processing services on the cloud while moving computing power and data storage away from the mobile device.</div>
+
+    <h3>Three perspectives</h3>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Combination</div>
+        <div class="concept-desc">Cloud + mobile + wireless networks to deliver compute benefits to mobile users, network operators, and cloud providers — a "win" for all parties.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Offloading</div>
+        <div class="concept-desc">Mobile devices <strong>offload</strong> resource-hungry computation modules to the cloud and retrieve results — the device handles sensing and lightweight processing only.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Migration</div>
+        <div class="concept-desc">Computing power and data storage are <strong>migrated</strong> to cloud infrastructure, freeing the mobile device from both processing and storage burden.</div>
+      </div>
+    </div>
+
+    <h3>Motivation</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Enablers</div>
+        <div class="proto-card-title">Growth drivers</div>
+        <div class="proto-card-desc">Huge proliferation of smartphones; increased device capability; easy, low-cost high-bandwidth internet access from mobile devices.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Constraints</div>
+        <div class="proto-card-title">Resource challenges</div>
+        <div class="proto-card-desc">Battery life, limited storage, constrained bandwidth. Resource-hungry applications cannot run sustainably on the device alone.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Cloud side</div>
+        <div class="proto-card-title">Cloud advantage</div>
+        <div class="proto-card-desc">Low-cost, elastic, on-demand resources on a pay-as-you-go model. Cloud can provide virtually unlimited compute and storage.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Use case</div>
+        <div class="proto-card-title">Example</div>
+        <div class="proto-card-desc">Mobile device senses environmental data and performs initial analysis; predictive modelling (resource-hungry) is offloaded to the cloud; results returned to device for decision-making.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: MBaaS -->
+  <div class="section">
+    <div class="section-label">2 · Mobile Backend as a Service (MBaaS)</div>
+    <div class="callout"><strong>MBaaS:</strong> A model that gives mobile application developers a way to connect their apps to cloud storage and processing, abstracting away the complexity of managing back-end infrastructure so developers can focus on front-end development.</div>
+
+    <div class="tag-row">
+      <span class="tag tag-good">Multiple apps on shared backend</span>
+      <span class="tag tag-good">Multiple developer teams</span>
+      <span class="tag tag-good">Multiple mobile platforms</span>
+      <span class="tag tag-good">Third-party API integration</span>
+      <span class="tag tag-good">Enterprise connectivity</span>
+    </div>
+
+    <h3>Real-world examples of cloud-augmented mobile</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Amazon Silk (split browser)</span>
+      <span class="tag tag-good">Apple Siri</span>
+      <span class="tag tag-good">Apple iCloud</span>
+      <span class="tag tag-good">Image recognition apps</span>
+      <span class="tag tag-good">Augmented reality apps</span>
+    </div>
+    <div class="callout yellow"><strong>Common pattern:</strong> All these examples rely on a high-bandwidth wireless backbone to make the cloud appear seamlessly integrated — the processing on the cloud feels as if it runs on the device itself.</div>
+  </div>
+
+  <!-- Section 3: Runtime Offloading -->
+  <div class="section">
+    <div class="section-label">3 · Runtime Offloading — Challenges</div>
+    <div class="callout pink"><strong>Dynamic offloading is extremely non-trivial.</strong> Doing anything at runtime is fundamentally more complex than static partitioning.</div>
+
+    <h3>Key runtime offloading issues</h3>
+    <table class="port-table">
+      <thead><tr><th>Issue</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Dynamic application profiling</td><td>Continuously monitoring the app's execution to determine which modules are resource-intensive</td></tr>
+        <tr><td class="proto-name">Runtime application partitioning</td><td>Dividing the app into device-side and cloud-side components at run time</td></tr>
+        <tr><td class="proto-name">Migration of intensive components</td><td>Moving computationally heavy modules to cloud while maintaining correctness</td></tr>
+        <tr><td class="proto-name">Continuous synchronization</td><td>Keeping device and cloud execution states consistent throughout the entire runtime</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Key system components</h3>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Profiler</div>
+        <div class="concept-desc">Monitors application execution to collect data on <strong>execution time</strong>, <strong>power consumption</strong>, and <strong>network traffic</strong>. Determines what to offload.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Solver</div>
+        <div class="concept-desc">Decides <strong>which parts of the app run on device</strong> and which are uploaded to the cloud. Central decision-maker for partitioning.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Synchronizer</div>
+        <div class="concept-desc">Collects results of split execution, combines them, and makes the execution <strong>transparent to the user</strong> — feels like the app ran locally end-to-end.</div>
+      </div>
+    </div>
+
+    <div class="callout pink"><strong>Transparency requirement:</strong> After partitioned execution, the synchronizer must stitch results so the user perceives zero interruption — achieving this seamlessly is one of the hardest problems in MCC.</div>
+  </div>
+
+  <!-- Section 4: Architecture -->
+  <div class="section">
+    <div class="section-label">4 · MCC System Architecture</div>
+
+    <div class="stack">
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Cloud</span>
+        <span class="layer-desc">Cloud controllers process requests; cloud data sender + server nodes; SLA-bound execution queues; Application Service Provider</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Wireless Network</span>
+        <span class="layer-desc">Internet + mobile network (ISP + Network Operators); handles latency — critical bottleneck</span>
+      </div>
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Mobile Devices (SMD)</span>
+        <span class="layer-desc">Profiler → Solver → SMD Synchronizer → Workload Manager; connected to base station</span>
+      </div>
+    </div>
+
+    <div class="callout yellow"><strong>Flow:</strong> Mobile device connects to base station → subscriber request transmitted via internet → cloud controller processes request → response returned to mobile user. Network latency is the critical non-compute bottleneck.</div>
+  </div>
+
+  <!-- Section 5: Advantages -->
+  <div class="section">
+    <div class="section-label">5 · Advantages of MCC</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Energy</div>
+        <div class="proto-card-title">Extended battery life</div>
+        <div class="proto-card-desc">Offloading resource-hungry computation reduces on-device CPU usage → less power draw → longer battery life. Remote application execution saves energy significantly.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Storage</div>
+        <div class="proto-card-title">Improved data storage capacity</div>
+        <div class="proto-card-desc">Data stored on the cloud (not device) — continuous data ingestion (e.g., environmental sensors) without filling local storage. Huge cloud capacity available.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Reliability</div>
+        <div class="proto-card-title">Better availability</div>
+        <div class="proto-card-desc">Data loss on device (lost/broken phone) does not result in permanent data loss. Cloud's redundant storage keeps data safe. Services remain accessible while moving between devices.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Security</div>
+        <div class="proto-card-title">Comprehensive security model</div>
+        <div class="proto-card-desc">Cloud can host virus scanning and malicious code detection services. DRM (digital rights management) for copyrighted content possible. Data + services are omnipresent — accessible from any device.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Provisioning</div>
+        <div class="proto-card-title">Dynamic scalability</div>
+        <div class="proto-card-desc">Cloud elasticity allows dynamic provisioning and infinite scalability for mobile apps. Multi-tenancy shares resources across users and applications efficiently.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Integration</div>
+        <div class="proto-card-title">Ease of integration</div>
+        <div class="proto-card-desc">Multiple services from different providers can be integrated through the cloud to meet user demands. Standardized API access simplifies cross-platform connectivity.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Challenges -->
+  <div class="section">
+    <div class="section-label">6 · Open Challenges in MCC</div>
+
+    <table class="port-table">
+      <thead><tr><th>Challenge</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Security &amp; Privacy</td><td>Two sub-categories: (1) security of mobile users (malicious code, GPS privacy, location-based service leakage); (2) security of cloud data. Multi-provider path means the user often doesn't know which cloud actually stores their data.</td></tr>
+        <tr><td class="proto-name">Context-aware services</td><td>Different users have different needs (streaming, email, scientific computation). Services must adapt to local context: data type, network status, device environment, user preferences.</td></tr>
+        <tr><td class="proto-name">Network access management</td><td>Improving link performance while optimizing limited bandwidth. Latency is the primary bottleneck; multiple users share the same wireless and backbone resources.</td></tr>
+        <tr><td class="proto-name">QoS &amp; Pricing</td><td>Multiple parties involved (cloud provider + mobile network operator). Business model and SLA structure must satisfy both provider economics and user expectations.</td></tr>
+        <tr><td class="proto-name">Standard interfaces</td><td>Need standard APIs across different devices and application types so MCC frameworks are interoperable and reusable.</td></tr>
+        <tr><td class="proto-name">Service convergence</td><td>Services differentiated by type, cost, availability, quality. Need a scheme for mobile users to utilize multiple clouds in a unified, seamless fashion.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout pink"><strong>Security complexity:</strong> The mobile user typically subscribes to a mobile service provider, not the cloud itself. The service framework may silently select different cloud providers based on availability and pricing — making security assurance very difficult to guarantee end-to-end.</div>
+
+    <div class="callout"><strong>Threat model (from lecture):</strong> Two approaches to mobile security — (1) host agent on the device inspects file activity locally; (2) smartphone records minimum execution trace and sends it to a remote security server on the cloud for analysis.</div>
+  </div>
+
+  <!-- Section 7: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>MCC Definition:</strong> Cloud + mobile + wireless — offloads resource-hungry computation from constrained mobile devices to elastic cloud infrastructure, returning only results.</div>
+    <div class="callout green"><strong>Core benefit:</strong> Battery life extended, storage unlimited, reliability improved — all because the heavy lifting moves off-device.</div>
+    <div class="callout yellow"><strong>MBaaS:</strong> Backend-as-a-Service for mobile developers; abstracts infrastructure management so focus stays on front-end app logic.</div>
+    <div class="callout pink"><strong>Runtime offloading caveat:</strong> Dynamic partitioning, migration, and synchronization at runtime are extremely non-trivial. Profiler + Solver + Synchronizer components are needed but making them transparent to users is an open research problem.</div>
+    <div class="callout pink"><strong>Security caveat:</strong> Mobile user often cannot know which cloud provider holds their data — multi-provider paths make end-to-end security guarantees difficult.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

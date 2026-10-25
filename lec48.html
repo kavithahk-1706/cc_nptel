@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 48 — Docker: Overview, Components, and Architecture | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec47.html" class="nav-lec">← prev</a>
+      <a href="lec49.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 48</span>
+    <span class="high-badge">HIGH priority</span>
+    <h1>Docker: Overview, Components, and Architecture</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Covers the Docker container platform in depth — the problem it solves (complex multi-environment software deployment), its key benefits, core concepts (image, layer, container, registry), and the client-daemon-registry architecture that underlies every Docker operation. Conceptual foundation before the demo lectures. Reference: <em>Docker in Practice</em>, Ian Miell and Aidan Hopson.</p>
+  </div>
+
+  <!-- Section 1: The Problem Docker Solves -->
+  <div class="section">
+    <div class="section-label">1 · The Problem Docker Solves</div>
+    <div class="callout"><strong>Traditional deployment challenge:</strong> Deploying software across different environments (development, test, production) required significant manual effort. Each environment had its own OS variant, libraries, and dependencies — shipping code from one to another meant re-engineering configuration.</div>
+
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Traditional / VM Deployment</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Pipeline</span>Install → Configure → Maintain separately on each of: dev server, test server, live server</div>
+          <div class="compare-row"><span class="label">Config management</span>Complex array of configuration mechanisms per environment</div>
+          <div class="compare-row"><span class="label">Environment mismatch</span>Code working on Ubuntu may fail on Red Hat; must re-engineer</div>
+          <div class="compare-row"><span class="label">VM overhead</span>Waiting for VMs to boot; managing guest OS overhead</div>
+          <div class="compare-row"><span class="label">Specialist required</span>Each tool needs trained engineers familiar with its approach</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Docker Deployment</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Pipeline</span>Install → Configure once in Docker image → docker run on dev, test, and live</div>
+          <div class="compare-row"><span class="label">Config management</span>Single standardized pipeline to one output; no per-environment config</div>
+          <div class="compare-row"><span class="label">Environment mismatch</span>As long as Docker runs on the host, the container runs identically</div>
+          <div class="compare-row"><span class="label">Overhead</span>Lightweight — shares host OS kernel; starts almost instantly</div>
+          <div class="compare-row"><span class="label">Portability</span>Image is self-contained; ships from laptop to server to cloud unchanged</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout yellow"><strong>Docker philosophy:</strong> Build, ship, and run any app anywhere. Everything goes through a common pipeline to a single output that can be used on any target — no need to maintain an array of configuration mechanisms.</div>
+  </div>
+
+  <!-- Section 2: Key Benefits -->
+  <div class="section">
+    <div class="section-label">2 · Key Benefits of Docker</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Portability</div>
+        <div class="proto-card-title">Replace VMs in Many Situations</div>
+        <div class="proto-card-desc">When you only care about the application (not the OS), Docker replaces VMs. Lighter weight, quicker to start up, easier to move around due to layered filesystem. Scriptable — everything can be automated from the command line.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Portability</div>
+        <div class="proto-card-title">Package Software with No Dependencies</div>
+        <div class="proto-card-desc">A Docker image has no external dependency issues. Build your image and be sure it runs on any modern Linux host with Docker installed — regardless of which Linux variant (Ubuntu, Red Hat, CentOS, etc.).</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Developer Productivity</div>
+        <div class="proto-card-title">Rapid Prototyping Sandbox</div>
+        <div class="proto-card-desc">Spin up a sandbox environment almost instantly without disrupting your existing setup or provisioning a full VM. Before Docker, setting up the prototype environment alone consumed significant time.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Developer Productivity</div>
+        <div class="proto-card-title">Full-Stack Offline Productivity</div>
+        <div class="proto-card-desc">Bundle all components of a system into Docker containers and orchestrate them locally on a laptop. Enables working on the full stack even in offline mode — for development and testing without network access.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Operations</div>
+        <div class="proto-card-title">Enable Microservice Architecture</div>
+        <div class="proto-card-desc">Facilitates decomposition of complex systems into a series of composable parts — each manageable, pluggable, and independently deployable. Docker makes each microservice a self-contained unit that reasons in isolation.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Operations</div>
+        <div class="proto-card-title">Enable Continuous Delivery (CD)</div>
+        <div class="proto-card-desc">CD is a software delivery paradigm where every change triggers a rebuild → automated delivery to production. Docker builds are more reproducible and replicable than traditional methods — making CD pipelines far easier to implement.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Quality</div>
+        <div class="proto-card-title">Reduce Debugging Overhead</div>
+        <div class="proto-card-desc">State debugging steps clearly — even in script form — for a system with known properties. Bug reproduction is simpler because the container environment is reproducible. Eliminates "works on my machine" class of bugs.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Quality</div>
+        <div class="proto-card-title">Document Software Dependencies</div>
+        <div class="proto-card-desc">Building a Docker image forces explicit documentation of all software dependencies from the starting point. Since the image must be portable, you cannot skip a dependency — they must all be stated and packaged.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Core Concepts -->
+  <div class="section">
+    <div class="section-label">3 · Docker Core Concepts</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Concept</div>
+        <div class="proto-card-title">Layer</div>
+        <div class="proto-card-desc">A collection of changes to files — the difference between one version of the application and another. Layers are stored on disk. Each image is built up from multiple layers stacked on top of one another (e.g., OS layer → application v1 layer → application v2 layer).</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Concept</div>
+        <div class="proto-card-title">Image</div>
+        <div class="proto-card-desc">A collection of filesystem layers plus metadata. The static, read-only blueprint for a container. Multiple versions of an application can coexist as separate images. Images are pulled from a registry and stored on disk — they are not running processes.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Concept</div>
+        <div class="proto-card-title">Container</div>
+        <div class="proto-card-desc">A running instance of an image. Multiple containers can run from the same image simultaneously (e.g., myapp-container-v1.2, myapp-container-v1.3). When a new version is needed, build a new image (v3) and deploy it as new containers.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Concept</div>
+        <div class="proto-card-title">Registry</div>
+        <div class="proto-card-desc">A catalog/namespace where Docker images are stored and versioned. Can be a private registry (on internal network, restricted access) or a public registry such as Docker Hub (maintained by Docker Inc., internet-accessible). Daemons pull images from registries.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Key Commands -->
+  <div class="section">
+    <div class="section-label">4 · Key Docker Commands</div>
+    <table class="port-table">
+      <thead><tr><th>Command</th><th>Action</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">docker build</td><td>Build a Docker image</td><td>Creates a new image from a Dockerfile; packages code + dependencies into layers</td></tr>
+        <tr><td class="proto-name">docker run</td><td>Run a Docker image as a container</td><td>Instantiates a running container from an image; can run multiple containers from one image</td></tr>
+        <tr><td class="proto-name">docker commit</td><td>Commit a Docker container as an image</td><td>Captures the current state of a container as a new image for reuse or sharing</td></tr>
+        <tr><td class="proto-name">docker tag</td><td>Tag a Docker image</td><td>Assigns a human-readable name/version label to an image for identification in a registry</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 5: Docker Architecture -->
+  <div class="section">
+    <div class="section-label">5 · Docker Architecture</div>
+    <div class="callout"><strong>Two-part host architecture:</strong> Docker on a host machine is split into two parts — (1) the <strong>Docker daemon</strong> (server-side, with a RESTful API) and (2) the <strong>Docker client</strong> (command-line tool that talks to the daemon). Communication between the two uses the HTTP protocol.</div>
+
+    <h3>Components</h3>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Docker Client</div>
+        <div class="concept-desc">The command-line program the user invokes. Sends HTTP requests to the Docker daemon and receives responses. Acts as the intermediary between the user (or application) and the RESTful API. Does not manage containers directly — it instructs the daemon.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Docker Daemon</div>
+        <div class="concept-desc">The server process on the host machine. Receives requests from the client via HTTP and returns responses. Responsible for managing images and containers behind the scenes — pulls images from registries, creates and runs containers, manages their lifecycle.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Docker Registry</div>
+        <div class="concept-desc">A service that stores Docker images. A <strong>private registry</strong> sits on the internal network with controlled access. <strong>Docker Hub</strong> is the public registry run by Docker Inc., accessible over the internet. Other public registries can also exist.</div>
+      </div>
+    </div>
+
+    <h3>How It All Works Together</h3>
+    <div class="callout green">
+      <strong>Request flow:</strong><br>
+      1. User invokes Docker client → client sends HTTP request to Docker daemon on host machine<br>
+      2. Docker daemon receives request → manages image/container operations behind the scenes<br>
+      3. If an image is needed, daemon sends HTTP request to private registry (internal network) or Docker Hub (internet)<br>
+      4. Registry returns the image → daemon returns response to client
+    </div>
+
+    <div class="callout pink"><strong>Transport protocol note:</strong> The HTTP protocol used between client and daemon is the application-layer transport — do not confuse this with the Transport layer of the network stack (TCP/UDP). Docker piggybacks on HTTP for its REST API communication.</div>
+  </div>
+
+  <!-- Section 6: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Core philosophy:</strong> Build, ship, run any app anywhere. Docker packages code + all dependencies into a self-contained image that runs identically on any host with Docker — eliminating environment-specific configuration problems.</div>
+    <div class="callout green"><strong>Key advantage over VMs:</strong> Docker containers are lighter (no guest OS), faster to start, easier to move, and scriptable — making them preferable when only the application (not the OS) matters.</div>
+    <div class="callout yellow"><strong>Image → Layer → Container:</strong> An image is a stack of filesystem layers (each layer = set of file changes). A container is a running instance of an image. Multiple containers can run from the same image simultaneously.</div>
+    <div class="callout"><strong>Registry:</strong> Where images are stored — either a private registry on the internal network (restricted access) or Docker Hub (public, internet-accessible, run by Docker Inc.).</div>
+    <div class="callout green"><strong>Architecture:</strong> Docker client sends HTTP requests to the Docker daemon (RESTful API). The daemon manages all container and image operations, pulling images from registries as needed. The client is just the user-facing intermediary.</div>
+    <div class="callout pink"><strong>CD enablement:</strong> Docker's reproducibility makes Continuous Delivery (rebuild on every change → automated delivery to production) far more practical than traditional build methods.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

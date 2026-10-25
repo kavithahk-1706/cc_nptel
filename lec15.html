@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 15 — OpenStack | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec14.html" class="nav-lec">← prev</a>
+      <a href="lec16.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 15</span>
+    <span class="med-badge">MED priority</span>
+    <h1>OpenStack</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Overview of OpenStack — the leading open-source cloud operating system for IaaS. Covers its eight major components (Nova, Neutron, Swift, Cinder, Keystone, Glance, Ceilometer, Horizon), storage types, and the VM provisioning workflow. Architectural and definitional; most exam questions ask to identify which component handles which function.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · What is OpenStack?</div>
+    <div class="callout"><strong>OpenStack</strong> is a cloud operating system that controls large pools of compute, storage, and networking resources throughout a data centre — all managed through a dashboard (Horizon) that gives administrators control and lets users self-provision resources.</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Type</div>
+        <div class="proto-card-title">Open-source IaaS cloud</div>
+        <div class="proto-card-desc">Free to download and install. You supply the hardware; OpenStack turns it into a managed cloud. Runs on as few as two PCs — widely used in university labs and experimental setups.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Origin</div>
+        <div class="proto-card-title">NASA + Rackspace (2010)</div>
+        <div class="proto-card-desc">Started as a collaboration between NASA (compute) and Rackspace (object storage). Named releases started with "Austin" and continue through regular project-named versions.</div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>IIT Kharagpur example:</strong> The department runs an experimental OpenStack cloud called <em>Meghamala</em>, installed on blade servers, used by faculty and research scholars for computing needs.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · OpenStack Components</div>
+    <p>OpenStack is made of independent projects, each handling one service type. These eight are the key ones.</p>
+    <table class="port-table">
+      <thead><tr><th>Component</th><th>Project name</th><th>Function</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Compute</td><td>Nova</td><td>Manages the full lifecycle of VM instances — spawning, scheduling, decommissioning on demand. Manages ephemeral and persistent storage per VM.</td></tr>
+        <tr><td class="proto-name">Networking</td><td>Neutron</td><td>Network connectivity as a service. Provides APIs for defining networks and attaching instances to them. Pluggable architecture — works with many networking vendors. Manages internal cloud network + external network gateway.</td></tr>
+        <tr><td class="proto-name">Object Storage</td><td>Swift</td><td>Stores and retrieves arbitrary unstructured data objects via RESTful HTTP API. Highly fault-tolerant — replicates data 3× across server clusters. Not a mountable file server; designed for scale-out.</td></tr>
+        <tr><td class="proto-name">Block Storage</td><td>Cinder</td><td>Provides persistent block storage to running instances. Pluggable driver architecture for creating and managing block storage volumes. Persists until explicitly deleted by user.</td></tr>
+        <tr><td class="proto-name">Identity</td><td>Keystone</td><td>Authentication and authorization service for all other OpenStack services. Provides a catalogue of endpoints (service registry). Issues temporary tokens used for inter-service authentication.</td></tr>
+        <tr><td class="proto-name">Image Service</td><td>Glance</td><td>Stores and retrieves virtual machine disk images (OS images etc.). Nova uses Glance when provisioning new instances — looks up the image URI. Images physically stored in Swift.</td></tr>
+        <tr><td class="proto-name">Telemetry</td><td>Ceilometer</td><td>Monitors and meters cloud usage for billing, benchmarking, scalability analysis, and statistical reporting. Enables metered-service billing model. Helps forecast future infrastructure needs.</td></tr>
+        <tr><td class="proto-name">Dashboard</td><td>Horizon</td><td>Web-based self-service portal. Administrators launch instances, assign IPs, configure access control, manage users and quotas. Primary frontend for cloud management.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · OpenStack Storage Types</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Ephemeral Storage</div>
+        <div class="concept-desc">Persists only until the VM is terminated. Accessible from within the VM as a local file system. Used for running the OS or as scratch space. Managed by <strong>Nova</strong>.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Block Storage</div>
+        <div class="concept-desc">Persists until explicitly deleted by the user. Accessible as a block device from within the VM. Used to add additional persistent storage. Managed by <strong>Cinder</strong>.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Object Storage</div>
+        <div class="concept-desc">Persists until explicitly deleted. Accessible from anywhere via HTTP. Used to store files including VM images. Managed by <strong>Swift</strong>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · VM Provisioning Workflow</div>
+    <p>When a user creates a VM through Horizon, the following sequence runs:</p>
+    <div class="stack">
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">1. User → Horizon</span>
+        <span class="layer-desc">User logs in, specifies VM parameters (name, flavor, key), clicks Create</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">2. Horizon → Keystone</span>
+        <span class="layer-desc">Horizon sends HTTP request to Keystone with authentication info. Keystone validates and returns a temporary token.</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">3. Horizon → Nova API (with token)</span>
+        <span class="layer-desc">Horizon posts the VM creation request to Nova API. Nova API validates the token with Keystone again.</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">4. Nova → Nova Scheduler → Compute node</span>
+        <span class="layer-desc">Nova Scheduler selects an appropriate compute host from the database, publishes a message to the compute queue. Nova Compute picks it up.</span>
+      </div>
+      <div class="stack-layer layer-app">
+        <span class="layer-name">5. Nova coordinates remaining services</span>
+        <span class="layer-desc">Neutron configures networking. Cinder provides block storage. Glance looks up the image URI. Swift retrieves the image. Hypervisor renders (boots) the VM.</span>
+      </div>
+    </div>
+    <div class="callout green"><strong>Summary:</strong> Horizon (UI) → Keystone (auth token) → Nova (compute orchestration) → Neutron (network) + Cinder (storage) + Glance (image lookup) + Swift (image retrieval) → Hypervisor (VM boots).</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · OpenStack Architecture Overview</div>
+    <div class="callout"><strong>Layered architecture:</strong> Standard hardware → OpenStack shared services → Compute / Networking / Storage services → Dashboard and REST APIs → User applications.</div>
+    <div class="callout yellow"><strong>Multi-tenancy:</strong> OpenStack supports quotas per project/user. Users can be associated with multiple projects. Administrators control resource limits from Horizon.</div>
+    <div class="callout pink"><strong>Internal vs external network:</strong> Cloud components communicate over an internal network (hidden from outside). The external network (e.g. institute LAN) is exposed to users as the gateway. Both are managed by Neutron.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>OpenStack</strong> is an open-source IaaS cloud OS managing compute (Nova), networking (Neutron), object storage (Swift), block storage (Cinder), identity (Keystone), image (Glance), telemetry (Ceilometer), and dashboard (Horizon).</div>
+    <div class="callout green"><strong>Storage types:</strong> Ephemeral (VM lifetime, Nova) → Block (persistent until deleted, Cinder) → Object (anywhere-accessible via HTTP, Swift). VM images live in Glance metadata and Swift storage.</div>
+    <div class="callout yellow"><strong>Provisioning flow:</strong> Horizon → Keystone (token) → Nova (schedule) → Neutron + Cinder + Glance + Swift → Hypervisor boots VM.</div>
+    <div class="callout"><strong>Ceilometer</strong> is the metering/telemetry service — enables metered billing and provides statistical data for capacity planning.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

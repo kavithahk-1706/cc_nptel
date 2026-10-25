@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 28 — Cloud Security III | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec27.html" class="nav-lec">← prev</a>
+      <a href="lec29.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 28</span>
+    <span class="med-badge">MED priority</span>
+    <h1>Cloud Security III — Case Study: Co-Residence Attacks on EC2</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Applied case study based on the ACM CCS 2009 paper "Hey, You, Get Off of My Cloud." Covers co-residence attacks on Amazon EC2: cloud cartography, instance placement exploits, co-residency detection, cross-VM side-channel attacks, and countermeasures. Reinforces cloud-specific security risks from lec27 with concrete experimental evidence.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · The Paper — Context &amp; Key Claim</div>
+    <div class="callout"><strong>"Hey, You, Get Off of My Cloud: Exploring Information Leakage in Third-Party Compute Clouds"</strong> — ACM CCS 2009. Claimed as first work in cloud cartography. Experiments conducted on Amazon EC2.</div>
+    <div class="callout green"><strong>Key result:</strong> 40% success rate in achieving co-residence with the target VM on a real commercial cloud (Amazon EC2) — without any insider access or provider cooperation.</div>
+    <div class="callout pink"><strong>Objective of this lecture:</strong> Not to expose EC2 vulnerabilities, but to understand what types of cloud-specific security risks are practically exploitable. The paper uses EC2 as a real-world test bed.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · New Risk Factors in Cloud</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Trust &amp; dependency</div>
+        <div class="proto-card-title">Customer must trust the provider</div>
+        <div class="proto-card-desc">Customer delegates data, processes, and applications to the cloud provider's infrastructure. They must trust that the provider preserves the privacy of data and the integrity of all computations — with no independent means of verification.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Multi-tenancy</div>
+        <div class="proto-card-title">Co-location with unknown parties</div>
+        <div class="proto-card-desc">Multiple customers' VMs share the same physical server. The customer has no control over who they share physical hardware with. A malicious co-tenant can potentially exploit shared physical resources to extract information.</div>
+      </div>
+    </div>
+    <h3>Multi-tenancy threat vectors</h3>
+    <div class="tag-row">
+      <span class="tag tag-bad">Side-channel / cross-VM information leakage via shared physical resources</span>
+      <span class="tag tag-bad">Potential extraction of RSA and AES secret keys via side channels</span>
+      <span class="tag tag-bad">Vulnerable VM isolation (hypervisor escape)</span>
+      <span class="tag tag-bad">No control over which other tenants share the same server</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · The Attack Model — Two Steps</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Step 1: Placement</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Goal</span>Place attacker's VM on the same physical server as the target VM</div>
+          <div class="compare-row"><span class="label">Challenge</span>Provider does not disclose where VMs are placed; co-location is opaque</div>
+          <div class="compare-row"><span class="label">Method</span>Cloud cartography + instance placement locality exploitation</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Step 2: Extraction</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Goal</span>Extract confidential information from the victim VM via side channels</div>
+          <div class="compare-row"><span class="label">Vectors</span>Keystroke timing, cache usage patterns, covert channels, traffic rate analysis</div>
+          <div class="compare-row"><span class="label">Advantage</span>Once co-resident, attacker has direct access to shared physical resources</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout"><strong>Threat model assumptions:</strong> Provider and infrastructure are trusted (no insider attack). Adversaries are non-provider-affiliated customers — they interact as ordinary users. Victims run services requiring privacy/confidentiality.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · Amazon EC2 Architecture (as studied)</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Instance parameters</div>
+        <div class="proto-card-title">Three degrees of freedom</div>
+        <div class="proto-card-desc"><strong>Instance type</strong> (m1.small, m1.medium, m1.large, m1.xlarge), <strong>Region</strong> (US, EU, Asia), <strong>Availability Zone</strong> (within a region, e.g. US-East, US-West). Customers are randomly assigned to a physical machine based on these three choices.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Hypervisor</div>
+        <div class="proto-card-title">Xen + Dom0</div>
+        <div class="proto-card-desc"><strong>Dom0</strong> is the privileged VM that manages guest images, provisions physical resources, controls access rights, and routes packets. Dom0 reports itself as a hop in traceroute. An instance is assigned to a single physical machine for its entire lifetime.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Addressing</div>
+        <div class="proto-card-title">Internal + External IP</div>
+        <div class="proto-card-desc">Each instance gets an internal IP (used within the cloud) and an external IP (used outside the cloud). Within the cloud, both DNS names resolve to the internal IP. Outside the cloud, the external DNS name resolves to the external IP.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Availability zones</div>
+        <div class="proto-card-title">Physically separate power &amp; network</div>
+        <div class="proto-card-desc">Each AZ has separate power and network infrastructure. Different IP blocks are used per AZ. A power failure or network issue in one AZ does not cascade to others — this isolation is also what makes placement cartography possible (AZ → IP block correlation).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · Step 1a — Cloud Cartography (Finding the Target)</div>
+    <div class="callout"><strong>Cloud cartography:</strong> Building a map of which IP address ranges correspond to which instance types and availability zones, so an attacker can choose parameters that place their VM near the target.</div>
+    <h3>Probing methodology</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">External probe</div>
+        <div class="proto-card-title">From outside EC2 → EC2 instance</div>
+        <div class="proto-card-desc">Used tools: <strong>nmap, hping, wget</strong>. Scanned ports 80 (HTTP) and 443 (HTTPS) across known EC2 IP prefixes to find responsive IPs. Then used DNS lookups to map each public IP to its internal EC2 address. Result: ~14,000 unique internal IPs discovered.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Internal probe</div>
+        <div class="proto-card-title">From EC2 instance → EC2 instance</div>
+        <div class="proto-card-desc">Originates from an attacker-controlled EC2 instance with an EC2 target as destination. Allows direct internal IP probing, round-trip time measurement, and traceroute to identify Dom0 hops — all from inside the cloud network.</div>
+      </div>
+    </div>
+    <div class="callout green"><strong>Key observation:</strong> Different availability zones and instance types correspond to disjoint IP address blocks. By launching probe instances and observing which /24 prefixes they land in, an attacker can reverse-engineer the placement partitioning scheme.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · Step 1b — Co-Residency Detection</div>
+    <div class="callout"><strong>Co-residency check:</strong> Two instances are likely co-resident if they share the same Dom0 IP, have small round-trip times, and have numerically close internal IP addresses (typically within a /24).</div>
+    <h3>Detection method (non-invasive)</h3>
+    <ol>
+      <li>Compare internal IP addresses — are they in the same or adjacent /24 block?</li>
+      <li>Perform TCP SYN traceroute to an open port on the target — if only one hop (the Dom0), they are on the same physical server.</li>
+      <li>Check requires at most <strong>two TCP SYN packets</strong> — no full TCP connection is established; victim is unaware.</li>
+    </ol>
+    <div class="callout pink">Disk-based covert channels can also be used to confirm co-residency: if two instances under attacker control can communicate via a shared covert channel, they are confirmed co-resident.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">7 · Step 1c — Causing Co-Residency</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Brute force placement</div>
+        <div class="proto-card-title">Launch many probe instances</div>
+        <div class="proto-card-desc">Launch numerous instances in the target's availability zone and instance type. With enough attempts, probability of landing on the same physical server increases — 40% success rate reported in the paper.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Temporal locality</div>
+        <div class="proto-card-title">Target recently-launched instances</div>
+        <div class="proto-card-desc">EC2 tends to assign freshly launched instances to a small set of machines. Launching attacker instances at the same time as (or just after) the victim increases co-location probability. <em>Parallel placement locality</em>: two instances launched at roughly the same time are often assigned to the same machine.</div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Placement locality types:</strong> Sequential locality — IP addresses repeat when new instances are launched after terminating old ones from the same account. Parallel locality — instances launched simultaneously from different accounts tend toward the same physical server. Instance flooding — launching many parallel instances in the same AZ/type maximizes coverage.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">8 · Step 2 — Exploiting Co-Residency (Side-Channel Attacks)</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Keystroke timing</div>
+        <div class="proto-card-title">Password inference</div>
+        <div class="proto-card-desc">SSH keystrokes generate detectable inter-packet timing patterns across the shared network stack. A co-resident attacker monitoring these timings can statistically narrow down the password being typed.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Cache usage analysis</div>
+        <div class="proto-card-title">Process activity inference</div>
+        <div class="proto-card-desc">Monitor patterns of CPU cache evictions. The cache usage pattern of a co-resident process leaks information about what the process is doing — allows classification of workload type or detection of sensitive operations.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Covert channels</div>
+        <div class="proto-card-title">Intentional data leakage</div>
+        <div class="proto-card-desc">Create a covert communication path between two attacker-controlled co-resident VMs via shared resources (disk I/O, network timing, CPU load). Bypasses any network-layer security controls — channel exists entirely within the physical server.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Traffic rate estimation</div>
+        <div class="proto-card-title">Victim activity profiling</div>
+        <div class="proto-card-desc">Measure victim's HTTP traffic rates from a co-resident vantage point. Distinguish no-traffic, idle HTTP, and active HTTP states — useful for timing attacks or profiling customer behavior patterns.</div>
+      </div>
+    </div>
+    <span class="ts">▶ 29:42</span>
+    <div class="callout yellow">Worth watching: Traffic rate estimation graphs showing measurable differences between no-HTTP, idle-HTTP, and active-HTTP conditions — the numeric data is not fully reproducible from the transcript description.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">9 · Countermeasures &amp; Their Limitations</div>
+    <table class="port-table">
+      <thead><tr><th>Countermeasure</th><th>How it helps</th><th>Limitation</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Randomized IP allocation</td><td>Blocks cartography tools (nmap, traceroute) from mapping AZ→IP correspondence</td><td>Randomization conflicts with resource management and routing optimization; operationally expensive for the provider</td></tr>
+        <tr><td class="proto-name">Prevent Dom0 identification</td><td>Stops co-residency check based on single-hop traceroute</td><td>Attacker can still use other heuristics (IP proximity, timing); doesn't eliminate co-residency</td></tr>
+        <tr><td class="proto-name">No co-location (strict isolation)</td><td>Eliminates co-residency entirely — physically separate each tenant</td><td>Extremely inefficient for the provider; defeats the economics of multi-tenant cloud; not commercially viable</td></tr>
+        <tr><td class="proto-name">Side-channel mitigation</td><td>Cache partitioning, noise injection, timing randomization</td><td>Remains an open research problem; each mitigation can often be bypassed; performance overhead is significant</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Two-step attack:</strong> Placement (co-locate attacker VM with victim VM via cloud cartography + locality exploitation) followed by Extraction (side-channel attacks on shared physical resources).</div>
+    <div class="callout green"><strong>40% co-residence success:</strong> Against a real commercial cloud (Amazon EC2) with no insider access — demonstrates that co-residence attacks are not theoretical; they are practically achievable.</div>
+    <div class="callout yellow"><strong>Side-channel vectors:</strong> Keystroke timing (password inference), cache usage analysis (workload classification), covert channels (intentional data exfiltration between co-resident VMs), and traffic rate profiling.</div>
+    <div class="callout pink"><strong>No clean fix:</strong> All countermeasures carry significant operational or efficiency costs. Side-channel attacks on shared infrastructure remain an open and unsolved problem in cloud security.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

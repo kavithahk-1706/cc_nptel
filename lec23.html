@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 23 — MapReduce Tutorial | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec22.html" class="nav-lec">← prev</a>
+      <a href="lec24.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 23</span>
+    <span class="high-badge">HIGH priority</span>
+    <h1>MapReduce Tutorial — Worked Problems &amp; Pseudocode</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Three problems: HDFS block count calculation, MapReduce pseudocode for computing an average (3 mappers, 1 reducer), and MapReduce pseudocode for salary aggregation grouped by gender. Pseudocode logic is examinable — understand the map phase output and the reduce phase aggregation before reading the code.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · MapReduce Recap</div>
+    <div class="callout"><strong>MapReduce model:</strong> M mappers each read 1/M of input from the distributed file system (GFS/HDFS). Each mapper produces one output file per reducer, stored locally and sorted by key. Each reducer fetches its files from all M mappers via RPC, groups by key, applies the reduce function, and writes to GFS/HDFS.</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Map phase</div>
+        <div class="proto-card-title">(k1, v1) → (k2, v2)</div>
+        <div class="proto-card-desc">Transform: read 1/M of input → apply map function → emit intermediate (key, value) pairs → write one file per reducer to local FS.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Reduce phase</div>
+        <div class="proto-card-title">(k2, [v2]) → (k2, result)</div>
+        <div class="proto-card-desc">Aggregate: fetch all partial files from mappers via RPC → group by key → apply reduce function (sum, average, count, etc.) → write to GFS/HDFS.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Problem 1 — HDFS Block Count</div>
+    <div class="callout yellow">
+      <strong>Given:</strong> HDFS block size = 64 MB. Replication factor = 3. Three files: 64 KB, 65 MB, 127 MB.<br>
+      <strong>Find:</strong> Total number of physical blocks stored (including replicas).
+    </div>
+    <table class="port-table">
+      <thead><tr><th>File size</th><th>Blocks needed</th><th>Reasoning</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">64 KB</td><td>1 block</td><td>64 KB &lt; 64 MB → fits in 1 block (partially filled)</td></tr>
+        <tr><td class="proto-name">65 MB</td><td>2 blocks</td><td>First 64 MB in block 1; remaining 1 MB in block 2</td></tr>
+        <tr><td class="proto-name">127 MB</td><td>2 blocks</td><td>First 64 MB in block 1; remaining 63 MB in block 2</td></tr>
+        <tr><td class="proto-name">Total logical blocks</td><td><strong>5</strong></td><td>1 + 2 + 2</td></tr>
+        <tr><td class="proto-name">Physical blocks (×3 replicas)</td><td><strong>15</strong></td><td>5 × 3 = 15 blocks stored on cluster</td></tr>
+      </tbody>
+    </table>
+    <div class="callout green"><strong>Rule:</strong> Blocks = ⌈file_size / block_size⌉ per file. Multiply total by replication factor for actual storage used.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Problem 2 — Average of a Set of Integers</div>
+    <div class="callout yellow">
+      <strong>Given:</strong> Input = {10, 20, 30, 40, 50}. 3 mappers, 1 reducer.<br>
+      <strong>Find:</strong> Average using MapReduce. Write pseudocode for mapper and reducer.
+    </div>
+    <h3>Data partition by master</h3>
+    <table class="port-table">
+      <thead><tr><th>Mapper</th><th>Input chunk</th><th>Mapper output (local avg, count)</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">M1</td><td>10, 20</td><td>(15.0, 2) → avg=15, count=2</td></tr>
+        <tr><td class="proto-name">M2</td><td>30, 40</td><td>(35.0, 2) → avg=35, count=2</td></tr>
+        <tr><td class="proto-name">M3</td><td>50</td><td>(50.0, 1) → avg=50, count=1</td></tr>
+      </tbody>
+    </table>
+    <h3>Reducer aggregation</h3>
+    <div class="callout">
+      Σ(avg × count) = 15×2 + 35×2 + 50×1 = 30 + 70 + 50 = 150<br>
+      Σ(count) = 2 + 2 + 1 = 5<br>
+      <strong>Final average = 150 / 5 = 30</strong>
+    </div>
+    <h3>Pseudocode</h3>
+    <div class="callout yellow"><strong>Mapper (mapper.py)</strong></div>
+    <div class="callout">
+<pre>def map(l):           # l = list of integers assigned by master
+    s = 0
+    for i in range(len(l)):
+        s = s + l[i]
+    avg = s * 1.0 / len(l)   # float division
+    print(avg, len(l))        # emit (local_avg, count) to local FS</pre>
+    </div>
+    <div class="callout yellow"><strong>Reducer (reducer.py)</strong></div>
+    <div class="callout">
+<pre>def reduce(mapper_outputs):   # list of (avg, count) from all mappers
+    total = 0
+    count = 0
+    for (avg, c) in mapper_outputs:
+        total = total + avg * c   # reconstruct partial sum
+        count = count + c
+    average = total * 1.0 / count
+    print(average)                # write to GFS/HDFS</pre>
+    </div>
+    <div class="callout pink"><strong>Key point:</strong> Mappers emit (local_avg, count), NOT raw sums, so the reducer can reconstruct the weighted sum. Emitting just the local avg and taking an average-of-averages is incorrect when chunk sizes differ.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · Problem 3 — Salary Aggregation Grouped by Gender</div>
+    <div class="callout yellow">
+      <strong>Given:</strong> Input tuples: (name, gender, salary) e.g. ("John", "M", 10000), ("Martha", "F", 15000), …<br>
+      <strong>Find:</strong> Total salary and average salary grouped by gender (M and F), using MapReduce.
+    </div>
+    <h3>Design</h3>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Map phase</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Input</span>(name, gender, salary)</div>
+          <div class="compare-row"><span class="label">Extract</span>gender and salary only; discard name</div>
+          <div class="compare-row"><span class="label">Emit key</span>gender ("M" or "F")</div>
+          <div class="compare-row"><span class="label">Emit value</span>salary (integer)</div>
+          <div class="compare-row"><span class="label">Output</span>("M", 10000), ("F", 15000), …</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Reduce phase</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Input</span>All (gender, salary) pairs from mappers</div>
+          <div class="compare-row"><span class="label">Group by</span>gender key</div>
+          <div class="compare-row"><span class="label">Compute</span>total = Σ salaries; avg = total / count</div>
+          <div class="compare-row"><span class="label">Output</span>("M", total_M, avg_M), ("F", total_F, avg_F)</div>
+          <div class="compare-row"><span class="label">Write to</span>GFS/HDFS</div>
+        </div>
+      </div>
+    </div>
+    <h3>Pseudocode</h3>
+    <div class="callout yellow"><strong>Mapper (mapper.py)</strong></div>
+    <div class="callout">
+<pre>for line in sys.stdin:
+    fields = line.split(",")
+    name   = fields[0]
+    gender = fields[1]
+    salary = int(fields[2])
+    print(gender, salary)   # emit (gender, salary) to local FS</pre>
+    </div>
+    <div class="callout yellow"><strong>Reducer (reducer.py)</strong></div>
+    <div class="callout">
+<pre>dict_org = {}   # { gender: [salary1, salary2, ...] }
+
+for line in sys.stdin:
+    gender, salary = line.split()
+    salary = int(salary)
+    if gender in dict_org:
+        dict_org[gender].append(salary)
+    else:
+        dict_org[gender] = [salary]   # initialize on first encounter
+
+for gender in dict_org:
+    salaries    = dict_org[gender]
+    total_sal   = sum(salaries)
+    avg_sal     = total_sal * 1.0 / len(salaries)
+    print(gender, total_sal, avg_sal)   # write to GFS/HDFS</pre>
+    </div>
+    <div class="callout green"><strong>Pattern:</strong> Mapper extracts only the fields needed for the query (gender, salary) — discards irrelevant fields (name). Reducer groups by key and applies aggregate function (sum, average). This is the standard MapReduce filter-aggregate pattern.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>HDFS blocks:</strong> ⌈file_size / block_size⌉ per file; multiply by replication factor (typically 3) for physical storage budget.</div>
+    <div class="callout green"><strong>Average pattern:</strong> Mappers emit (local_avg, count); reducer computes Σ(avg×count) / Σ(count). Never average the averages directly when chunk sizes differ.</div>
+    <div class="callout yellow"><strong>Group-by pattern:</strong> Map phase emits (group_key, value); reduce phase collects all values per key and applies aggregate. Mapper discards fields not needed by the query.</div>
+    <div class="callout pink"><strong>Scalability logic:</strong> MapReduce value comes from parallelism across M mappers. With small datasets it adds overhead; it shines only at large scale (thousands of processors, TB+ data).</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 58 — Case Study I: Spatial Cloud Computing | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec57.html" class="nav-lec">← prev</a>
+      <a href="lec59.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 58</span>
+    <span class="skip-badge">SKIP priority</span>
+    <h1>Case Study I: Spatial Cloud Computing</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Applied case study showing how cloud computing suits the needs of geospatial and spatio-temporal data analysis. Covers spatial data fundamentals, analysis goals, the cloud fit, and a concrete case study of mobility analytics (TrashCloud framework) implemented on Google Cloud Platform. Motivating example — skim for the definition of spatial cloud computing and Tobler's First Law.</p>
+  </div>
+
+  <!-- Section 1: Spatial Data Fundamentals -->
+  <div class="section">
+    <div class="section-label">1 · Spatial Data Fundamentals</div>
+    <div class="callout"><strong>Spatial data:</strong> Any information that has a feature set along with a location (coordinate). <strong>Geospatial data</strong> specifically refers to objects, events, or phenomena on or near the Earth's surface — combining location (latitude/longitude), attribute information (features of the object), and often a temporal dimension (how things change over time).</div>
+
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Spatial (visible) attributes</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Building</span>Footprint, floor plan, shape from above</div>
+          <div class="compare-row"><span class="label">Road</span>Polyline — series of coordinates tracing the road</div>
+          <div class="compare-row"><span class="label">Forest</span>Polygon boundary of forested area</div>
+          <div class="compare-row"><span class="label">Example</span>Can be observed by flying a drone over the area</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Non-spatial (attribute) data</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Building</span>Name, departments inside, academic vs residential</div>
+          <div class="compare-row"><span class="label">Road</span>Name, type, width, speed limit</div>
+          <div class="compare-row"><span class="label">Forest</span>Forest type, ownership, protected status</div>
+          <div class="compare-row"><span class="label">Example</span>Cannot be read from the drone image; stored as attribute table</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout pink"><strong>Spatio-temporal data:</strong> Adding the time dimension — how spatial features change over time. Examples: forest coverage change over decades, shift in river paths, agricultural land use over seasons, meteorological patterns. Over 90% of datasets worldwide have some spatial context inherently embedded in them.</div>
+  </div>
+
+  <!-- Section 2: Spatial Analysis and Applications -->
+  <div class="section">
+    <div class="section-label">2 · Spatial Analysis and Applications</div>
+    <div class="callout"><strong>Spatial analysis</strong> adds a new perspective to decision-making by letting you pose location-oriented questions, find patterns, trends, and relationships between regions — going far beyond just viewing a map.</div>
+
+    <h3>Application Domains</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Crime hotspot mapping and police patrol routing</span>
+      <span class="tag tag-good">Flood/drought prediction and early warning</span>
+      <span class="tag tag-good">Optimal path finding and traffic congestion prediction</span>
+      <span class="tag tag-good">Crop yield estimation with multimodal inputs (rainfall, soil, demand)</span>
+      <span class="tag tag-good">Cyclone path prediction and emergency routing</span>
+      <span class="tag tag-good">Development planning by local, state, and national governments</span>
+      <span class="tag tag-good">Delivery time estimation for e-commerce</span>
+      <span class="tag tag-good">Wildlife and animal migration pattern analysis</span>
+    </div>
+
+    <div class="callout yellow"><strong>Tobler's First Law of Geography:</strong> "Near things are more related than distant things." Everything is related to everything else, but nearby objects are more strongly related. Example: temperature of Kharagpur is more likely similar to Midnapore (15 km away) than to Darjeeling or Shimla. This principle underpins spatial interpolation, kriging, and spatial autocorrelation methods.</div>
+  </div>
+
+  <!-- Section 3: Why Cloud for Spatial Data? -->
+  <div class="section">
+    <div class="section-label">3 · Why Cloud for Spatial Data?</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Enormous Data Volume</div>
+        <div class="proto-card-desc">Spatial datasets are voluminous. Moving terabytes of data from one place to another is a serious constraint. Meaningful analysis must happen where the data is — or be brought to an elastic compute platform that scales to the data volume.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Heterogeneous Data Sources</div>
+        <div class="proto-card-desc">Spatial analysis requires integrating multiple datasets — satellite imagery, weather sensors, road networks, demographic data, economic indicators — all with different formats, projections, and update frequencies. A shared platform enables integration.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Access Spikes and Real-time Demand</div>
+        <div class="proto-card-desc">Emergency events (floods, cyclones, fires) create sudden massive spikes in demand for spatial analysis. Servers must scale up instantly. Normal operations don't justify always-on high-capacity hardware — cloud elasticity is the ideal fit.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Scalable Multi-user Access</div>
+        <div class="proto-card-desc">Government agencies, researchers, businesses, and NGOs all need concurrent access to spatial services. Cloud enables large numbers of concurrent users and standardized spatial web services (via OGC standards) that any client can access.</div>
+      </div>
+    </div>
+
+    <div class="callout green"><strong>Cloud fit for spatial:</strong> Cloud = ubiquitous, on-demand, elastic, shared pool of compute/storage/network — matches spatial data's need for scalability, real-time access, and integration across heterogeneous sources. Cloud's ability to provide configurable compute infrastructure also enables intensive simulation models (climate modeling, flood simulation) that cannot run on fixed on-premises hardware.</div>
+  </div>
+
+  <!-- Section 4: Spatio-temporal Cloud Computing -->
+  <div class="section">
+    <div class="section-label">4 · Spatio-temporal Cloud Computing</div>
+    <div class="callout"><strong>Spatio-temporal cloud computing:</strong> The cloud computing paradigm that is <em>driven by geospatial sciences</em> and <em>optimized by spatio-temporal principles</em> — enabling geospatial science discoveries within a distributed computing environment. Cloud features (IaaS/PaaS/SaaS, elasticity) remain, but are specialized to support spatial web services and geospatial domain knowledge.</div>
+
+    <h3>Spatial Cloud Architecture</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Service Layer</div>
+        <div class="proto-card-title">Spatial Web Services (OGC-standard)</div>
+        <div class="proto-card-desc">Web Feature Service (WFS): returns vector features; Web Map Service (WMS): returns rendered maps; Catalog Service (CSW): metadata discovery; Processing Service: spatial operations (buffer, overlay, analysis). OGC = Open Geospatial Consortium — defines standards for interoperability.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Data Layer</div>
+        <div class="proto-card-title">Spatial Databases</div>
+        <div class="proto-card-desc">Spatial databases (PostGIS, Oracle Spatial) store geometry and attributes. The cloud instance accesses these via standardized APIs. Any OGC-client can query these services regardless of underlying database implementation.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">User Layer</div>
+        <div class="proto-card-title">Private and Public Organizations</div>
+        <div class="proto-card-desc">Government agencies, businesses, and research organizations share spatial data via cloud. Deployment models (public/private/hybrid/community cloud) apply to spatial cloud as to any cloud — choice depends on data sensitivity, compliance, and collaboration needs.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Benefit</div>
+        <div class="proto-card-title">Shared Resource Pooling</div>
+        <div class="proto-card-desc">Multiple organizations can share the spatial data infrastructure for both common goals (national mapping) and individual needs (municipal planning). Avoids siloed datasets, promotes integration and cross-domain analysis.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Case Study — Mobility Analytics / TrashCloud -->
+  <div class="section">
+    <div class="section-label">5 · Case Study: Mobility Analytics and TrashCloud</div>
+    <div class="callout"><strong>Mobility analytics:</strong> Analysis of how objects (humans, vehicles, animals, natural phenomena) move through space over time, with the goal of understanding patterns, predicting future locations, and improving transportation systems. Human movement has <em>intent</em> — semantic context embedded in the trajectory.</div>
+
+    <h3>Mobility Data Sources</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Daily GPS footprints and travel logs</span>
+      <span class="tag tag-good">Check-ins (social media, transit)</span>
+      <span class="tag tag-good">Mobile phone activity logs</span>
+      <span class="tag tag-good">Vehicle and transportation data</span>
+      <span class="tag tag-good">Smart home sensor data / IoT</span>
+      <span class="tag tag-good">Animal movement and cyclone path data</span>
+    </div>
+
+    <div class="callout yellow"><strong>Semantic trajectory:</strong> A trajectory is more than x,y coordinates over time — it carries <em>semantic meaning</em> (intent). Example: students walking home from class may detour to food joints or coffee shops. Recognizing this intent enables better location-based services (food delivery, route suggestions, facility placement).</div>
+
+    <h3>TrashCloud Framework</h3>
+    <div class="callout"><strong>TrashCloud</strong> (Trajectory-based cloud) — a cloud-based framework for mobility trace analysis to enable smart city applications. Core services: trip planning, travel time prediction, and ridesharing facilitation.</div>
+
+    <div class="stack">
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Urban Sensing / Data Acquisition</span>
+        <span class="layer-desc">GPS traces, road network data, real-time traffic information — raw spatio-temporal input to the system</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">Trajectory Pre-processing</span>
+        <span class="layer-desc">Cleaning, filtering, and preparing raw trajectory data for analysis</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Trajectory Modeling</span>
+        <span class="layer-desc">Map matching (snapping GPS to road network), trajectory geo-tagging, semantic enrichment</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">Trajectory Trace Processing</span>
+        <span class="layer-desc">Spatio-temporal range queries, trajectory-based query processing, information retrieval</span>
+      </div>
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Services: Indexing + Map Matching + Query Processing</span>
+        <span class="layer-desc">Location-based services — trip planning, travel time prediction, ridesharing — delivered to end users</span>
+      </div>
+    </div>
+
+    <div class="callout green"><strong>GCP implementation:</strong> TrashCloud was deployed on Google Cloud Platform using Google BigQuery + Cloud SQL (trajectory data indexing and storage), Google Compute Engine (map matching and query processing). Also tested on IIT Kharagpur's in-house Megamala cloud. Demonstrates that a real spatial analytics pipeline can be fully realized on commercial cloud infrastructure.</div>
+  </div>
+
+  <!-- Section 6: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Spatial data:</strong> Feature + location + time. Over 90% of real-world datasets have spatial context. Analysis goes beyond mapping to find patterns, predict events, and support decision-making.</div>
+    <div class="callout yellow"><strong>Tobler's First Law:</strong> Near things are more related than distant things — the foundational domain principle that shapes all spatial analysis methods.</div>
+    <div class="callout green"><strong>Spatio-temporal Cloud Computing:</strong> Cloud paradigm driven by geospatial science and optimized by spatio-temporal principles. Cloud's elasticity and scalability solve spatial data's volume, heterogeneity, and access spike challenges.</div>
+    <div class="callout"><strong>TrashCloud:</strong> A practical end-to-end cloud-based trajectory mining framework for smart city mobility analytics — shows cloud computing enabling real-time spatial services at scale.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

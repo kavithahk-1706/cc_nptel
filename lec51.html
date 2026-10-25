@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 51 — Dew Computing | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec50.html" class="nav-lec">← prev</a>
+      <a href="lec52.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 51</span>
+    <span class="med-badge">MED priority</span>
+    <h1>Dew Computing</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Introduces Dew Computing — a computing paradigm that brings cloud-level services down to the end device, enabling operation even without internet connectivity. Covers the two key features (independence and collaboration), the Dew Virtual Machine (DVM) architecture, six service models (WID, SID, DID, IAD, PID, Software in Dew), and open challenges. A distinct exam topic requiring definition recall and comparison with cloud/fog/edge.</p>
+  </div>
+
+  <!-- Section 1: What is Dew Computing? -->
+  <div class="section">
+    <div class="section-label">1 · What is Dew Computing?</div>
+    <div class="callout"><strong>Dew Computing:</strong> A computing paradigm that combines the core concepts of cloud computing with the capabilities of end devices (PCs, smartphones, etc.) to provide services even when internet connectivity is unavailable. When connectivity is restored, the local state synchronizes with the cloud backend.</div>
+
+    <div class="callout yellow"><strong>Name analogy:</strong> Cloud computing is remote (far above). Fog/Edge computing is closer to the ground. <strong>Dew</strong> is at ground level — at the device itself. Just as dew forms on surfaces at ground level, dew computing operates at the user's own device.</div>
+
+    <div class="callout yellow"><strong>Canonical example — Dropbox:</strong> Your Dropbox folder is accessible even without internet (independence). When connectivity returns, changes sync automatically with the cloud (collaboration). This is the dew computing model.</div>
+
+    <h3>Two Key Features</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Feature 1</div>
+        <div class="proto-card-title">Independence</div>
+        <div class="proto-card-desc">The local device must be able to provide services without a continuous internet connection. The user can read, write, and work on local data even when the cloud is unreachable. Independence is achieved through a local replica of the data/service.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Feature 2</div>
+        <div class="proto-card-title">Collaboration</div>
+        <div class="proto-card-desc">The local dew service must be able to connect to the cloud and synchronize data when connectivity is available. Synchronization happens automatically (in an "automated mode") — the user does not need to manually trigger a sync in normal operation.</div>
+      </div>
+    </div>
+
+    <div class="callout pink"><strong>Key distinction from pure cloud computing:</strong> Cloud computing requires constant, reliable internet connectivity. Dew computing works without it — connectivity is needed only for synchronization, not for core service operation.</div>
+  </div>
+
+  <!-- Section 2: Position in IoT-Cloud Continuum -->
+  <div class="section">
+    <div class="section-label">2 · Dew in the Computing Hierarchy</div>
+    <div class="stack">
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Smart IoT Modules / Smart Devices</span>
+        <span class="layer-desc">Lowest level — sensors, actuators, wearables. Dew computing is realizable here: devices work offline on last-synced data, sync with higher layers when connectivity is available.</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">Edge Devices</span>
+        <span class="layer-desc">Smartphones, tablets, laptops — the primary dew computing hosts. The Dew Virtual Machine (DVM) runs here, providing local services and managing cloud sync.</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Fog / Edge Servers</span>
+        <span class="layer-desc">Intermediate servers closer to the user than the cloud. Fog computing is at this layer.</span>
+      </div>
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Cloud Server</span>
+        <span class="layer-desc">The remote, centralized backend. Dew devices sync with cloud when connectivity is available — but are not dependent on it for moment-to-moment operation.</span>
+      </div>
+    </div>
+    <div class="callout green"><strong>Key insight:</strong> Dew computing does not rely on centralized cloud data centers for its moment-to-moment operation. It is a microservice-based paradigm that does not depend on centralized control — the DVM provides services locally and synchronizes when appropriate.</div>
+  </div>
+
+  <!-- Section 3: Dew Architecture — DVM -->
+  <div class="section">
+    <div class="section-label">3 · Dew Architecture — The Dew Virtual Machine (DVM)</div>
+    <div class="callout"><strong>Dew Virtual Machine (DVM):</strong> An isolated, independent environment installed on the local system that runs the Dew Server. Analogous to installing Dropbox on your computer — the DVM is what you install to enable dew computing for a service. Has the capability of syncing with the cloud when connectivity is present.</div>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">DVM component</div>
+        <div class="proto-card-title">Dew Server</div>
+        <div class="proto-card-desc">The core of the DVM. Serves user requests through the client services module. Performs synchronization between local data and remote cloud data. Pursues three goals: data replication, data distribution, and data synchronization. Also handles housekeeping (data organization in the dew database).</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">DVM component</div>
+        <div class="proto-card-title">Dew Client Program</div>
+        <div class="proto-card-desc">Interacts with the end user (client) on the local device. The user-facing interface that requests services from the Dew Server. Decoupled from the server so the user experience remains smooth regardless of sync state.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">DVM component</div>
+        <div class="proto-card-title">Dew DBMS</div>
+        <div class="proto-card-desc">The local database management system within the DVM. Stores dew data in an organized way on the local device. Managed by the Dew Server for replication, distribution, and synchronization with the cloud database.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">DVM component</div>
+        <div class="proto-card-title">Dew Client Services</div>
+        <div class="proto-card-desc">The module that provides actual services to the end user — storage, web access, database queries, etc. Interfaces between the Dew Client Program and the Dew Server. May incorporate AI/intelligent modules for access prediction and caching decisions.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Service Models -->
+  <div class="section">
+    <div class="section-label">4 · Dew Service Models</div>
+    <table class="port-table">
+      <thead><tr><th>Model</th><th>Acronym</th><th>Description</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Infrastructure as Dew</td><td>IAD</td><td>Local device is dynamically supported by cloud services. Local device may have an exact DVM clone running in the cloud (always kept in sync). Alternatively, all settings/data saved in cloud and pulled as needed.</td><td>iCloud, system restore from cloud backup</td></tr>
+        <tr><td class="proto-name">Platform in Dew</td><td>PID</td><td>Software development suite installed on local device; settings, application data, deployment data, and online backups synchronized to cloud. Must be able to sync development data and system deployment data.</td><td>GitHub (local repository + remote cloud sync)</td></tr>
+        <tr><td class="proto-name">Software in Dew</td><td>SID</td><td>Configuration and ownership of software saved in cloud. Applications installed by user are tied to their account — can be reinstalled on any linked device without repurchase.</td><td>Apple App Store, Google Play Store</td></tr>
+        <tr><td class="proto-name">Storage in Dew</td><td>SID</td><td>Storage of local device is partially or fully copied to cloud. User can access files anytime without constant connectivity (independence); folder contents automatically sync with cloud when connected (collaboration).</td><td>Dropbox, Google Drive</td></tr>
+        <tr><td class="proto-name">Web in Dew</td><td>WID</td><td>Local device possesses a duplicate fraction of the World Wide Web (or a modified/cached copy). Satisfies the independence feature — user can access web content offline. Synchronizes with live web to satisfy collaboration feature.</td><td>Cached web pages, offline browser modes</td></tr>
+        <tr><td class="proto-name">Database in Dew</td><td>DID</td><td>Both local device and cloud store copies of the same database. One is designated the primary (authoritative) version (the database administrator copy). Provides reliability — one can act as backup for the other.</td><td>Offline-capable mobile apps with local DB sync</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 5: Challenges -->
+  <div class="section">
+    <div class="section-label">5 · Challenges in Dew Computing</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Power Management</div>
+        <div class="proto-card-desc">The DVM runs on the local device alongside other services, drawing power. Deciding when to sync, how much background processing to do, and managing battery life — especially on mobile/IoT devices — is a significant challenge.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Processor Utilization</div>
+        <div class="proto-card-desc">The local processor must handle dew services alongside the device's normal workload. Efficient scheduling and resource sharing is required to avoid degrading the primary device experience.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Data Storage</div>
+        <div class="proto-card-desc">How much data to keep locally? Depends on cloud subscription AND local device capacity. Particularly challenging on low-resource devices (smartwatches, small IoT devices) where storage is severely constrained.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">OS Viability</div>
+        <div class="proto-card-desc">The DVM must be compatible with the host device's operating system. Not all OS variants or device types may support a standard DVM implementation — portability across diverse device types is non-trivial.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Programming Principles</div>
+        <div class="proto-card-desc">What types of services can be provided? How configurable are the dew microservices? Defining programming models and APIs that work across the heterogeneous device landscape is an open research challenge.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Security</div>
+        <div class="proto-card-desc">Data stored locally in the dew system is exposed to the local environment and other services running on the device. Ensuring that dew data is not accessible to unauthorized services — and securing the sync channel — is a serious concern.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Dew Computing:</strong> A paradigm that brings cloud services to the end device level — users get service even without internet. Works on last-synced data offline; auto-syncs with cloud when connectivity returns.</div>
+    <div class="callout green"><strong>Two defining features:</strong> Independence (device serves users without continuous internet) and Collaboration (device syncs with cloud when connected). Both must be present for a system to qualify as dew computing.</div>
+    <div class="callout yellow"><strong>Name hierarchy:</strong> Cloud (remote, above) → Fog (intermediate) → Dew (ground level, at the device). Dropbox is the canonical example of a dew computing service.</div>
+    <div class="callout"><strong>Dew Virtual Machine (DVM):</strong> An isolated environment on the local device housing the Dew Server (sync + serve), Dew Client Program (user interface), Dew DBMS (local data storage), and Dew Client Services (service delivery layer).</div>
+    <div class="callout green"><strong>Six service models:</strong> IAD (Infrastructure), PID (Platform), Software in Dew, Storage in Dew, Web in Dew (WID), Database in Dew (DID) — analogous to cloud IaaS/PaaS/SaaS but with local-offline capability.</div>
+    <div class="callout pink"><strong>Challenges:</strong> Power management, processor utilization, local storage constraints, OS viability across device types, programming model design, and security of locally-stored dew data.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

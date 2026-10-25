@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 50 — Docker Container Demo (Part 2) | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec49.html" class="nav-lec">← prev</a>
+      <a href="lec51.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 50</span>
+    <span class="skip-badge">SKIP priority</span>
+    <h1>Docker Container Demo (Part 2)</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Continuation of the Docker demo — pulls MySQL and phpMyAdmin images, customizes MySQL with a Dockerfile, creates a database and inserts records, commits the container state as a new image, saves it as a .tar archive, transfers to Windows, loads and runs there. Demonstrates end-to-end Docker portability. No new conceptual content; skim for command workflow.</p>
+  </div>
+
+  <!-- Section 1: End-to-End Demo Workflow -->
+  <div class="section">
+    <div class="section-label">1 · End-to-End Demo Workflow</div>
+    <div class="callout"><strong>What was demonstrated:</strong> A MySQL database customized on Ubuntu (with a table and records) was packaged as a Docker image, transferred to a Windows machine, and run there — without installing MySQL, Apache, PHP, or phpMyAdmin on the Windows machine separately.</div>
+
+    <table class="port-table">
+      <thead><tr><th>Phase</th><th>Action</th><th>Platform</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">1 — Pull</td><td>docker pull mysql (latest from Docker Hub); docker pull phpmyadmin (latest)</td><td>Ubuntu</td></tr>
+        <tr><td class="proto-name">2 — Build</td><td>Write Dockerfile specifying custom data directory for persistence; docker build → new mysql custom image</td><td>Ubuntu</td></tr>
+        <tr><td class="proto-name">3 — Run</td><td>docker run custom MySQL image; docker run phpMyAdmin with --link to MySQL container</td><td>Ubuntu</td></tr>
+        <tr><td class="proto-name">4 — Modify</td><td>Access phpMyAdmin at localhost:8080; create database mydb1; create table nptel_tab (course_id, course_name, credit); insert records</td><td>Ubuntu</td></tr>
+        <tr><td class="proto-name">5 — Commit</td><td>docker commit (running MySQL container) → new image mysql_v3 (captures current state with data)</td><td>Ubuntu</td></tr>
+        <tr><td class="proto-name">6 — Save</td><td>docker save mysql_v3 → myimage1.tar (archive containing image layers)</td><td>Ubuntu</td></tr>
+        <tr><td class="proto-name">7 — Transfer</td><td>Upload .tar via Google Drive (or FTP, SCP, etc.) to destination machine</td><td>Network</td></tr>
+        <tr><td class="proto-name">8 — Load</td><td>docker load &lt; myimage1.tar → image mysql_v3 appears in Docker on Windows</td><td>Windows</td></tr>
+        <tr><td class="proto-name">9 — Run</td><td>docker run mysql_v3 as mysql1 container; docker run phpmyadmin (fresh from Hub) with --link mysql1</td><td>Windows</td></tr>
+        <tr><td class="proto-name">10 — Verify</td><td>Access phpMyAdmin at localhost:8080 → mydb1 database present, nptel_tab table present, records intact (1001 cloud computing 3, 1002 networking 4)</td><td>Windows</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout green"><strong>Result:</strong> All data created on Ubuntu — database, table, records — was present and accessible on the Windows machine immediately after loading the Docker image. No separate MySQL, Apache, PHP, or phpMyAdmin installation was needed at the destination.</div>
+  </div>
+
+  <!-- Section 2: Dockerfile for Persistent Data -->
+  <div class="section">
+    <div class="section-label">2 · Dockerfile for Custom MySQL Image</div>
+    <div class="callout"><strong>Why a Dockerfile was needed:</strong> The official MySQL image from Docker Hub has a default data directory. To make data persistent (survives container removal) and capturable in a committed image, a custom data directory was specified.</div>
+
+    <div class="callout yellow"><strong>Dockerfile approach:</strong> Start FROM the pulled MySQL image; COPY the default <code>/var/lib/mysql</code> data to a custom volume directory (e.g., <code>/volume1/var/lib</code>); specify that custom directory as the data path. Build with <code>docker build</code> → new image with persistent-friendly data layout that can be committed with data intact.</div>
+
+    <div class="callout pink"><strong>Without this customization:</strong> The standard MySQL image's data directory is ephemeral — when the container is removed, data is lost. The Dockerfile moves data to a directory that persists and can be committed into a new image layer.</div>
+  </div>
+
+  <!-- Section 3: Key Commands Demonstrated -->
+  <div class="section">
+    <div class="section-label">3 · Key Commands Demonstrated</div>
+    <table class="port-table">
+      <thead><tr><th>Command</th><th>What It Does</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">docker pull &lt;image&gt;</td><td>Pull image from Docker Hub to local machine</td></tr>
+        <tr><td class="proto-name">docker build -t &lt;name&gt; .</td><td>Build a new image from the Dockerfile in the current directory; tag it with &lt;name&gt;</td></tr>
+        <tr><td class="proto-name">docker run --name &lt;n&gt; -d &lt;image&gt;</td><td>Run image as a background (-d) container named &lt;n&gt;</td></tr>
+        <tr><td class="proto-name">docker run --link &lt;c&gt;:db -p 8080:80</td><td>Run container linked to container &lt;c&gt; (aliased as "db"), forwarding host port 8080 to container port 80</td></tr>
+        <tr><td class="proto-name">docker ps</td><td>List currently running containers</td></tr>
+        <tr><td class="proto-name">docker images</td><td>List images available on this machine</td></tr>
+        <tr><td class="proto-name">docker commit &lt;container-id&gt; &lt;name&gt;</td><td>Capture the current state of a running container as a new image (preserves data changes)</td></tr>
+        <tr><td class="proto-name">docker save &lt;image&gt; &gt; &lt;file.tar&gt;</td><td>Export an image to a .tar archive file for transfer</td></tr>
+        <tr><td class="proto-name">docker load &lt; &lt;file.tar&gt;</td><td>Import a .tar archive as a Docker image at the destination</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 4: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>docker commit:</strong> Saves the current state of a running container (including any data changes) as a new image. This is how modified application state is captured for transfer.</div>
+    <div class="callout green"><strong>docker save / docker load:</strong> The export/import mechanism for Docker images — save creates a .tar archive; load imports it at the destination. Any transfer method (FTP, SCP, Google Drive) can carry the .tar file.</div>
+    <div class="callout yellow"><strong>--link flag:</strong> Connects two containers on the same host — phpMyAdmin uses this to connect to the MySQL container. The linked container is given an alias (e.g., ":db") used in the container's environment.</div>
+    <div class="callout pink"><strong>Dockerfile for persistence:</strong> The standard MySQL image's data directory is ephemeral. A custom Dockerfile that moves data to a volume-friendly directory allows that data to be captured in committed images and transferred reliably.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

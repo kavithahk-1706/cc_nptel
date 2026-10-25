@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 29 — Cloud Security IV | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec28.html" class="nav-lec">← prev</a>
+      <a href="lec30.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 29</span>
+    <span class="med-badge">MED priority</span>
+    <h1>Cloud Security IV — Collaborative SaaS Cloud Security</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Covers security challenges when SaaS clouds collaborate in a loosely coupled federation. Topics include selecting a trustworthy cloud provider (SelCSP framework: trust, reputation, competence), risk-based access control, inter-domain role mapping (IDRM), and detection/removal of cyclic inheritance and separation-of-duty conflicts. Research-level content; useful for understanding multi-cloud security architecture.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · Collaborative SaaS Cloud — The Problem</div>
+    <div class="callout"><strong>Collaborative SaaS cloud:</strong> Multiple cloud-hosted applications owned by different organizations communicate and share data with each other — loosely coupled federation across SaaS instances, domains, or providers.</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Tightly coupled</div>
+        <div class="proto-card-title">Strong connectivity, full information</div>
+        <div class="proto-card-desc">Federating clouds with strong bindings. Existing security mechanisms are mostly designed for tightly coupled systems — full credentials and policies are available to all parties.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Loosely coupled</div>
+        <div class="proto-card-title">Dynamic, partial information</div>
+        <div class="proto-card-desc">Instances in different clouds collaborate with minimal shared context. Parties may not carry all credentials or know all security settings of their collaborators. This is the more common and harder-to-secure scenario.</div>
+      </div>
+    </div>
+    <h3>Cloud-specific security challenges in this model</h3>
+    <div class="tag-row">
+      <span class="tag tag-bad">Co-tenancy — shared physical infrastructure</span>
+      <span class="tag tag-bad">Lack of control over outsourced data and apps</span>
+      <span class="tag tag-bad">Inadequate policies and SLA non-standardization</span>
+      <span class="tag tag-bad">Integrity of data shared across multiple users</span>
+      <span class="tag tag-bad">No audit trails directly available to the consumer</span>
+      <span class="tag tag-bad">Choosing an ideal SaaS cloud provider</span>
+    </div>
+    <div class="callout pink"><strong>SaaS has maximum provider control:</strong> Security responsibility shifts almost entirely to the provider; the consumer controls only their data and its usage — not the application platform or underlying infrastructure.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · SelCSP — Selecting a Trustworthy SaaS Provider</div>
+    <div class="callout"><strong>SelCSP framework:</strong> Given a set of registered Cloud Service Providers (CSPs), recommend the best-suited CSP for a customer's business outsourcing requirement, evaluated on three axes: <strong>Trust, Reputation, and Competence</strong>.</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Trust</div>
+        <div class="concept-desc">How much the customer can rely on the provider's honesty, data privacy, and service integrity. Estimated from interaction history and third-party assessments.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Reputation</div>
+        <div class="concept-desc">Community-based rating from past interactions. Computed from temporal interaction matrices and ratings. Distinct from trust — a provider can have high reputation but lower trust for a specific task type.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Competence</div>
+        <div class="concept-desc">Whether the provider has the technical capability and SLA guarantees to actually deliver the required service. Standard SLAs are non-uniform across providers — risk estimation accounts for this.</div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>SLA limitation:</strong> Most cloud SLAs guarantee availability but not other business-critical performance assurances. There is no standard set of SLA clauses across providers — compensation and penalty structures are non-uniform.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Risk-Based Access Control for Anonymous Users</div>
+    <div class="callout"><strong>Problem:</strong> Anonymous users (from collaborating domains) request access to local resources. They may lack the exact permissions required. A binary allow/deny decision either blocks legitimate collaboration or creates over-exposure.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Traditional MLS (binary)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Decision</span>Allow or deny based on exact permission match</div>
+          <div class="compare-row"><span class="label">Risk treatment</span>Discards many requests that would have been safe</div>
+          <div class="compare-row"><span class="label">Flexibility</span>Low — reduces collaboration to eliminate risk</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Risk-based access control</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Decision</span>Grant access even without exact permissions, up to a risk threshold</div>
+          <div class="compare-row"><span class="label">Risk treatment</span>Balance access risk against security uncertainty; quantify operational need</div>
+          <div class="compare-row"><span class="label">Flexibility</span>High — maximizes information sharing while keeping risk low</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Fuzzy inference system:</strong> Used to quantify requester reputation and local object security level, then compute authorized permissions. Analogous to physical access: a visitor can enter the lobby and the visitor lounge, but not the labs — the permitted subset depends on reputation and need.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · IDRM — Inter-Domain Role Mapping</div>
+    <div class="callout"><strong>IDRM problem:</strong> When a user from Domain A (with role R_A) wants to access resources in Domain B, their role must be mapped to an equivalent role in B's role hierarchy. The goal is to find a minimal set of Domain B roles that encompasses exactly the requested permissions — no more.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">IDRM Availability</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Goal</span>Maximize the permissions that can be granted from available roles</div>
+          <div class="compare-row"><span class="label">Objective</span>Minimize the number of extra (excess) permissions granted</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">IDRM Safety</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Goal</span>Ensure no unauthorized permissions are granted under any mapping</div>
+          <div class="compare-row"><span class="label">Objective</span>Ensure the mapped roles do not exceed the requesting role's intended permissions</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Complexity:</strong> IDRM has no polynomial-time exact solution. Greedy search-based heuristics provide sub-optimal but practically useful solutions. Multiple minimal role sets may exist; no single role set may exactly match all requested permissions.</div>
+    <div class="callout"><strong>Principle of minimal access:</strong> Grant only the permissions necessary to execute the requested task. If read-only access suffices, do not grant read-write. Role mapping must respect this constraint across domain boundaries.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · Access Conflict Detection &amp; Removal</div>
+    <div class="callout"><strong>Problem:</strong> In loosely coupled multi-domain collaboration, role inheritance chains can create cyclic paths that grant access the requester was never supposed to have.</div>
+    <h3>Two types of conflict</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Cyclic inheritance conflict</div>
+        <div class="proto-card-title">Role cycle enables unauthorized access</div>
+        <div class="proto-card-desc">Subject S is not allowed to write to object O directly, but inherits a role that inherits a role that inherits write permission on O. The cycle allows what should be blocked. Detection scans for unsafe role cycles in the collaboration graph.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">SoD constraint violation</div>
+        <div class="proto-card-title">Separation of Duty broken via inter-domain path</div>
+        <div class="proto-card-desc">A bank teller who issues a draft cannot also verify it (SoD). In multi-domain collaboration, a cross-domain role chain may allow the same entity to hold both roles via intermediate paths — violating SoD even though each domain's local policy is correct.</div>
+      </div>
+    </div>
+    <h3>Conflict removal strategy</h3>
+    <div class="callout green"><strong>Collaborating role (virtual role):</strong> When no exact role match exists that resolves the conflict, create a synthetic "collaborating role" that grants only the safe subset of permissions. This virtual role breaks the unsafe cycle and prevents the conflict from re-emerging through other inheritance paths.</div>
+    <div class="callout yellow"><strong>Two cases:</strong> (1) Exact match role exists — use it directly with modified inheritance links. (2) No exact match — create a sub-role or dummy role that includes only the necessary permissions, inserted into the hierarchy to break the problematic cycle.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · Framework Summary</div>
+    <table class="port-table">
+      <thead><tr><th>Stage</th><th>Component</th><th>Problem solved</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">1</td><td>SelCSP</td><td>Select a trustworthy and competent SaaS cloud provider before outsourcing, using trust + reputation + competence scoring</td></tr>
+        <tr><td class="proto-name">2</td><td>Risk-based access control</td><td>Authorize anonymous collaborating users with incomplete credentials by balancing access risk and security uncertainty via fuzzy inference</td></tr>
+        <tr><td class="proto-name">3</td><td>IDRM</td><td>Map authorized permissions to local roles in the target domain with minimal excess permission (greedy heuristic)</td></tr>
+        <tr><td class="proto-name">4</td><td>Conflict detection &amp; removal</td><td>Detect cyclic inheritance conflicts and SoD violations; resolve by creating collaborating (virtual) roles that break unsafe cycles</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Loosely coupled collaboration is the hard case:</strong> Parties have incomplete credentials and unknown security settings of their collaborators. Tight coupling security mechanisms do not transfer directly.</div>
+    <div class="callout green"><strong>SelCSP:</strong> Evaluate providers on Trust + Reputation + Competence before outsourcing; standard SLAs alone are insufficient because they lack standard clauses and compensation structures.</div>
+    <div class="callout yellow"><strong>IDRM:</strong> Mapping cross-domain roles is NP-hard in general; greedy heuristics find minimal-excess-permission role sets. Two variants — IDRM availability (maximize grantable permissions) and IDRM safety (prevent over-grant).</div>
+    <div class="callout pink"><strong>SoD violations in federation:</strong> Even when each domain's local policy is correct, inter-domain role chains can create cycles that violate Separation of Duty. Detection + collaborating role creation is the mitigation strategy.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

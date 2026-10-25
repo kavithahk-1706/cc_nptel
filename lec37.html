@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 37 — Green Cloud | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec36.html" class="nav-lec">← prev</a>
+      <a href="lec38.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 37</span>
+    <span class="med-badge">MED priority</span>
+    <h1>Green Cloud</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Examines the energy consumption problem of cloud data centers — why it matters, how data centers are structured, and how energy is distributed across computing vs cooling infrastructure. Introduces green cloud computing: carbon-aware brokering, green middleware, and the PUE metric. Awareness-level content; statistics are from 2007-era reports but the framework and metrics remain relevant.</p>
+  </div>
+
+  <!-- Section 1: The Energy Problem -->
+  <div class="section">
+    <div class="section-label">1 · The Energy Problem in Cloud</div>
+    <div class="callout pink"><strong>Dark side of cloud:</strong> Large-scale cloud infrastructure consumes enormous amounts of energy. The cost of the computing equipment in a data center is roughly matched by the cost of environmental infrastructure (space, cooling, power) — and in some locations, environmental costs exceed hardware costs.</div>
+
+    <h3>Why Energy is a Scaling Constraint</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Supply Constraint</div>
+        <div class="proto-card-title">Energy Supply Limits Growth</div>
+        <div class="proto-card-desc">Beyond a certain scale, even if a provider has capital to build more data centers, the available power supply in a region becomes a binding constraint. Cloud growth is increasingly limited by energy infrastructure, not hardware.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Carbon Footprint</div>
+        <div class="proto-card-title">Environmental Impact</div>
+        <div class="proto-card-desc">More energy consumption → more electricity generation → higher carbon dioxide emissions. Gartner (2007) estimated the IT industry contributes 2% of total global CO₂ emissions. Data center emissions worldwide now exceed combined emissions of Argentina and the Netherlands.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Operational Cost</div>
+        <div class="proto-card-title">Energy as % of OpEx</div>
+        <div class="proto-card-desc">Energy accounts for approximately 10% of data center operational cost — and projected to rise to 50% within a few years (as of the report era). Amazon estimated energy-related costs at 42% of total data center budget (including cooling amortized over 15 years).</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Waste</div>
+        <div class="proto-card-title">Idle Server Consumption</div>
+        <div class="proto-card-desc">An idle server still consumes approximately 66% of its peak CPU load energy. Even when serving no requests, keeping servers on to maintain availability imposes a significant baseline energy cost — analogous to an ice cream parlor running refrigeration with no customers.</div>
+      </div>
+    </div>
+
+    <div class="callout yellow"><strong>Consolidation insight from lecture:</strong> If 4 servers each have 2 VMs running (spread for load distribution), each server runs at low utilization but all 4 draw energy. Better: consolidate 8 VMs onto 2 servers fully loaded, and put the other 2 into sleep/passive mode. Same compute served, ~50% fewer active servers, significant energy savings — but SLA constraints and scheduling complexity make this non-trivial.</div>
+  </div>
+
+  <!-- Section 2: Data Center Energy Distribution -->
+  <div class="section">
+    <div class="section-label">2 · Data Center Energy Distribution</div>
+
+    <span class="ts">▶ 14:42</span>
+    <div class="callout yellow">Worth watching: Pie/bar chart showing the split of energy consumption — computing 40%, cooling 45%, power distribution 15%. Key takeaway: the majority of energy goes to non-computing infrastructure.</div>
+
+    <table class="port-table">
+      <thead>
+        <tr><th>Component</th><th>Share of Total Energy</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="proto-name">Cooling System</td><td>~45%</td><td>Largest single consumer; cooling system cost alone: $2–5M/year (per report-era figures)</td></tr>
+        <tr><td class="proto-name">Computing Equipment</td><td>~40%</td><td>Servers, storage — the actual compute work only uses 40% of total power drawn</td></tr>
+        <tr><td class="proto-name">Power Distribution</td><td>~15%</td><td>UPS, power conversion losses, wiring infrastructure</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout pink"><strong>Key implication:</strong> 60% of data center energy is consumed by infrastructure <em>supporting</em> the compute, not by compute itself. Green cloud efforts must target cooling efficiency and power distribution — not just server utilization.</div>
+
+    <h3>Server Energy Model</h3>
+    <p>A server's power draw has two components:</p>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Fixed Power (Idle State)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">What draws it</span>Memory modules, disk, always-on circuitry</div>
+          <div class="compare-row"><span class="label">Magnitude</span>~66% of peak CPU load even at idle</div>
+          <div class="compare-row"><span class="label">Implication</span>Turning off idle servers saves the remaining 34% — not the full power cost</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Variable Power (Under Load)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">What draws it</span>CPU frequency scaling, active computation</div>
+          <div class="compare-row"><span class="label">Magnitude</span>Up to 100% of peak load</div>
+          <div class="compare-row"><span class="label">Implication</span>Consolidating workloads onto fewer servers raises per-server utilization and reduces total active-server count</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Switch/Network Energy Model</h3>
+    <p>For chassis-based blade switches (typical in data centers):</p>
+    <table class="port-table">
+      <thead>
+        <tr><th>Component</th><th>Share of Switch Power</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="proto-name">Chassis</td><td>~36%</td></tr>
+        <tr><td class="proto-name">Line cards</td><td>~43%</td></tr>
+        <tr><td class="proto-name">Port transceivers</td><td>~11%</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>Model:</strong> P_switch = P_chassis + (n_linecards × P_linecard) + Σ(n_ports × P_transceiver). Network infrastructure energy is significant and must be included in any green cloud energy model.</div>
+  </div>
+
+  <!-- Section 3: DC Architecture Evolution -->
+  <div class="section">
+    <div class="section-label">3 · Data Center Network Architecture</div>
+
+    <span class="ts">▶ 15:28</span>
+    <div class="callout yellow">Worth watching: Diagrams comparing 2-tier (access + core) and 3-tier (access + aggregation + core) DC network architectures, showing how switch placement and mesh density affect both performance and energy consumption.</div>
+
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">2-Tier DC Architecture</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Layers</span>Core (highly meshed Layer-3 switches) + Access layer</div>
+          <div class="compare-row"><span class="label">Load balancing</span>ICMP-based at core</div>
+          <div class="compare-row"><span class="label">Connectivity</span>Standard 1–10 Gbps</div>
+          <div class="compare-row"><span class="label">Scale</span>Earlier generation; less scalable</div>
+          <div class="compare-row"><span class="label">Servers</span>Rack servers at edge (access layer)</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">3-Tier DC Architecture (current)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Layers</span>Core + Aggregation + Access (hierarchical)</div>
+          <div class="compare-row"><span class="label">Load balancing</span>2-way ECMP; better distribution</div>
+          <div class="compare-row"><span class="label">Connectivity</span>100 Gbps Ethernet at core</div>
+          <div class="compare-row"><span class="label">Scale</span>Scales to 10,000+ servers; used in modern large DCs</div>
+          <div class="compare-row"><span class="label">Tradeoff</span>Better performance, but more network equipment = more energy</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Green Computing Definition -->
+  <div class="section">
+    <div class="section-label">4 · Green Cloud Computing — Definition</div>
+    <div class="callout"><strong>Green computing:</strong> Environmentally responsible and eco-friendly use of computers and their resources. Encompasses the design, manufacturing, engineering, use, and disposal of computing devices in ways that minimize environmental impact.</div>
+    <div class="callout"><strong>Green cloud computing:</strong> Achieves not only efficient processing and utilization of computing infrastructure, but also minimizes energy consumption — both goals simultaneously. Performance + energy efficiency, not performance at the cost of energy.</div>
+
+    <h3>Efficiency at Every Layer</h3>
+    <div class="stack">
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">IaaS Layer</span>
+        <span class="layer-desc">Most visible energy impact: server consolidation, VM placement, cooling, power management — primary focus of green cloud research</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">PaaS Layer</span>
+        <span class="layer-desc">Green profiler, power capping, green compiler, green resource allocation — reducing energy consumed by platforms and middleware</span>
+      </div>
+      <div class="stack-layer layer-app">
+        <span class="layer-name">SaaS / Application Layer</span>
+        <span class="layer-desc">Algorithm efficiency matters — a more efficient algorithm with lower CPU complexity reduces energy consumption that propagates down through all layers</span>
+      </div>
+    </div>
+
+    <div class="callout green"><strong>Key insight:</strong> Energy optimization is not only an IaaS problem. An inefficient algorithm at the SaaS layer that takes unnecessary CPU cycles increases energy consumption at every layer below it. Green cloud must address the full stack.</div>
+  </div>
+
+  <!-- Section 5: Performance vs Energy Trade-off -->
+  <div class="section">
+    <div class="section-label">5 · Performance vs Energy Efficiency</div>
+    <div class="callout pink"><strong>The core tension:</strong> Traditional resource management optimizes for performance and SLA compliance. Green cloud adds energy efficiency as a co-equal objective — the scheduler must balance both, not just one.</div>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Performance Goal</div>
+        <div class="proto-card-title">Maximize Service Quality</div>
+        <div class="proto-card-desc">Minimize response time, maintain SLA, avoid service violations, ensure high availability. This typically means keeping more servers active and spreading load.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Energy Goal</div>
+        <div class="proto-card-title">Minimize Energy Consumption</div>
+        <div class="proto-card-desc">Consolidate VMs onto fewer servers, power down idle servers, route traffic through fewer network paths. Conflicts with performance spread — requires careful scheduling.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Provider Pressure</div>
+        <div class="proto-card-title">Protect Profit Margin</div>
+        <div class="proto-card-desc">Energy costs at Amazon: ~42% of total data center budget. As costs rise, providers must reduce energy per unit of compute to maintain profitability — green computing is economically motivated, not just altruistic.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Location Strategy</div>
+        <div class="proto-card-title">Data Centers Near Power Sources</div>
+        <div class="proto-card-desc">Google, Microsoft, Yahoo build data centers near cheap hydroelectric power (e.g., Columbia River region) to exploit lower-cost electricity and reduce transmission losses.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Green Cloud Architecture -->
+  <div class="section">
+    <div class="section-label">6 · Green Cloud Architecture</div>
+
+    <span class="ts">▶ 26:04</span>
+    <div class="callout yellow">Worth watching: Green cloud architecture diagram showing physical machines → VMs → Green Cloud Allocator/Broker with energy monitoring added alongside the standard QoS components.</div>
+
+    <h3>Green Broker</h3>
+    <div class="callout"><strong>Green Broker:</strong> An extension of the standard cloud broker that adds <strong>carbon-aware scheduling</strong>. In addition to analyzing user requirements, calculating cost, and scheduling services, the green broker calculates the carbon footprint of each provisioning decision and selects the option that minimizes carbon emissions while meeting SLA.</div>
+
+    <h3>Green Broker Components</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Existing</div>
+        <div class="proto-card-title">Grid Negotiator / Service Analyzer / Consumer Profiler</div>
+        <div class="proto-card-desc">Standard broker components — negotiate resources, analyze what services the consumer needs, and profile usage patterns.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">New: Green Addition</div>
+        <div class="proto-card-title">Energy Monitor + Carbon-Aware Scheduler</div>
+        <div class="proto-card-desc">Energy monitor tracks real-time power consumption of VMs and servers. Carbon-aware scheduler factors CO₂ impact into service scheduling decisions — prioritizes lower-carbon CSPs when performance requirements allow.</div>
+      </div>
+    </div>
+
+    <h3>Green Middleware by Layer</h3>
+    <table class="port-table">
+      <thead>
+        <tr><th>Layer</th><th>Green Component</th><th>Function</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="proto-name">IaaS</td><td>Energy/temperature sensor, demand predictor</td><td>Monitor physical server power draw; predict demand to proactively consolidate/spin-down servers before demand drops</td></tr>
+        <tr><td class="proto-name">PaaS</td><td>Green profiler, power capping, green compiler, green resource allocator</td><td>Profile energy use of platform services; enforce power caps per workload; compile/allocate resources with energy awareness</td></tr>
+        <tr><td class="proto-name">SaaS</td><td>Power capping, green software services</td><td>Enforce power limits on service instances; optimize application-layer algorithms for energy efficiency</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 7: PUE -->
+  <div class="section">
+    <div class="section-label">7 · Power Usage Effectiveness (PUE)</div>
+    <div class="callout"><strong>PUE (Power Usage Effectiveness):</strong> A metric to measure the energy efficiency of a data center. <br><br><strong>PUE = Total Facility Power / IT Equipment Power</strong><br><br>A PUE of 1.0 would mean 100% of power goes to IT equipment with zero overhead — physically impossible. A PUE of 2.0 means for every watt of compute, another watt is spent on cooling, lighting, and distribution. Industry best-in-class is ~1.1–1.2 (large hyperscale providers).</div>
+    <div class="callout pink"><strong>Research status:</strong> PUE measurement methodology and what counts as "IT equipment power" vs "facility power" is still debated. Green cloud computing has significant open research questions in energy modeling, carbon-aware scheduling, and cross-layer optimization.</div>
+  </div>
+
+  <!-- Section 8: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Energy Breakdown:</strong> ~45% cooling, ~40% computing, ~15% power distribution. The majority of a data center's energy is consumed by support infrastructure, not the compute itself — so cooling optimization is as important as server consolidation.</div>
+    <div class="callout pink"><strong>Idle Server Problem:</strong> An idle server still draws ~66% of peak power. VM consolidation (packing VMs onto fewer active servers and sleeping the rest) is the primary lever for energy savings, but creates tension with SLA and load distribution.</div>
+    <div class="callout green"><strong>Green Broker:</strong> Adds carbon footprint calculation and carbon-aware scheduling to the standard cloud brokering function — selecting CSPs and VMs based on both QoS and energy/carbon cost.</div>
+    <div class="callout"><strong>PUE:</strong> Power Usage Effectiveness = Total Facility Power / IT Equipment Power. PUE = 1.0 is ideal; industry best-in-class approaches 1.1. Lowering PUE is the primary data center efficiency target.</div>
+    <div class="callout yellow"><strong>Economics motivate green:</strong> Energy is 42%+ of Amazon's data center budget. Green computing is not purely environmental — it is a cost imperative for large-scale cloud providers whose profitability depends on energy efficiency at scale.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

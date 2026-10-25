@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 25 — Resource Management II | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec24.html" class="nav-lec">← prev</a>
+      <a href="lec26.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 25</span>
+    <span class="med-badge">MED priority</span>
+    <h1>Resource Management II — Approaches, Taxonomy &amp; Metrics</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Survey of IaaS resource management: defines seven RM sub-problems (provisioning, allocation, adaptation, discovery, brokering, estimation, mapping, scheduling), catalogues representative research approaches for each, and specifies the evaluation metrics. Heavy on taxonomy and terminology; no worked problems.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · Broad Objectives of Resource Management</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Provider objectives</div>
+        <div class="proto-card-title">Maximize utilization &amp; profit</div>
+        <div class="proto-card-desc">Maximize resource utilization, minimize energy cost, preserve SLA, and reduce RM overhead — the protocol itself must not degrade performance.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Consumer objectives</div>
+        <div class="proto-card-title">Guaranteed QoS &amp; SLA</div>
+        <div class="proto-card-desc">Receive requested resources with low latency, guaranteed throughput, and simple API — without over-paying or dealing with provisioning complexity.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">System-level goals</div>
+        <div class="proto-card-title">Scalability &amp; cost effectiveness</div>
+        <div class="proto-card-desc">Support infinite-scale-up/down elasticity, improve system throughput, reduce latency, keep specialized environments (power/thermal management) feasible, maintain simplified interface.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">RM overhead constraint</div>
+        <div class="proto-card-title">Reduced overhead</div>
+        <div class="proto-card-desc">If the RM protocol itself consumes excessive resources, performance degrades. RM must impose minimal overhead relative to the benefit it delivers.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Hardware &amp; Logical Resource Challenges</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Hardware (bare metal)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">CPU</span>Core scheduling, frequency scaling</div>
+          <div class="compare-row"><span class="label">Memory</span>NUMA, allocation, ballooning</div>
+          <div class="compare-row"><span class="label">Storage</span>Disk I/O, block allocation</div>
+          <div class="compare-row"><span class="label">Network</span>Bandwidth, switch configuration</div>
+          <div class="compare-row"><span class="label">Sensors</span>Thermal, power monitoring devices</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Logical (soft) resources</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">OS</span>Kernel, energy management subsystem</div>
+          <div class="compare-row"><span class="label">Network BW</span>Throughput and load balancing</div>
+          <div class="compare-row"><span class="label">Security</span>Information security, privacy-preserving controls</div>
+          <div class="compare-row"><span class="label">APIs</span>Service interfaces and protocols</div>
+          <div class="compare-row"><span class="label">Delays</span>End-to-end latency budgets</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Key constraint:</strong> Hardware and logical resources are not independent. Fast storage is useless with slow network access. Resource management must coordinate all dimensions simultaneously — not optimize one in isolation.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · RM Sub-Problem Taxonomy</div>
+    <table class="port-table">
+      <thead><tr><th>Sub-problem</th><th>Definition</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Provisioning</td><td>Allocation of service-provider resources to customers (users or processes)</td></tr>
+        <tr><td class="proto-name">Allocation</td><td>Distribution of available resources economically among computing groups, programs, or processes</td></tr>
+        <tr><td class="proto-name">Adaptation</td><td>Ability of the system to dynamically adjust resource assignment to fulfill changing user requirements</td></tr>
+        <tr><td class="proto-name">Mapping</td><td>Correspondence between resources required by users and resources available with providers</td></tr>
+        <tr><td class="proto-name">Modeling</td><td>State-transition model of resource management based on attributes, states, transitions, and outputs of each resource entity</td></tr>
+        <tr><td class="proto-name">Estimation</td><td>A priori prediction of resource requirements for an application, using meta-information (expected memory, threads, disk)</td></tr>
+        <tr><td class="proto-name">Discovery &amp; selection</td><td>Identifying and selecting the best-fit authenticated resources from a pool of available providers</td></tr>
+        <tr><td class="proto-name">Brokering</td><td>Negotiation through an agent to ensure necessary resources are available at the right time and cost to meet user objectives</td></tr>
+        <tr><td class="proto-name">Scheduling</td><td>Timetable of events and resources — determining start/end times, predecessor relationships, and resource assignments for jobs</td></tr>
+      </tbody>
+    </table>
+    <div class="callout pink"><strong>Not isolated:</strong> These sub-problems are interlinked. Scheduling depends on allocation; allocation depends on provisioning; estimation informs all of them. Emphasis varies by application type.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · Provisioning Approaches</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Game theory</div>
+        <div class="proto-card-title">Nash equilibrium approach</div>
+        <div class="proto-card-desc">Models provider and consumers as rational game players. Finds optimal resource allocation considering heterogeneous resources, user behavior, incomplete information, and dynamic successive allocation rounds.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Queuing theory</div>
+        <div class="proto-card-title">Network queuing model</div>
+        <div class="proto-card-desc">Queues represent application tiers with different performance characteristics. k-means clustering determines workload mix; queuing model predicts server capacity needed for that mix.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">VM scheduling</div>
+        <div class="proto-card-title">EDF scheduler on Xen</div>
+        <div class="proto-card-desc">Earliest Deadline First scheduler implements weighted fair sharing of CPU capacity among VMs on a Xen hypervisor. CPU share of a VM can be changed at runtime; migrates VMs if resource requirement changes.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Adaptive</div>
+        <div class="proto-card-title">SLA-oriented dynamic provisioning</div>
+        <div class="proto-card-desc">Automatically detects bottlenecks and resolves them; adapts parameters to meet per-user accuracy or QoS goals; provisions incrementally in response to SLA targets rather than static thresholds.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · Allocation Approaches</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Market-driven</div>
+        <div class="proto-card-title">Market-oriented allocation</div>
+        <div class="proto-card-desc">Uses model predictive control driven by market demand signals to solve the allocation problem. Resource price and availability are treated as market variables.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Multi-agent</div>
+        <div class="proto-card-title">Intelligent multi-agent model</div>
+        <div class="proto-card-desc">Targets resource virtualization for mobile devices. Agents automatically allocate services to available resources based on device capabilities and service requirements.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Energy-aware</div>
+        <div class="proto-card-title">Energy-aware allocation</div>
+        <div class="proto-card-desc">Allocation decisions factor in power consumption at each node. Aims to minimize total energy draw while satisfying QoS — integrates measurement-based analysis of performance metrics.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Real-time</div>
+        <div class="proto-card-title">Dynamic consolidation for SME IaaS</div>
+        <div class="proto-card-desc">Designed for small and medium IaaS providers to maximize hardware utilization with minimal operational cost. Uses dynamic scheduling and consolidation of VMs at runtime as load fluctuates.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · Mapping &amp; Adaptation Approaches</div>
+    <h3>Mapping</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Symmetric mapping</div>
+        <div class="proto-card-title">Three-function pattern</div>
+        <div class="proto-card-desc">Divides mapping into: (1) users and providers match, (2) engage resource supply, (3) manage agreements. Users subscribe resource containers and place tasks; providers place supply containers on physical resources.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Load-aware</div>
+        <div class="proto-card-title">VM image multicast + caching</div>
+        <div class="proto-card-desc">Reduces VM image preparation overhead using multicast file transfer and image caching. Maps based on current load to minimize deployment latency and network waste.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Request partitioning</div>
+        <div class="proto-card-title">Iterated local search</div>
+        <div class="proto-card-desc">Partitions a large user request into sub-requests using iterated local search; routes each sub-request to the most cost-efficient eligible CSP. Enables multi-provider request splitting online.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Virtual network mapping</div>
+        <div class="proto-card-title">VN → substrate network</div>
+        <div class="proto-card-desc">Maps user's virtual network (VN) onto the physical substrate network. Optimizes embedding to satisfy bandwidth and node constraints while minimizing resource consumption.</div>
+      </div>
+    </div>
+    <h3>Adaptation</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Reinforcement learning guided control policy</span>
+      <span class="tag tag-good">Web service-based prototypes</span>
+      <span class="tag tag-good">Virtual network DNA-based load balancing</span>
+      <span class="tag tag-good">Hybrid approaches</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">7 · Evaluation Metrics</div>
+    <div class="callout"><strong>Any RM technique must be evaluated across all dimensions below</strong> — optimizing one metric at the cost of another defeats the purpose of cloud resource management.</div>
+    <table class="port-table">
+      <thead><tr><th>Metric</th><th>What it measures</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Reliability</td><td>Probability the RM mechanism correctly allocates resources without failure</td></tr>
+        <tr><td class="proto-name">Ease of deployment</td><td>Overhead required to install and configure the RM system — should not consume more than it saves</td></tr>
+        <tr><td class="proto-name">Quality of service</td><td>Whether SLA targets (throughput, latency, availability) are met by the managed resources</td></tr>
+        <tr><td class="proto-name">Delay</td><td>End-to-end latency introduced by the RM protocol itself (scheduling, brokering, migration overhead)</td></tr>
+        <tr><td class="proto-name">Control overhead</td><td>CPU, memory, and network consumed by the RM process — must be minimal relative to benefit</td></tr>
+        <tr><td class="proto-name">Scalability</td><td>Whether the RM mechanism can handle increasing numbers of VMs, nodes, or requests without degrading</td></tr>
+      </tbody>
+    </table>
+    <div class="callout pink"><strong>Metric weights vary:</strong> Delay-sensitive applications prioritize latency; safety-critical applications prioritize reliability; cost-sensitive SME providers prioritize deployment ease and overhead. Choose RM technique to match the dominant metric.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>RM taxonomy:</strong> Nine sub-problems — provisioning, allocation, adaptation, mapping, modeling, estimation, discovery, brokering, scheduling — are interlinked and must be addressed in coordination, not isolation.</div>
+    <div class="callout green"><strong>Research approaches:</strong> Game theory (Nash equilibrium), queuing models (k-means + EDF), energy-aware allocation, RL-guided adaptation, symmetric mapping, and request partitioning represent major research directions for IaaS RM.</div>
+    <div class="callout yellow"><strong>IaaS is primary focus:</strong> Because PaaS and SaaS performance is bounded by the underlying infrastructure capacity, IaaS RM produces the highest leverage across the entire cloud stack.</div>
+    <div class="callout pink"><strong>Evaluation trap:</strong> An RM protocol with high overhead can degrade system performance below what unmanaged resources would deliver — always evaluate RM mechanisms against reliability, QoS, latency, and scalability metrics together.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

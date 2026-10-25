@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 14 — Introduction to MapReduce | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec13.html" class="nav-lec">← prev</a>
+      <a href="lec15.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 14</span>
+    <span class="high-badge">HIGH priority</span>
+    <h1>Introduction to MapReduce</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Introduces MapReduce — Google's parallel programming paradigm for processing massive datasets on thousands of commodity processors. Covers the word-frequency scalability analysis motivating the design, the two-phase Map/Reduce execution model, fault tolerance, and efficiency formula. Highly exam-relevant.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · What is MapReduce?</div>
+    <div class="callout"><strong>MapReduce</strong> is a parallel programming model developed at Google, designed to process and generate large volumes of data via massively parallel computation on tens of thousands of processors.</div>
+    <h3>Origins and motivation</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Original purpose</div>
+        <div class="proto-card-title">Large-scale web search</div>
+        <div class="proto-card-desc">Built to process Google's massive corpus of web documents stored in GFS and BigTable. Primary task: text processing and indexing at internet scale.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Now</div>
+        <div class="proto-card-title">General scientific computing</div>
+        <div class="proto-card-desc">Adopted widely for scientific data processing. Open-source implementation: <strong>Hadoop</strong> (originally developed at Yahoo, now available as pre-packaged AMIs on Amazon EC2).</div>
+      </div>
+    </div>
+    <h3>Core design goals</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Fault tolerant</span>
+      <span class="tag tag-good">Inherently parallel workloads</span>
+      <span class="tag tag-good">Works on GFS/HDFS/BigTable</span>
+      <span class="tag tag-good">Scalable to thousands of processors</span>
+    </div>
+    <div class="callout pink"><strong>Prerequisite:</strong> MapReduce only works when the problem has <em>inherent parallelism</em>. A strictly sequential chain of operations gains nothing from parallel execution.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Parallel Efficiency — Motivation</div>
+    <p>Ideal parallel speedup: a task taking time T on one processor takes T/p on p processors. In reality, three factors reduce efficiency:</p>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Synchronization</div>
+        <div class="concept-desc">Processors must coordinate on shared state and timing. Coordination overhead grows with processor count.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Communication</div>
+        <div class="concept-desc">Inter-processor messaging costs real time. Passing partial results between nodes is not free.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Load imbalance</div>
+        <div class="concept-desc">Work may not divide evenly — some processors finish early and sit idle while others are still running.</div>
+      </div>
+    </div>
+    <div class="callout">
+      <strong>Parallel efficiency formula:</strong><br>
+      η = T / (p · T<sub>p</sub>)<br>
+      where T = single-processor time, T<sub>p</sub> = parallel execution time with p processors.<br><br>
+      <strong>Scalable:</strong> efficiency remains constant as data size n and processor count p both increase proportionally.<br>
+      <strong>Also:</strong> for fixed p, efficiency increases as n grows (more data per processor = less relative overhead).
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Case Study — Word Frequency Counting</div>
+    <div class="callout yellow"><strong>Problem:</strong> Given a huge collection of n documents and m distinct words, compute the frequency (total occurrence count) of each word across the entire collection. This is a classic search-engine indexing problem.</div>
+    <p>Two parallelization strategies exist. Assume p processors, each word occurs on average f times, and cost c = time to read one word = time to send one word via inter-processor communication.</p>
+    <h3>Approach 1 — Partition by words (m/p words per processor)</h3>
+    <div class="callout pink">
+      <strong>Strategy:</strong> Each processor is responsible for m/p words. It reads all n documents and counts occurrences of its assigned words.<br><br>
+      <strong>Problem:</strong> Each processor reads the entire document set (n × m × f) but only contributes useful work for m/p words. Most reads are wasted — the processor reads words it was not assigned to count.<br><br>
+      <strong>Parallel efficiency:</strong> η ≈ 1/p — efficiency <em>falls</em> as p increases. <strong>Not scalable.</strong>
+    </div>
+    <h3>Approach 2 — Partition by documents (n/p documents per processor)</h3>
+    <div class="callout green">
+      <strong>Strategy:</strong> Each processor handles n/p documents and counts <em>all</em> m words within its partition. Partial frequency vectors from all processors are aggregated at the end.<br><br>
+      <strong>Key insight:</strong> Every disk read is useful — every word read contributes to the final count. No wasted I/O.<br><br>
+      <strong>Parallel efficiency:</strong> η ≈ 1 / (1 + 2/(p·n·f)) → approaches 1 as n·f grows for fixed p.<br><br>
+      <strong>Scalable:</strong> if both n (data) and p (processors) increase proportionally, efficiency stays constant. Also, for fixed p, efficiency increases as n grows.
+    </div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Approach 1 — Partition words</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Each processor handles</span>m/p words over all n docs</div>
+          <div class="compare-row"><span class="label">Useful reads</span>Only m/p out of m — wasteful</div>
+          <div class="compare-row"><span class="label">Efficiency</span>1/p — drops with more processors</div>
+          <div class="compare-row"><span class="label">Scalable?</span>No</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Approach 2 — Partition documents</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Each processor handles</span>All m words over n/p docs</div>
+          <div class="compare-row"><span class="label">Useful reads</span>Every read contributes to final result</div>
+          <div class="compare-row"><span class="label">Efficiency</span>Approaches 1 for large n and fixed p</div>
+          <div class="compare-row"><span class="label">Scalable?</span>Yes — proportional scaling keeps η constant</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout"><strong>Lesson for MapReduce:</strong> Approach 2 — partition the data, each processor works on all words but a subset of documents, then aggregate — is the model MapReduce follows.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · MapReduce Programming Model</div>
+    <div class="callout"><strong>MapReduce</strong> is a parallel programming abstraction with two phases — Map and Reduce — coordinated by a master process. Configurable number of M mapper processors and R reducer processors.</div>
+    <h3>Map phase</h3>
+    <div class="stack">
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Input read</span>
+        <span class="layer-desc">Each mapper reads approximately 1/M of the total input data from global GFS/HDFS storage</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">Map operation</span>
+        <span class="layer-desc">Transforms input key-value pairs → intermediate key-value pairs: map(k₁, v₁) → [(k₂, v₂)]</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Output to local disk</span>
+        <span class="layer-desc">Each mapper writes one output file PER reducer, sorted by key, to its local disk. Master tracks all file locations.</span>
+      </div>
+    </div>
+    <h3>Reduce phase</h3>
+    <div class="stack">
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Locate input</span>
+        <span class="layer-desc">Master informs each reducer where (which mapper local disks) its input files are stored</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">Fetch via RPC</span>
+        <span class="layer-desc">Reducer makes Remote Procedure Calls to each mapper to fetch its designated output file</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Reduce operation</span>
+        <span class="layer-desc">Groups all values with the same key, applies aggregate function f: (k₂, [v₂]) → (k₂, f([v₂]))</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">Final output</span>
+        <span class="layer-desc">Results written back to GFS/HDFS</span>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Key structural point:</strong> Every mapper produces exactly R output files — one per reducer. The master knows where all of them live. Reducers fetch their slice from every mapper's local disk via RPC.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · MapReduce Word Count Example</div>
+    <span class="ts">▶ 26:36</span>
+    <div class="callout yellow">Worth watching: The diagram showing 3 mappers → intermediate files → 2 reducers, illustrating exactly how word-count keys are routed and aggregated.</div>
+    <p>3 mappers (M1, M2, M3), 2 reducers (R1, R2). Words w₁, w₂, w₃, w₄ distributed across the document collection.</p>
+    <table class="port-table">
+      <thead><tr><th>Phase</th><th>Actor</th><th>Action</th><th>Output</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Map</td><td>Each mapper</td><td>Counts occurrences of each word in its document partition</td><td>One file per reducer, sorted by word key</td></tr>
+        <tr><td class="proto-name">Shuffle</td><td>Master</td><td>Tells each reducer where its files are across all mapper nodes</td><td>Reducers know which mapper disk to call</td></tr>
+        <tr><td class="proto-name">Reduce</td><td>Each reducer</td><td>Fetches its files from all mappers via RPC, sums counts for the same word key</td><td>Final frequency for assigned words (e.g. w₁=7, w₂=15)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · Fault Tolerance in MapReduce</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Detection</div>
+        <div class="proto-card-title">Heartbeat messages</div>
+        <div class="proto-card-desc">Master sends regular "are you alive?" probes. If a node communicates but shows no progress, master duplicates its task and assigns it to a free or already-finished processor.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Mapper failure</div>
+        <div class="proto-card-title">Full re-execution</div>
+        <div class="proto-card-desc">Master reassigns all key-value pairs from the failed mapper to another worker node. The failed mapper's local output files are lost and must be regenerated.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Reducer failure</div>
+        <div class="proto-card-title">Partial re-execution</div>
+        <div class="proto-card-desc">Only the remaining (not yet completed) reduce tasks are reassigned. Tasks already completed have results written to GFS — those don't need rerunning.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Straggler handling</div>
+        <div class="proto-card-title">Speculative execution</div>
+        <div class="proto-card-desc">If a node is alive but slow, master assigns the same task to another processor in parallel. Whichever finishes first wins.</div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Why mapper failure is more expensive:</strong> Mapper output lives on the mapper's local disk. If the mapper dies, that output is gone. Reducer output goes to GFS and survives reducer failure.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">7 · MapReduce Parallel Efficiency</div>
+    <p>Let: w = computation time per word, c = time to read/write one word from/to disk, D = total data volume, P = processors (acting as both mappers and reducers).</p>
+    <table class="port-table">
+      <thead><tr><th>Stage</th><th>Time per processor</th><th>Data produced</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Map</td><td>c_m · D/P (read) + w · D/P (compute)</td><td>D′ (intermediate key-value pairs)</td></tr>
+        <tr><td class="proto-name">Local write</td><td>Each mapper writes D′/P to local disk</td><td>P files (one per reducer)</td></tr>
+        <tr><td class="proto-name">Remote read</td><td>Each reducer fetches D′/P from each of P mappers → D′/P²· P = D′/P reads</td><td>Reducer input</td></tr>
+        <tr><td class="proto-name">Reduce</td><td>c_r · D′/P + function aggregation</td><td>D″ (final output)</td></tr>
+      </tbody>
+    </table>
+    <div class="callout green">
+      <strong>MapReduce parallel efficiency (simplified, ignoring decomposition overhead):</strong><br><br>
+      η = 1 / (1 + 2c/w)<br><br>
+      <strong>Interpretation:</strong> If disk I/O cost c is much smaller than computation cost w (c ≪ w), efficiency → 1. Compute-heavy tasks benefit most from MapReduce. I/O-bound tasks with high c/w ratio lose efficiency.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">8 · Applications of MapReduce</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Primary use</div>
+        <div class="proto-card-title">Document indexing</div>
+        <div class="proto-card-desc">Map emits (word, document_id) pairs. Reduce groups by word and builds an inverted index — the core of Google Search. Also handles structured data indexing.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Database</div>
+        <div class="proto-card-title">Relational operations</div>
+        <div class="proto-card-desc">SQL-style GROUP BY, JOIN, and aggregation on large datasets that would be infeasible in a single RDBMS. Takes advantage of fault-tolerant parallel execution.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Analytics</div>
+        <div class="proto-card-title">Word count / frequency analysis</div>
+        <div class="proto-card-desc">Classic MapReduce example — count occurrences of each term across a large corpus. Directly maps to the word-frequency motivating problem.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Science</div>
+        <div class="proto-card-title">Scientific data processing</div>
+        <div class="proto-card-desc">Genomics, astronomy, physics simulations — any large-scale embarrassingly parallel computation over distributed data.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>MapReduce design:</strong> Two-phase parallel paradigm — Map transforms input key-value pairs into intermediate pairs; Reduce aggregates them by key. M mappers, R reducers, one master coordinator.</div>
+    <div class="callout green"><strong>Scalability insight:</strong> Partitioning documents (not words) across processors makes every disk read useful, achieving efficiency → 1 as data grows. This is the design philosophy behind MapReduce.</div>
+    <div class="callout yellow"><strong>Mapper output detail:</strong> Each mapper writes exactly R files (one per reducer) to its local disk sorted by key. Master tracks all locations. Reducers fetch via RPC.</div>
+    <div class="callout pink"><strong>Fault tolerance asymmetry:</strong> Mapper failure requires full re-execution (output on local disk is lost). Reducer failure only requires re-executing incomplete tasks (completed output is in GFS).</div>
+    <div class="callout green"><strong>Efficiency formula:</strong> η = 1/(1 + 2c/w). Compute-heavy tasks (small c/w) benefit most; I/O-heavy tasks are penalized by disk overhead.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

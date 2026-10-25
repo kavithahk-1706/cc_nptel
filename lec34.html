@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 34 — Fog Computing II | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec33.html" class="nav-lec">← prev</a>
+      <a href="lec35.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 34</span>
+    <span class="med-badge">MED priority</span>
+    <h1>Fog Computing – II</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Continues fog computing with a structured cloud-vs-fog comparison, key use cases (connected vehicles, smart grid, disaster management, IoT), and a detailed treatment of resource management challenges in fog networks. Important for exam questions on fog vs. cloud differences and resource management problems.</p>
+  </div>
+
+  <!-- Section 1: Cloud vs Fog Comparison -->
+  <div class="section">
+    <div class="section-label">1 · Cloud vs Fog — Comparison</div>
+
+    <table class="port-table">
+      <thead><tr><th>Attribute</th><th>Cloud</th><th>Fog</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Latency</td><td>High (multi-hop to remote datacenter)</td><td>Low (one hop, edge of network)</td></tr>
+        <tr><td class="proto-name">Delay jitter</td><td>High</td><td>Very low</td></tr>
+        <tr><td class="proto-name">Server location</td><td>Within the Internet (user often doesn't know exactly where)</td><td>At the edge, local network — known and localized</td></tr>
+        <tr><td class="proto-name">Client-to-server distance</td><td>Multiple hops</td><td>One hop</td></tr>
+        <tr><td class="proto-name">Security</td><td>Undefined (user has little control over third-party cloud)</td><td>Can be defined — organization may control local fog devices</td></tr>
+        <tr><td class="proto-name">Attack on data en route</td><td>Higher risk (many hops = more interception points)</td><td>Lower risk (single hop)</td></tr>
+        <tr><td class="proto-name">Location awareness</td><td>Minimal</td><td>High — fog is inherently location-aware</td></tr>
+        <tr><td class="proto-name">Geographic distribution</td><td>Logically centralized (few datacenters)</td><td>Highly distributed (many edge nodes)</td></tr>
+        <tr><td class="proto-name">Number of server nodes</td><td>Few, but extremely resourceful</td><td>Very large number, lower resources per node</td></tr>
+        <tr><td class="proto-name">Mobility support</td><td>Limited</td><td>Better — local decision-making handles mobility transitions</td></tr>
+        <tr><td class="proto-name">Real-time applications</td><td>Supported, but with higher latency</td><td>Primary motivation — low-latency real-time support</td></tr>
+        <tr><td class="proto-name">Last-mile connectivity</td><td>Usually wired/cable</td><td>Usually wireless</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout green"><strong>Relationship:</strong> Cloud and fog are complementary, not competitive. Proper <strong>orchestration and synchronization</strong> between fog (local, real-time) and cloud (global, compute-heavy) is what makes the combined system successful.</div>
+  </div>
+
+  <!-- Section 2: Use Cases -->
+  <div class="section">
+    <div class="section-label">2 · Fog Use Cases</div>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Emergency / Disaster</div>
+        <div class="proto-card-title">Emergency evacuation systems</div>
+        <div class="proto-card-desc">During fire/earthquake, default exit routes may be blocked. Fog nodes dynamically re-plan exit routes using real-time sensor data (per room, per floor) without cloud round-trip. Also: real-time landslide/flood notifications to affected areas.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Connected Vehicles (VANET)</div>
+        <div class="proto-card-title">Vehicle-to-vehicle / vehicle-to-infrastructure</div>
+        <div class="proto-card-desc">Road-side units (RSUs) and access points form the fog layer. Accident alerts, infotainment, traffic support handled locally. V2V collision warnings cannot wait for cloud round-trips — fog enables sub-second response. Traffic lights adapt signal timing to congestion in real time.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Smart Grid</div>
+        <div class="proto-card-title">Power management</div>
+        <div class="proto-card-desc">Smart meters at each home report consumption. Fog layer aggregates per-building/campus usage and makes local provisioning decisions. Aggregated data sent to cloud for long-term analytics (monthly patterns, regional provisioning).</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">IoT / Sensor Networks</div>
+        <div class="proto-card-title">Data pre-processing and aggregation</div>
+        <div class="proto-card-desc">Large sensor deployments produce raw data streams too large to transmit in full. Fog pre-processes, compresses, and summarizes data before forwarding to cloud — reduces core network congestion and cloud processing load.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Resource Management Challenges -->
+  <div class="section">
+    <div class="section-label">3 · Resource Management in Fog Networks</div>
+
+    <div class="callout pink"><strong>Core tension:</strong> Fog devices are resource-constrained compared to cloud servers. Achieving the cloud's scalability, high availability, and latency guarantees on limited fog hardware is the central resource management challenge.</div>
+
+    <h3>Resource management problem dimensions</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Utilization</div>
+        <div class="proto-card-title">Idle node exploitation</div>
+        <div class="proto-card-desc">Some fog nodes may be overloaded while others are idle (skewed distribution). Need to utilize idle nodes for better throughput through load balancing and parallel operations.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Load balancing</div>
+        <div class="proto-card-title">Meeting real-time delay requirements</div>
+        <div class="proto-card-desc">Real-time applications have strict latency SLAs. Load must be balanced so no node becomes a bottleneck that violates timing guarantees.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Fault tolerance</div>
+        <div class="proto-card-title">Node failure handling</div>
+        <div class="proto-card-desc">If a fog node goes down, applications and data on it must migrate. Need: fault detection, migration triggers, target node selection, migration of partially processed data — all with minimal latency impact.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Scalability</div>
+        <div class="proto-card-title">Scaling fog infrastructure</div>
+        <div class="proto-card-desc">Scalability is a core cloud property that fog must also support. As the number of IoT devices grows, fog must scale gracefully without centralized coordination bottlenecks.</div>
+      </div>
+    </div>
+
+    <h3>Specific operational challenges</h3>
+    <table class="port-table">
+      <thead><tr><th>Challenge</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Data unavailability</td><td>Application runs on a fog node but required data lives on a different sensor/source — data fetching adds latency</td></tr>
+        <tr><td class="proto-name">Node overload</td><td>Executing fog node becomes unresponsive under heavy workload, compromising latency guarantees</td></tr>
+        <tr><td class="proto-name">Migration target selection</td><td>When a node fails, choosing the new node quickly and correctly is non-trivial — nearest node may not be the most suitable</td></tr>
+        <tr><td class="proto-name">Partial state migration</td><td>Partially processed persistent data must be migrated to a new node while maintaining correctness</td></tr>
+        <tr><td class="proto-name">Result delivery</td><td>Final result must reach the client/actuator within the latency deadline even during migration</td></tr>
+        <tr><td class="proto-name">Multi-tenancy isolation</td><td>Multiple applications may collocate on the same fog node — data and resource integrity of each must be ensured; fog has fewer resources than cloud, making isolation harder</td></tr>
+        <tr><td class="proto-name">Component placement</td><td>Deploying application components across different fog nodes while meeting each component's latency requirement</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Resource management approaches (from research)</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Migrate to nearest available node</span>
+      <span class="tag tag-good">Minimize carbon footprint / energy</span>
+      <span class="tag tag-good">Resource prediction and advance reservation</span>
+      <span class="tag tag-good">LP formulation + heuristics for placement</span>
+      <span class="tag tag-good">Docker containers for fast, elastic deployment</span>
+      <span class="tag tag-good">Base station association + VM placement optimization</span>
+    </div>
+  </div>
+
+  <!-- Section 4: Security in Fog -->
+  <div class="section">
+    <div class="section-label">4 · Security Challenges Specific to Fog</div>
+    <div class="callout pink"><strong>Resource-constrained security:</strong> Resource-hungry security measures (encryption, intrusion detection) that run fine on cloud servers may not be deployable on lightweight fog devices. Security mechanisms must be sized for fog hardware.</div>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Attack surface</div>
+        <div class="proto-card-title">Fog as attack platform</div>
+        <div class="proto-card-desc">Distributed fog nodes — each with less oversight than centralized cloud — can be exploited to launch attacks (DDoS, man-in-the-middle). Less centralized control = more potential entry points.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Robustness</div>
+        <div class="proto-card-title">Fog device robustness</div>
+        <div class="proto-card-desc">How hardened are fog devices? Physically accessible edge devices (road-side units, smart meters) are easier to tamper with than datacenter servers in secured facilities.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Cloud vs Fog:</strong> Fog wins on latency, location awareness, and real-time capability; cloud wins on compute power and scalability. The two must be orchestrated together.</div>
+    <div class="callout green"><strong>Key use cases:</strong> Connected vehicles (VANET), smart grids, disaster management, and IoT sensor networks — all require local, real-time processing that cloud round-trips cannot support.</div>
+    <div class="callout pink"><strong>Resource management:</strong> The core operational challenge — load balancing, fault tolerance, migration of partial state, multi-tenant isolation, and real-time latency guarantees on constrained hardware.</div>
+    <div class="callout pink"><strong>Security:</strong> Distributed fog creates a far larger and harder-to-control attack surface than centralized cloud. Resource-constrained fog nodes may not support heavy security measures.</div>
+    <div class="callout green"><strong>Bottom line:</strong> Fog is a necessity for IoT-scale, real-time applications. Its success depends on proper orchestration with cloud — not a replacement, but a companion computing layer.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

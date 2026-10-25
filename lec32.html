@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 32 — Mobile Cloud Computing II | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec31.html" class="nav-lec">← prev</a>
+      <a href="lec33.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 32</span>
+    <span class="med-badge">MED priority</span>
+    <h1>Mobile Cloud Computing – II</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Deep-dives into the task partitioning problem for mobile offloading — the call-graph model, ILP formulation, energy-saving conditions, and the cloudlet architecture. Covers MAUI and COMET research systems. Key exam material is the energy-saving formula and the conditions under which offloading is beneficial.</p>
+  </div>
+
+  <!-- Section 1: Core Problem -->
+  <div class="section">
+    <div class="section-label">1 · The Core MCC Problem — Task Partitioning</div>
+    <div class="callout"><strong>Task partitioning problem:</strong> Given an application, decide which methods/modules execute <em>locally</em> on the mobile device and which are <em>offloaded</em> to the cloud — to minimize energy consumption while keeping total execution latency within a threshold T.</div>
+
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Static Partitioning</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">When</span>Decided once at app launch</div>
+          <div class="compare-row"><span class="label">Method</span>ILP solver invoked at startup</div>
+          <div class="compare-row"><span class="label">Heuristics</span>Pre-launch estimation of energy consumption</div>
+          <div class="compare-row"><span class="label">Limitation</span>Cannot adapt if environment or workload changes during execution</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Dynamic / Adaptive Partitioning</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">When</span>Re-evaluated continuously during runtime</div>
+          <div class="compare-row"><span class="label">Method</span>Cost graph + branch-and-bound; profiling at procedure-call level</div>
+          <div class="compare-row"><span class="label">Adapts to</span>Varying bandwidth, changing data, remote resource availability</div>
+          <div class="compare-row"><span class="label">Challenge</span>Scheduling + resource management across independently owned infrastructure</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Call-graph model</h3>
+    <p>The application is represented as a <strong>call graph</strong> where nodes are methods/tasks:</p>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Native nodes</div>
+        <div class="proto-card-title">Must run on device</div>
+        <div class="proto-card-desc">Some methods (e.g., hardware-dependent, sensor access) <strong>cannot be offloaded</strong>. These are fixed to the device in the graph.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Remoteable nodes</div>
+        <div class="proto-card-title">Can run on device or cloud</div>
+        <div class="proto-card-desc">The optimizer decides. Edges represent <strong>execution dependencies</strong> — a method cannot start until its predecessor completes.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Node cost (local)</div>
+        <div class="proto-card-title">Energy to run locally</div>
+        <div class="proto-card-desc">Energy consumed executing the method on the mobile device.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Edge cost (transfer)</div>
+        <div class="proto-card-title">Energy to transfer + receive</div>
+        <div class="proto-card-desc">Energy consumed transmitting program state/data to the remote server (and receiving results). Cloud-side execution energy assumed negligible compared to device energy.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Energy Saving Formula -->
+  <div class="section">
+    <div class="section-label">2 · Energy Saving Formula — When to Offload</div>
+
+    <h3>Variable definitions</h3>
+    <table class="port-table">
+      <thead><tr><th>Symbol</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">P<sub>c</sub></td><td>Energy cost per second when mobile phone is <strong>computing</strong></td></tr>
+        <tr><td class="proto-name">P<sub>i</sub></td><td>Energy cost per second when mobile phone is <strong>idle</strong></td></tr>
+        <tr><td class="proto-name">P<sub>tr</sub></td><td>Energy cost per second when mobile phone is <strong>transmitting data</strong></td></tr>
+        <tr><td class="proto-name">C</td><td>Number of instructions to execute</td></tr>
+        <tr><td class="proto-name">M</td><td>Speed of mobile device to compute C instructions (instructions/sec)</td></tr>
+        <tr><td class="proto-name">S = F·M</td><td>Speed of cloud server; F = how many times faster the cloud is than the mobile</td></tr>
+        <tr><td class="proto-name">D</td><td>Total data to transmit</td></tr>
+        <tr><td class="proto-name">B</td><td>Available bandwidth (data/sec)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Energy saved by offloading</h3>
+    <div class="callout green">
+      <strong>Energy saved = Energy (local) − Energy (offloaded)</strong><br><br>
+      <strong>Local execution energy:</strong> P<sub>c</sub> · (C/M)<br><br>
+      <strong>Offloaded execution energy:</strong> P<sub>i</sub> · (C/S) + P<sub>tr</sub> · (D/B)<br>
+      — idle while cloud computes, plus transmit cost<br><br>
+      Substituting S = F·M:<br><br>
+      <strong>Energy saved = (C/M) · [P<sub>c</sub> − P<sub>i</sub>/F] − P<sub>tr</sub> · (D/B)</strong><br><br>
+      Offloading is beneficial when this expression is <strong>positive</strong>.
+    </div>
+
+    <h3>Conditions for offloading to save energy</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Condition 1</div>
+        <div class="proto-card-title">D/B must be small compared to C/M</div>
+        <div class="proto-card-desc">Data transfer time (D/B) must be much smaller than local compute time (C/M). If you spend more energy transmitting than you save by offloading — don't offload.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Condition 2</div>
+        <div class="proto-card-title">F must be sufficiently large</div>
+        <div class="proto-card-desc">The cloud must be significantly faster than the mobile device. If F is small (cloud only slightly faster), the energy saving margin disappears.</div>
+      </div>
+    </div>
+
+    <div class="callout pink"><strong>Not all applications benefit from offloading.</strong> Apps with large data-to-computation ratios (high D, low C) are poor offloading candidates. Cloud services for mobile must also account for energy overhead of privacy, security, reliability, and data communication beyond this simple formula.</div>
+
+    <div class="callout green"><strong>Golden rule:</strong> Offloading is beneficial when <em>large computation (C)</em> is needed with <em>relatively small data communication (D)</em>. Computation-heavy, data-light tasks are ideal candidates.</div>
+  </div>
+
+  <!-- Section 3: Research Systems -->
+  <div class="section">
+    <div class="section-label">3 · Research Systems — MAUI and COMET</div>
+
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">MAUI</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Full name</span>Mobile Assistance Using Infrastructure</div>
+          <div class="compare-row"><span class="label">Approach</span>Programmer annotates each method as <strong>remoteable</strong> or not</div>
+          <div class="compare-row"><span class="label">Source code</span>Required — annotations needed</div>
+          <div class="compare-row"><span class="label">Architecture</span>MAUI client (mobile) + MAUI server (cloud); profiler + solver partition app; RPC calls between sides</div>
+          <div class="compare-row"><span class="label">Decision</span>Framework uses annotations + profiling to decide whether to execute method on cloud to save energy and reduce time</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">COMET</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Full name</span>Code Offloading by Migrating Execution Transparently</div>
+          <div class="compare-row"><span class="label">Approach</span>Works on <strong>unmodified applications</strong> — no source code required, only binaries</div>
+          <div class="compare-row"><span class="label">Source code</span>Not required</div>
+          <div class="compare-row"><span class="label">Architecture</span>Phone OS + Remote OS with <strong>Distributed Shared Memory (DSM)</strong> model</div>
+          <div class="compare-row"><span class="label">DSM</span>Physically separate memories addressed as one logical shared space — allows transparent thread migration across machines</div>
+          <div class="compare-row"><span class="label">Optimization</span>Only sends modified heap portions (not full heap) during migration — reduces data traffic</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Cloudlets -->
+  <div class="section">
+    <div class="section-label">4 · Cloudlets — Reducing Offloading Latency</div>
+    <div class="callout"><strong>Cloudlet:</strong> A trusted, resource-rich computer or cluster that is well-connected to the internet and available for use by <em>nearby</em> mobile devices. Essentially a "small cloud" close to the user.</div>
+
+    <div class="stack">
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Remote Cloud</span>
+        <span class="layer-desc">Full-scale cloud infrastructure; high latency; multiple hops</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Cloudlet (Middle Tier)</span>
+        <span class="layer-desc">Resource-rich, nearby; single-hop via Wi-Fi/short-range radio; low latency; reduces energy overhead</span>
+      </div>
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Mobile Devices</span>
+        <span class="layer-desc">Resource-constrained SMDs; offload to cloudlet instead of distant cloud</span>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Latency advantage</div>
+        <div class="proto-card-title">Single-hop network</div>
+        <div class="proto-card-desc">Reaching cloudlet via Wi-Fi or short-range radio — one hop instead of many — dramatically reduces round-trip latency compared to offloading to a remote cloud datacenter.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Energy advantage</div>
+        <div class="proto-card-title">Lower transmission cost</div>
+        <div class="proto-card-desc">Wi-Fi transmission is more energy-efficient than cellular/mobile network transmission. Shorter distance + fewer hops = less P<sub>tr</sub> · (D/B) energy cost.</div>
+      </div>
+    </div>
+
+    <div class="callout green"><strong>Cloudlet architectural role:</strong> Middle tier in a 3-tier architecture (Mobile Devices → Cloudlet → Cloud). Cloudlets reduce latency for offloading-sensitive applications and improve the energy-saving math by lowering transmission costs.</div>
+  </div>
+
+  <!-- Section 5: Communication Challenges -->
+  <div class="section">
+    <div class="section-label">5 · Key Challenges in MCC</div>
+    <table class="port-table">
+      <thead><tr><th>Challenge</th><th>Category</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Low bandwidth</td><td>Communication</td><td>Wireless radio spectrum is scarce compared to wired networks; bandwidth varies over time and location</td></tr>
+        <tr><td class="proto-name">Service availability</td><td>Communication</td><td>Congestion, network failure, weak mobile signal can prevent cloud connectivity</td></tr>
+        <tr><td class="proto-name">Heterogeneity</td><td>Communication</td><td>Wireless connectivity spans many heterogeneous networks; achieving always-on, on-demand, energy-efficient connectivity is hard</td></tr>
+        <tr><td class="proto-name">When to offload</td><td>Computation</td><td>Offloading is not always beneficial; critical to determine whether and which portions to offload</td></tr>
+        <tr><td class="proto-name">Security &amp; privacy</td><td>Trust</td><td>Data and processes on third-party cloud; privacy of user data and mobility traces</td></tr>
+        <tr><td class="proto-name">Fault tolerance</td><td>Reliability</td><td>Intermediate network failures, cloud-side faults, mobile device faults all disrupt offloaded execution</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout pink"><strong>Totality requirement:</strong> MCC cannot be solved in isolation — energy saving, latency, security, reliability, and heterogeneity must all be considered together to give the mobile user a seamless experience.</div>
+  </div>
+
+  <!-- Section 6: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Task Partitioning:</strong> The core MCC problem — split app methods between device (native/mandatory) and cloud (remoteable); modeled as a call graph; minimize energy subject to latency constraint L.</div>
+    <div class="callout green"><strong>Energy-saving condition:</strong> Offload when C (computation) is large and D/B (transfer time) is small. Cloud must be F times faster where F is sufficiently high. Formula: Energy saved = (C/M)·[P<sub>c</sub> − P<sub>i</sub>/F] − P<sub>tr</sub>·(D/B) &gt; 0.</div>
+    <div class="callout yellow"><strong>MAUI vs COMET:</strong> MAUI requires annotation but offers fine control; COMET works on unmodified binaries using DSM for transparent thread migration.</div>
+    <div class="callout green"><strong>Cloudlets:</strong> Middle-tier architecture — nearby resource-rich mini-clouds reachable in one hop via Wi-Fi, reducing latency and transmission energy compared to offloading to a distant cloud.</div>
+    <div class="callout pink"><strong>Not always beneficial:</strong> Offloading is a net loss when data transfer cost exceeds compute savings — must evaluate per application and per network condition.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

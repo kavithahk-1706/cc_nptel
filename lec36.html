@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 36 — Introduction to Docker Container | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec35.html" class="nav-lec">← prev</a>
+      <a href="lec37.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 36</span>
+    <span class="high-badge">HIGH priority</span>
+    <h1>Introduction to Docker Container</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Introduces Docker container technology — what containers are, how they differ from virtual machines, and why they matter for cloud computing. Covers the core philosophy of "develop, ship, run anywhere," the Docker architecture (engine, image, container, hub), and how containers sit on top of cloud IaaS. Conceptual and definitional; key differences between VMs and containers are exam-ready content.</p>
+  </div>
+
+  <!-- Section 1: The Problem — Application Portability -->
+  <div class="section">
+    <div class="section-label">1 · The Portability Problem</div>
+    <div class="callout pink"><strong>Core challenge:</strong> When you move a software application from one environment to another (laptop → server → cloud → mobile), it typically requires recompilation, reconfiguration, or redevelopment. As the number of application types and target environments grows, the combinatorial effort becomes unmanageable.</div>
+
+    <p>The problem manifests as a <strong>compatibility matrix</strong>: for every application (static website, background worker, user DB, analytics DB, API endpoint, web frontend, …) × every platform (laptop, server, Android, iOS, cloud, smart watch), you need a different build. The goal is to make every cell in that matrix a checkmark with minimal effort.</p>
+
+    <div class="callout yellow"><strong>Shipping container analogy (from lecture):</strong> Before standardized shipping containers, moving a piano required different equipment than moving a barrel or a car. The industry solved this by defining a standardized container — any product packed inside it can be handled by any crane, truck, ship, or rack. The same logic applies to software: if the application is bundled into a standardized container, any platform that can run the container can run the application — regardless of what is inside.</div>
+
+    <div class="callout green"><strong>Container solution:</strong> Bundle the application together with all its dependencies (libraries, binaries, runtime, environment variables, config files) into a self-contained unit called a <strong>container</strong>. The infrastructure only needs to support the container format — it does not need to know what is inside.</div>
+  </div>
+
+  <!-- Section 2: Docker Overview -->
+  <div class="section">
+    <div class="section-label">2 · Docker — Overview</div>
+    <div class="callout"><strong>Docker:</strong> An open-source container management service. Initial release: March 2013. Core philosophy: <strong>Develop → Ship → Run Anywhere</strong>. A Docker container can be deployed on any desktop OS (Mac, Linux, Windows), any cloud platform (OpenStack, Azure, AWS, Google Cloud, IBM Bluemix), and even on Android devices — without modification.</div>
+
+    <div class="callout pink"><strong>Docker vs Cloud:</strong> Docker is not a competitor to cloud — it is a complementary technology. Cloud can act as a <em>platform</em> to host Docker containers (IaaS running containers via Docker engine on VMs), enhancing cloud's capability by adding application-level portability.</div>
+
+    <h3>Key Features</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Portability</div>
+        <div class="proto-card-title">Run Anywhere</div>
+        <div class="proto-card-desc">A Docker container runs identically on a developer's laptop, a QA server, a production cloud VM, or an Android device — eliminating the "works on my machine" problem. No recompilation needed per target environment.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Lightweight</div>
+        <div class="proto-card-title">Smaller Footprint</div>
+        <div class="proto-card-desc">Container images are typically tens of MBs. Containers share the host OS kernel — no separate guest OS per container. They start almost instantaneously and require far fewer resources than VMs.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Isolation</div>
+        <div class="proto-card-title">Process Isolation</div>
+        <div class="proto-card-desc">Each container runs as an isolated process in user space. It accesses the host filesystem and ports only if explicitly configured to do so — default is fully isolated.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Scalability</div>
+        <div class="proto-card-title">Easy to Scale</div>
+        <div class="proto-card-desc">Because containers are lightweight, spinning up many instances of the same container is fast and resource-efficient. Scaling up is not constrained by the overhead of full OS provisioning.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Collaboration</div>
+        <div class="proto-card-title">Dev/QA/Ops Alignment</div>
+        <div class="proto-card-desc">Development, QA, and operations teams all work with the same container image. Environment differences between teams are eliminated — the container is the shared artifact.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Versioning</div>
+        <div class="proto-card-title">Incremental Updates</div>
+        <div class="proto-card-desc">Docker images are layered. A modification to container A produces container A' that stores only the diff — not a full copy of the image. This saves storage and makes updates efficient.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Docker Architecture vs Traditional Virtualization -->
+  <div class="section">
+    <div class="section-label">3 · Docker Architecture vs Traditional Virtualization</div>
+
+    <span class="ts">▶ 18:42</span>
+    <div class="callout yellow">Worth watching: Side-by-side architecture diagram — traditional VM stack (server → host OS → hypervisor → guest OS → app) vs Docker stack (server → host OS → Docker engine → containers with apps).</div>
+
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Traditional Virtualization (VM)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Stack</span>Physical server → Host OS → Hypervisor (VMM) → Guest OS → Application</div>
+          <div class="compare-row"><span class="label">Guest OS</span>Each VM has its own full guest OS (Linux, Windows, etc.)</div>
+          <div class="compare-row"><span class="label">Resource use</span>Heavy — each VM includes a full OS image; disk, RAM, CPU overhead per VM</div>
+          <div class="compare-row"><span class="label">Startup</span>Minutes — OS boot sequence per VM</div>
+          <div class="compare-row"><span class="label">Isolation</span>Full hardware-level isolation via hypervisor</div>
+          <div class="compare-row"><span class="label">Image size</span>GBs (includes OS)</div>
+          <div class="compare-row"><span class="label">Portability</span>VMs can be moved between hypervisors but carry the full OS</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Docker Containers</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Stack</span>Physical server → Host OS → Docker engine → Containers (app + deps)</div>
+          <div class="compare-row"><span class="label">Guest OS</span>None — containers share the host OS kernel</div>
+          <div class="compare-row"><span class="label">Resource use</span>Light — only app-layer code and dependencies bundled; no per-container OS</div>
+          <div class="compare-row"><span class="label">Startup</span>Seconds or less — no OS boot; container process starts directly</div>
+          <div class="compare-row"><span class="label">Isolation</span>Process-level isolation in user space; shares kernel</div>
+          <div class="compare-row"><span class="label">Image size</span>Tens of MBs (no OS)</div>
+          <div class="compare-row"><span class="label">Portability</span>Runs on any host with Docker engine — regardless of underlying OS or cloud</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout pink"><strong>Trade-off:</strong> VMs provide stronger hardware-level isolation (separate kernel per VM). Containers share the host kernel — a kernel vulnerability can affect all containers. For security-critical multi-tenant workloads, VMs remain preferred; for developer portability and microservice deployment, containers win on efficiency.</div>
+  </div>
+
+  <!-- Section 4: Images and Containers -->
+  <div class="section">
+    <div class="section-label">4 · Images vs Containers</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Docker Image</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Definition</span>A lightweight, standalone, executable package</div>
+          <div class="compare-row"><span class="label">Contents</span>Code, runtime, libraries, environment variables, config files — everything needed to run the software</div>
+          <div class="compare-row"><span class="label">State</span>Static — a blueprint; does not run on its own</div>
+          <div class="compare-row"><span class="label">Storage</span>Stored in Docker Hub (registry) or local image store</div>
+          <div class="compare-row"><span class="label">Analogy</span>A class definition or an executable binary on disk</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Docker Container</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Definition</span>A runtime instance of an image — what the image becomes in memory when executed</div>
+          <div class="compare-row"><span class="label">Contents</span>Image layers + a writable container layer for runtime state</div>
+          <div class="compare-row"><span class="label">State</span>Running process — isolated from the host by default</div>
+          <div class="compare-row"><span class="label">Access</span>Only accesses host filesystem/ports if explicitly configured</div>
+          <div class="compare-row"><span class="label">Analogy</span>A class instance — an object created from the image blueprint</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout"><strong>Key point:</strong> Multiple containers can run simultaneously from the same image, each in an isolated process. Each container takes no more memory than a running executable — no per-instance OS overhead.</div>
+  </div>
+
+  <!-- Section 5: Docker Components -->
+  <div class="section">
+    <div class="section-label">5 · Docker Components</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Runtime</div>
+        <div class="proto-card-title">Docker Engine</div>
+        <div class="proto-card-desc">The core daemon that builds Docker images and creates/runs Docker containers. Runs on top of the host OS (Linux, Mac, Windows). Analogous to a hypervisor in the VM world — sits between the OS and the containers.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Registry</div>
+        <div class="proto-card-title">Docker Hub</div>
+        <div class="proto-card-desc">Public repository of Docker images (hub.docker.com). Developers publish images here; users search and pull images. Docker Hub can automatically build images from Dockerfiles hosted on GitHub.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Build Script</div>
+        <div class="proto-card-title">Dockerfile</div>
+        <div class="proto-card-desc">A text script that defines how to build a Docker image automatically. Can be version-controlled in Git or SVN alongside source code. Docker Hub can trigger automated builds when a Dockerfile in GitHub changes.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Composition</div>
+        <div class="proto-card-title">Docker Compose</div>
+        <div class="proto-card-desc">A tool to define and run multi-container Docker applications. Allows an application composed of multiple services (web frontend, database, queue) to be described as a single configuration file.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Platform</div>
+        <div class="proto-card-title">Docker for Mac / Windows / Linux</div>
+        <div class="proto-card-desc">Platform-specific Docker distributions. Each provides the Docker engine adapted for that OS, allowing developers to run containers on their local machine during development without a separate Linux server.</div>
+      </div>
+    </div>
+
+    <span class="ts">▶ 26:58</span>
+    <div class="callout yellow">Worth watching: Workflow diagram — source repository → Docker engine (build) → container image pushed to registry → user searches/pulls the image → container instantiated and run. Shows the client-server nature of Docker operations.</div>
+  </div>
+
+  <!-- Section 6: Docker Commands Reference -->
+  <div class="section">
+    <div class="section-label">6 · Key Docker Commands</div>
+    <h3>Image Commands</h3>
+    <table class="port-table">
+      <thead>
+        <tr><th>Command</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="proto-name">images</td><td>List all local Docker images</td></tr>
+        <tr><td class="proto-name">pull</td><td>Download an image from a registry (e.g., Docker Hub)</td></tr>
+        <tr><td class="proto-name">tag</td><td>Tag an image with a name/version label</td></tr>
+        <tr><td class="proto-name">rmi</td><td>Delete a local image; also removes intermediate images no longer in use</td></tr>
+        <tr><td class="proto-name">build</td><td>Build an image from a Dockerfile</td></tr>
+        <tr><td class="proto-name">push</td><td>Upload a local image to a registry</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Container Commands</h3>
+    <table class="port-table">
+      <thead>
+        <tr><th>Command</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="proto-name">run</td><td>Create a container from an image and execute a command in it</td></tr>
+        <tr><td class="proto-name">ps</td><td>List all currently running containers</td></tr>
+        <tr><td class="proto-name">ps -a</td><td>List all containers including stopped ones</td></tr>
+        <tr><td class="proto-name">top</td><td>Display processes running inside a container</td></tr>
+        <tr><td class="proto-name">start / stop / pause</td><td>Change container state (running → stopped → paused)</td></tr>
+        <tr><td class="proto-name">rm</td><td>Delete a (stopped) container</td></tr>
+        <tr><td class="proto-name">commit</td><td>Create a new image from the current state of a running container</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout yellow"><strong>Note from lecture:</strong> Many Docker container commands mirror familiar Linux commands (ps, top, rm) — intentional design choice to reduce learning curve for Linux users.</div>
+  </div>
+
+  <!-- Section 7: Docker on Cloud -->
+  <div class="section">
+    <div class="section-label">7 · Docker on Cloud</div>
+
+    <span class="ts">▶ 27:42</span>
+    <div class="callout yellow">Worth watching: Diagram showing Docker containers running inside VMs on a cloud IaaS layer — hypervisor → guest OS → Docker engine → containers. Illustrates how cloud and containers are complementary, not competing.</div>
+
+    <p>Cloud acts as the <strong>IaaS platform</strong> on which Docker containers are deployed:</p>
+    <div class="stack">
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Physical Infrastructure</span>
+        <span class="layer-desc">Cloud data center hardware — servers, storage, network</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">Hypervisor / VMM</span>
+        <span class="layer-desc">Virtualizes hardware → provides Virtual Machines (IaaS layer)</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Guest OS on VM</span>
+        <span class="layer-desc">Linux or Windows running inside each VM</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">Docker Engine</span>
+        <span class="layer-desc">Container runtime running on the guest OS — manages images and containers</span>
+      </div>
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Docker Containers</span>
+        <span class="layer-desc">Application + dependencies, isolated per container — deployed across cloud VMs</span>
+      </div>
+    </div>
+
+    <h3>Who Uses Docker and Why</h3>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Developers</div>
+        <div class="concept-desc">Eliminate the "works on my machine" problem. Share a container image with teammates — exact same runtime environment for all, regardless of their local OS.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Operators</div>
+        <div class="concept-desc">Run and manage multiple applications side-by-side in isolated containers on the same host. Better compute density than one-application-per-VM.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Enterprises</div>
+        <div class="concept-desc">Build agile software delivery pipelines — build once, deploy to any environment (dev, QA, staging, production on any cloud). Works for Linux, Windows Server, and Linux-on-mainframe apps.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 8: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Portability Problem:</strong> Moving software between environments requires recompilation/reconfiguration — Docker solves this by bundling app + all dependencies into a standardized container.</div>
+    <div class="callout green"><strong>Image vs Container:</strong> An image is a static blueprint (code + dependencies); a container is a running instance of that image — analogous to class vs object. Multiple containers can run from one image, each isolated.</div>
+    <div class="callout green"><strong>Container vs VM:</strong> Containers share the host OS kernel (no per-container guest OS), are lightweight (tens of MBs vs GBs), start in seconds, and provide process-level isolation. VMs provide stronger hardware-level isolation but at far greater resource cost.</div>
+    <div class="callout yellow"><strong>Docker on Cloud:</strong> Docker and cloud are complementary — cloud (IaaS) provides the VM platform; Docker engine runs on VMs; containers run on the Docker engine. Cloud becomes a portable, scalable host for containerized applications.</div>
+    <div class="callout pink"><strong>Security Trade-off:</strong> Containers share the host kernel — a kernel-level vulnerability can compromise all containers on the same host. VMs maintain stronger isolation for multi-tenant security-critical workloads.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

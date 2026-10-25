@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 20 — GCP Demo (Static Hosting + App Engine) | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec19.html" class="nav-lec">← prev</a>
+      <a href="lec21.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 20</span>
+    <span class="skip-badge">SKIP priority</span>
+    <h1>GCP Demo — Static Web Hosting &amp; App Engine Deployment</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Live demo of two GCP workflows: (1) hosting a static website via a Cloud Storage bucket, and (2) deploying a Python Flask app to Google App Engine using Cloud Shell. No new theory — procedure-only lecture. The deployment steps below are the only exam-relevant takeaway.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · Demo A — Static Website Hosting (Cloud Storage)</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Steps</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">1</span>Login to GCP Console</div>
+          <div class="compare-row"><span class="label">2</span>Navigate to Storage → Browser → Create Bucket</div>
+          <div class="compare-row"><span class="label">3</span>Choose storage class (Regional) and location (e.g. asia-east1)</div>
+          <div class="compare-row"><span class="label">4</span>Upload all site files (index.html, 404.html, folders)</div>
+          <div class="compare-row"><span class="label">5</span>Set all objects to <strong>publicly readable</strong></div>
+          <div class="compare-row"><span class="label">6</span>Access via: storage.googleapis.com/&lt;bucket-name&gt;/index.html</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Requirements</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Must have</span>index.html (home page)</div>
+          <div class="compare-row"><span class="label">Must have</span>404.html (not-found page)</div>
+          <div class="compare-row"><span class="label">Visibility</span>All files set to public read</div>
+          <div class="compare-row"><span class="label">URL pattern</span>storage.googleapis.com/&lt;bucket&gt;/&lt;file&gt;</div>
+          <div class="compare-row"><span class="label">Service used</span>Cloud Storage (not App Engine)</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout yellow"><strong>Key distinction:</strong> Static hosting uses only the <strong>Storage</strong> service — no compute involved. Suitable for plain HTML/CSS/JS sites with no server-side logic.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Demo B — Python App Deployment (App Engine)</div>
+    <table class="port-table">
+      <thead><tr><th>Step</th><th>Command / Action</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">1. New project</td><td>GCP Console → Create Project</td><td>Creates a globally unique project with a unique identifier</td></tr>
+        <tr><td class="proto-name">2. Cloud Shell</td><td>Activate Cloud Shell in Console</td><td>Linux terminal within GCP — no local setup needed</td></tr>
+        <tr><td class="proto-name">3. Clone app</td><td>git clone &lt;github-repo&gt;</td><td>Download sample Python app (Flask "Hello World")</td></tr>
+        <tr><td class="proto-name">4. Config file</td><td>app.yaml</td><td>Declares runtime (python27), threading model (threadsafe: true), URL routing regex → main app handler</td></tr>
+        <tr><td class="proto-name">5. App file</td><td>main.py</td><td>Flask app returning "Hello World" for any matching URL</td></tr>
+        <tr><td class="proto-name">6. Local test</td><td>dev_appserver.py → web preview</td><td>Run development server inside Cloud Shell; verify via web preview</td></tr>
+        <tr><td class="proto-name">7. Edit &amp; retest</td><td>Edit main.py → restart server</td><td>Modify message; verify changes locally before deploying</td></tr>
+        <tr><td class="proto-name">8. Deploy</td><td>gcloud app deploy</td><td>Uploads files to Cloud Storage; deploys to App Engine; prompts for region</td></tr>
+        <tr><td class="proto-name">9. Browse</td><td>gcloud app browse</td><td>Returns public URL: &lt;project-id&gt;.appspot.com</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>app.yaml fields:</strong> <code>runtime: python27</code> — specifies Python 2.7 environment. <code>threadsafe: true</code> — app can handle concurrent requests. <code>url: .*</code> — regex matching any URL routes to <code>script: main.app</code>.</div>
+    <div class="callout green"><strong>App Engine advantage:</strong> No server management. Code + app.yaml is sufficient — App Engine handles scaling, load balancing, and OS. URL format: <code>&lt;project-id&gt;.appspot.com</code>.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Static hosting:</strong> Cloud Storage bucket → upload files → make public → accessible at storage.googleapis.com URL. Uses Storage service only.</div>
+    <div class="callout green"><strong>App Engine deployment:</strong> Cloud Shell → clone → app.yaml + main.py → dev test → gcloud app deploy → live at appspot.com. PaaS — no VM management.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

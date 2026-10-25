@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 49 — Docker Container Demo | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec48.html" class="nav-lec">← prev</a>
+      <a href="lec50.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 49</span>
+    <span class="skip-badge">SKIP priority</span>
+    <h1>Docker Container Demo</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Live demo session — installs Docker Engine on Ubuntu, verifies with the hello-world container, and previews the MySQL + phpMyAdmin demo to follow. Almost no new conceptual content; all key Docker concepts are in Lecture 48. Skim for the demo flow and installation command outline only.</p>
+  </div>
+
+  <!-- Section 1: Demo Objective -->
+  <div class="section">
+    <div class="section-label">1 · Demo Objective</div>
+    <div class="callout"><strong>Core demonstration:</strong> Show Docker's portability claim end-to-end. Configure a MySQL database (with phpMyAdmin frontend) on an Ubuntu system, package the modified state as a Docker image, transfer it to a Windows machine, and run it there — without any separate installation at the destination.</div>
+
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Traditional MySQL Transfer</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">At destination</span>Separate installation: MySQL, Apache web server, PHP, phpMyAdmin</div>
+          <div class="compare-row"><span class="label">Data transfer</span>Backup MySQL data at source → transfer → restore at destination MySQL</div>
+          <div class="compare-row"><span class="label">Expertise</span>Requires configuration expertise at both ends</div>
+          <div class="compare-row"><span class="label">Effort</span>High — many steps, failure points</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Docker-Based Transfer</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">At destination</span>Only Docker Engine needed — nothing else to install</div>
+          <div class="compare-row"><span class="label">Data transfer</span>Save Docker image (includes data + config) → transfer image file → load at destination</div>
+          <div class="compare-row"><span class="label">Expertise</span>Docker Engine at destination; no MySQL/Apache/PHP knowledge required</div>
+          <div class="compare-row"><span class="label">Effort</span>Low — load image → start running</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Demo Components -->
+  <div class="section">
+    <div class="section-label">2 · Demo Application: MySQL + phpMyAdmin</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Backend</div>
+        <div class="proto-card-title">MySQL Docker Image</div>
+        <div class="proto-card-desc">Open-source relational database; widely used. Official Docker image pulled from Docker Hub. Demo modifies this image — creates tables, adds records — then saves the modified image for transfer.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Frontend</div>
+        <div class="proto-card-title">phpMyAdmin Docker Image</div>
+        <div class="proto-card-desc">Web-based GUI that connects to a MySQL backend. Pulled directly from Docker Hub without modification. Allows viewing and manipulating MySQL data through a browser interface.</div>
+      </div>
+    </div>
+    <div class="callout"><strong>Demo flow:</strong> (1) Pull both images from Docker Hub on Ubuntu → (2) Run as containers → (3) Connect phpMyAdmin to MySQL → (4) Create table, add records → (5) Save modified MySQL image → (6) Transfer image to Windows machine → (7) Load and run on Windows — same data, same config, no reinstallation.</div>
+  </div>
+
+  <!-- Section 3: Docker Engine Installation -->
+  <div class="section">
+    <div class="section-label">3 · Docker Engine Installation on Ubuntu</div>
+    <div class="callout yellow"><strong>Reference:</strong> Full installation instructions are at <strong>docs.docker.com</strong>. The steps shown in the demo follow the official documentation.</div>
+
+    <table class="port-table">
+      <thead><tr><th>Step</th><th>Command / Action</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">1</td><td>sudo apt-get update</td><td>Update apt package index</td></tr>
+        <tr><td class="proto-name">2</td><td>Install prerequisite packages</td><td>Allow apt to use a repository over HTTPS (ca-certificates, curl, gnupg, etc.)</td></tr>
+        <tr><td class="proto-name">3</td><td>Add Docker's official GPG key</td><td>Authenticate packages from Docker's repository</td></tr>
+        <tr><td class="proto-name">4</td><td>Set up Docker's stable repository</td><td>Point apt at Docker's official package source</td></tr>
+        <tr><td class="proto-name">5</td><td>sudo apt-get update (again)</td><td>Refresh package index with Docker's repository included</td></tr>
+        <tr><td class="proto-name">6</td><td>sudo apt-get install docker-ce docker-ce-cli containerd.io</td><td>Install Docker Engine</td></tr>
+        <tr><td class="proto-name">7</td><td>docker run hello-world</td><td>Verify installation — pulls hello-world image from Docker Hub and runs it</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout green"><strong>Verification:</strong> <code>docker run hello-world</code> pulls the hello-world image from Docker Hub (since it's not present locally), runs a container, and prints "Hello from Docker!" — confirming the Docker Engine is installed and working correctly.</div>
+  </div>
+
+  <!-- Section 4: Docker Hub -->
+  <div class="section">
+    <div class="section-label">4 · Docker Hub — Image Repository</div>
+    <div class="callout"><strong>Docker Hub</strong> is the public registry maintained by Docker Inc. — the central place to find, share, and distribute container images. Standard official images (MySQL, Apache, Nginx, etc.) are tested and available to pull directly.</div>
+    <div class="callout yellow"><strong>Image pull behavior:</strong> When <code>docker run &lt;image-name&gt;</code> is called and the image is not present locally, Docker automatically pulls the latest version from Docker Hub. If the image is already cached locally, it runs from the local copy.</div>
+    <div class="callout pink"><strong>Other registries:</strong> Images can also come from private registries or other public registries — Docker Hub is the default but not the only source.</div>
+  </div>
+
+  <!-- Section 5: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Demo goal:</strong> Demonstrate Docker's portability — configure MySQL + phpMyAdmin on Ubuntu, save as image, transfer to Windows, run without reinstalling anything at the destination.</div>
+    <div class="callout green"><strong>Installation:</strong> Docker Engine is installed via apt on Ubuntu, following docs.docker.com. Verified with <code>docker run hello-world</code> — success means the engine is ready for use.</div>
+    <div class="callout yellow"><strong>Docker Hub:</strong> Public registry where official images (MySQL, phpMyAdmin, hello-world, etc.) are hosted. <code>docker run</code> automatically pulls from Hub if the image is not cached locally.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

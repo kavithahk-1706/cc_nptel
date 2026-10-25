@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 19 — Google Cloud Platform Overview | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec18.html" class="nav-lec">← prev</a>
+      <a href="lec20.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 19</span>
+    <span class="skip-badge">SKIP priority</span>
+    <h1>Google Cloud Platform (GCP) — Overview</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>High-level marketing overview of GCP's service catalog: compute (IaaS and PaaS), storage, and app services. No new architectural theory — primarily a prelude to the GCP demo in lec20. Skim the service taxonomy table; skip the rest if pressed for time.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · GCP Service Taxonomy</div>
+    <div class="callout"><strong>Three verticals:</strong> Compute → Storage → App Services. GCP provides both IaaS and PaaS within its compute tier, unlike AWS (EC2 only IaaS) or Azure (Web/Worker roles only PaaS).</div>
+    <table class="port-table">
+      <thead><tr><th>Vertical</th><th>Service</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name" rowspan="2">Compute</td><td>Google App Engine</td><td>PaaS</td><td>Managed platform; focus on code, not infrastructure; auto-scaling built in</td></tr>
+        <tr><td>Compute Engine</td><td>IaaS</td><td>Raw VMs with configurable CPU/memory/disk; full flexibility</td></tr>
+        <tr><td class="proto-name" rowspan="4">Storage</td><td>Cloud Storage</td><td>Object Storage</td><td>Globally accessible blob storage</td></tr>
+        <tr><td>Cloud SQL</td><td>Relational</td><td>Managed MySQL database</td></tr>
+        <tr><td>Cloud Datastore</td><td>NoSQL</td><td>Managed NoSQL (key-value / document)</td></tr>
+        <tr><td>Persistent Disk</td><td>Block Storage</td><td>Attached block storage for Compute Engine VMs</td></tr>
+        <tr><td class="proto-name" rowspan="3">App Services</td><td>BigQuery</td><td>Big Data Analytics</td><td>Serverless data warehouse for large-scale analytics queries</td></tr>
+        <tr><td>Cloud Endpoints</td><td>API Gateway</td><td>Expose and manage custom APIs</td></tr>
+        <tr><td>Caching &amp; Queues</td><td>Middleware</td><td>Task queues and memcache for application offloading</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Key Properties (exam one-liners)</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Global Distribution</div>
+        <div class="proto-card-title">Regions → Zones</div>
+        <div class="proto-card-desc">GCP infrastructure is organised into geographically distributed <strong>regions</strong>, each containing multiple <strong>zones</strong> for fault isolation. Services may be global, regional, or zonal.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Auto-Scaling</div>
+        <div class="proto-card-title">Scale up and down</div>
+        <div class="proto-card-desc">App Engine and Cloud Datastore provide <strong>automatic scaling</strong> — resources increase under load and release when idle. Pay only for what is consumed (pay-as-you-go).</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">PaaS vs IaaS Choice</div>
+        <div class="proto-card-title">App Engine vs Compute Engine</div>
+        <div class="proto-card-desc">Use <strong>App Engine</strong> when you want to focus solely on code (no patching, no OS). Use <strong>Compute Engine</strong> when you need full VM control, custom OS, or specific system configuration.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Mix and Match</div>
+        <div class="proto-card-title">Composable services</div>
+        <div class="proto-card-desc">GCP services are designed to be combined — e.g., App Engine (compute) + Cloud SQL (relational) + BigQuery (analytics) + Cloud Endpoints (API) in one application architecture.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>GCP Compute Tier:</strong> App Engine (PaaS, auto-scaling, code-only) vs Compute Engine (IaaS, raw VMs, full control). Both available on same platform.</div>
+    <div class="callout"><strong>GCP Storage Tier:</strong> Cloud Storage (object), Cloud SQL (MySQL), Cloud Datastore (NoSQL), Persistent Disk (block). Different data types → different services.</div>
+    <div class="callout green"><strong>Key design principle:</strong> GCP is modular and composable — pick and mix services. Google's own products (Search, YouTube, Gmail) run on the same underlying infrastructure.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

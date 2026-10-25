@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 24 — Resource Management I | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec23.html" class="nav-lec">← prev</a>
+      <a href="lec25.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 24</span>
+    <span class="med-badge">MED priority</span>
+    <h1>Resource Management I — Green Cloud &amp; VM Consolidation</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Introduces cloud resource management: resource types, data center power economics, and the green cloud framework. Covers VM consolidation via live migration (with a power-consumption example), VM image minimization, and research directions. Conceptual with one illustrative numerical example; no exam-style worked problems.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · Why Resource Management?</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Provider perspective</div>
+        <div class="concept-desc">Finite resources must serve as many consumers as possible while maximizing profit without SLA violations. Even with budget, physical power supply from the grid can be a hard ceiling.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Consumer perspective</div>
+        <div class="concept-desc">Cloud appears as an infinite, elastic pool accessed on a pay-as-you-go basis. The consumer should receive the requested resources without caring how they are physically managed.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Environmental obligation</div>
+        <div class="concept-desc">Carbon footprint and energy consumption are constrained by legal obligations and sustainability targets — not just economics. Energy availability can cap growth regardless of available capital.</div>
+      </div>
+    </div>
+    <div class="callout"><strong>Resource management definition:</strong> Operations used to control how capabilities provided by cloud resources and services are made available to external entities (users, applications, services) in an efficient way.</div>
+    <div class="callout yellow"><strong>Efficient means:</strong> maximizing ISP profit, minimizing energy consumption, respecting SLAs, or any combination — the management objective is configurable.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Resource Types</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Physical resources</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Compute</span>Servers, CPUs, multi-core nodes</div>
+          <div class="compare-row"><span class="label">Storage</span>Disks, databases (hardware tier)</div>
+          <div class="compare-row"><span class="label">Network</span>Switches, routers, bandwidth</div>
+          <div class="compare-row"><span class="label">Instruments</span>Scientific or specialized devices</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Logical resources</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Applications</span>Communication apps, business software</div>
+          <div class="compare-row"><span class="label">Processes</span>CPU executions of user workloads</div>
+          <div class="compare-row"><span class="label">Monitoring</span>Tools that observe physical resources</div>
+          <div class="compare-row"><span class="label">Management</span>Orchestration and control-plane services</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Layered view:</strong> IaaS (infrastructure) is the primary focus of resource management, but PaaS and SaaS layers also have resources that must be managed. Customers access cloud via heterogeneous endpoints: servers, laptops, smartphones, tablets.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Data Center Power Consumption</div>
+    <div class="callout"><strong>Scale:</strong> Servers consume ~0.5% of the world's total electricity. When data center logistics (cooling, UPS, AC) are included, the fraction rises above 1%. Energy demand for servers is reportedly doubling every 5–6 years.</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Compute infrastructure</div>
+        <div class="proto-card-title">Servers, storage, network</div>
+        <div class="proto-card-desc">Primary workload carriers. Power use is roughly proportional to active cores and memory, but not linearly — power consumption saturates as core count grows (non-linear relationship exploited by consolidation).</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Environmental infrastructure</div>
+        <div class="proto-card-title">Power supply, cooling, logistics</div>
+        <div class="proto-card-desc">UPS, AC units, rack logistics. Power draw is approximately equal to compute infrastructure — the "overhead" cost of keeping servers alive is nearly as large as the compute cost itself.</div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Grid ceiling:</strong> Even with unlimited budget, the local electricity grid may not supply additional power. A university data center cannot simply double capacity by paying more if the utility has no surplus.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · Green Cloud Framework</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">VM controls (compute side)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Scheduling</span>Power-aware and thermal-aware VM placement</div>
+          <div class="compare-row"><span class="label">VM images</span>Minimized, service-oriented OS images</div>
+          <div class="compare-row"><span class="label">Migration</span>Live VM migration to consolidate onto fewer nodes</div>
+          <div class="compare-row"><span class="label">Shutdown</span>Dynamic hibernation of idle servers</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Data center design (infra side)</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Rack design</span>Physical layout to minimize heat paths</div>
+          <div class="compare-row"><span class="label">Cooling</span>Targeted rack-level cooling enclosures, not room-wide</div>
+          <div class="compare-row"><span class="label">Recirculation</span>Managing hot aisle / cold aisle air flow</div>
+          <div class="compare-row"><span class="label">Integration</span>Integrated server + rack + cooling systems</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout green"><strong>Combined impact:</strong> No single technique is sufficient. Power-aware scheduling + VM image minimization + rack-level cooling together produce greater savings than any one implemented alone.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · VM Consolidation via Live Migration</div>
+    <div class="callout yellow"><strong>Observation:</strong> Power vs. active processors is non-linear — power consumption saturates as core count grows. Concentrating VMs on fewer nodes lets idle servers be hibernated, saving their idle power draw.</div>
+    <h3>Power example (greedy consolidation)</h3>
+    <table class="port-table">
+      <thead><tr><th>Scenario</th><th>Active nodes</th><th>Power calculation</th><th>Total power</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Distributed (4 nodes, 2 VMs each)</td><td>4</td><td>4 × 138 W</td><td>~552 W</td></tr>
+        <tr><td class="proto-name">Consolidated (1 node, 8 VMs; 3 hibernate)</td><td>1</td><td>170 W + 3 × 105 W</td><td>~485 W</td></tr>
+      </tbody>
+    </table>
+    <div class="callout pink"><strong>Caveat:</strong> Migration itself has a cost (network bandwidth, CPU overhead during transfer). VMs may be of different flavors and cannot always be packed arbitrarily. Greedy algorithms must track available cores per node and check capacity constraints before migrating.</div>
+    <h3>Live migration workflow</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Load decreases</div>
+        <div class="proto-card-title">Consolidate → hibernate</div>
+        <div class="proto-card-desc">Monitor load; live-migrate VMs to more utilized nodes using hypervisor live migration support; shut down or hibernate newly empty nodes to eliminate idle power draw.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Load increases</div>
+        <div class="proto-card-title">Wake-on-LAN → schedule</div>
+        <div class="proto-card-desc">Send wake-up signal (Wake-on-LAN) to hibernating nodes; wait for them to come online; schedule new VMs to the freshly available nodes.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · VM Image Minimization</div>
+    <div class="callout"><strong>Problem:</strong> Default VM images (e.g. Ubuntu 9.04 at ~4 GB) include packages and services the consumer never uses. Larger images increase live migration latency and carry idle daemons that waste CPU/memory.</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Remove unused packages</div>
+        <div class="proto-card-title">Strip X11, window managers, etc.</div>
+        <div class="proto-card-desc">Eliminate any package not required by the intended service. Service-oriented architecture demands service-oriented VM images — not general-purpose OS installs.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Optimize boot sequence</div>
+        <div class="proto-card-title">Read-ahead profiling + reorder</div>
+        <div class="proto-card-desc">Profile disk access at boot; reorder the sequence to prefetch boot files, minimizing CPU idle time from I/O waits. Reduces boot time and energy consumed during startup.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Custom Linux kernel</div>
+        <div class="proto-card-title">Build for DomU (no graphics/sound)</div>
+        <div class="proto-card-desc">Compile a kernel with only the drivers and modules required. No 3D graphics, no sound subsystem — just compute and network for the target workload.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Results (example)</div>
+        <div class="proto-card-title">4 GB → ~600 MB; 38s → 8s boot</div>
+        <div class="proto-card-desc">At 100 image launches per hour (small cloud) or 1000 per hour (production), the energy savings compound significantly across the fleet.</div>
+      </div>
+    </div>
+    <div class="callout green"><strong>Impact:</strong> Smaller image → faster live migration (less data over network) + lower idle resource consumption + less energy per boot. Scales enormously across thousands of simultaneous VM launches.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Resource management:</strong> Controls how cloud resources are made available to users, applications, and services efficiently — balancing profit, SLA compliance, and energy constraints simultaneously.</div>
+    <div class="callout green"><strong>Green cloud framework:</strong> Two orthogonal axes — VM controls (scheduling, image minimization, live migration) and data center design (rack layout, targeted cooling). Both must be addressed together for meaningful impact.</div>
+    <div class="callout yellow"><strong>VM consolidation:</strong> Non-linear power-vs-utilization relationship means concentrating VMs on fewer nodes and hibernating idle nodes reduces total power consumption; live migration enables this dynamically.</div>
+    <div class="callout pink"><strong>Research frontier:</strong> Power-aware + thermal-aware scheduling, integrated server-rack-cooling strategies, customer profiling for tailored VM images, and next-generation energy-efficient data center design are all open research areas.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

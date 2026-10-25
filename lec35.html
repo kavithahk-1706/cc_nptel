@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 35 — Use Case: Geospatial Cloud | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec34.html" class="nav-lec">← prev</a>
+      <a href="lec36.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 35</span>
+    <span class="med-badge">MED priority</span>
+    <h1>Use Case: Geospatial Cloud</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Applies cloud computing principles to the geospatial domain — covering what GIS and spatial data are, why they need cloud infrastructure, the architecture of a geospatial cloud, and the IIT Kharagpur Meghamala experimental deployment. Applied and use-case focused; introduces no new core cloud theory but shows how cloud economics, resource pooling, and web services map onto a real domain with heterogeneous, multi-stakeholder data.</p>
+  </div>
+
+  <!-- Section 1: What is Geospatial Data -->
+  <div class="section">
+    <div class="section-label">1 · Geospatial Data — Definition and Characteristics</div>
+    <div class="callout"><strong>Geospatial data:</strong> Information explicitly linked to a location on the earth's surface. Every data item is anchored to a coordinate system (typically lat-long). Over 90% of real-world data is estimated to carry some spatial attribute — student records (hall, department, hometown), product delivery addresses, pollution sensor readings, weather stations, etc.</div>
+
+    <h3>Static vs Dynamic</h3>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Static Spatial Data</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Change rate</span>Does not change or changes over very long periods</div>
+          <div class="compare-row"><span class="label">Examples</span>State/district boundaries, lakes, parks, roads (geometry)</div>
+          <div class="compare-row"><span class="label">Also called</span>Pseudo-static — building geometry is static even if electricity demand varies</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Dynamic Spatial Data</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Change rate</span>Varies frequently or continuously over time</div>
+          <div class="compare-row"><span class="label">Examples</span>Traffic movement, city population at any hour, air quality sensors</div>
+          <div class="compare-row"><span class="label">Implication</span>Requires time-stamped storage and continuous update pipelines</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Scale Dependency</h3>
+    <p>Geographic data varies with the scale of observation. A building viewed from a satellite is a <strong>point</strong>; viewed at street level it is a <strong>polygon</strong>. Scale affects the level of detail, precision, and the nature of spatial relationships — this is a fundamental challenge in multi-source data integration.</p>
+
+    <h3>Common Geographic Data Categories</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Legal/Administrative (boundaries, jurisdictions)</span>
+      <span class="tag tag-good">Cultural and Climatic</span>
+      <span class="tag tag-good">Economic</span>
+      <span class="tag tag-good">Hydrological (rivers, canals)</span>
+      <span class="tag tag-good">Elevation and Terrain</span>
+      <span class="tag tag-good">Infrastructure (roads, utilities)</span>
+      <span class="tag tag-good">Remote sensing (satellite imagery, aerial photos)</span>
+      <span class="tag tag-good">Sensor data (GPS, pollution, temperature, weather stations)</span>
+    </div>
+  </div>
+
+  <!-- Section 2: GIS — Components and Challenges -->
+  <div class="section">
+    <div class="section-label">2 · Geographic Information System (GIS)</div>
+    <div class="callout"><strong>GIS:</strong> A hardware-software-data-people platform for capturing, storing, querying, analyzing, and displaying geospatial data. The platform handles data where the spatial relationship — location on earth — is the defining attribute.</div>
+
+    <h3>GIS Components</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Hardware</div>
+        <div class="proto-card-title">Physical Infrastructure</div>
+        <div class="proto-card-desc">Storage for large volumes of spatial data; compute for intensive spatial operations; network for distributed data access.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Software</div>
+        <div class="proto-card-title">GIS Platforms and Tools</div>
+        <div class="proto-card-desc">Spatial database engines (PostGIS, Oracle Spatial), analysis tools, map rendering, web service interfaces (OGC WMS/WFS standards).</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Data</div>
+        <div class="proto-card-title">Spatial Datasets</div>
+        <div class="proto-card-desc">Maintained by different organizations with proprietary ownership. Heterogeneous in format, reference system, scale, and semantics. Volume is enormous.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">People</div>
+        <div class="proto-card-title">Specialized Expertise</div>
+        <div class="proto-card-desc">GIS requires a special category of staff who understand coordinate systems, spatial analysis algorithms, data semantics, and domain knowledge. Scarce and expensive.</div>
+      </div>
+    </div>
+
+    <h3>Why GIS is Computationally Intensive</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Spatial Operations</div>
+        <div class="proto-card-title">Shortest Path and Overlay</div>
+        <div class="proto-card-desc">A road network represented as a graph over a country can have millions of edges. Shortest-path algorithms and spatial overlay operations (buffering, intersection) are computationally expensive.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Variable Load</div>
+        <div class="proto-card-title">Dynamic Scaling Needed</div>
+        <div class="proto-card-desc">GIS queries arrive sporadically. The GIS server must scale up during peak query periods and release resources when idle — exactly the use case cloud elasticity is designed for.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Data Volume</div>
+        <div class="proto-card-title">Massive Storage Requirements</div>
+        <div class="proto-card-desc">Satellite imagery, elevation data, and sensor streams generate enormous volumes. Moving this data is extremely difficult — it is more feasible to bring compute to the data than data to the compute.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Network Intensity</div>
+        <div class="proto-card-title">Distributed Web Services</div>
+        <div class="proto-card-desc">Data is maintained by multiple organizations. Spatial web services must federate queries across distributed repositories over the network — high bandwidth, low-latency connectivity is essential.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Spatial Data Infrastructure -->
+  <div class="section">
+    <div class="section-label">3 · Spatial Data Infrastructure (SDI)</div>
+    <div class="callout"><strong>SDI concept:</strong> Treat spatial data as infrastructure rather than as privately held assets. Just as telecom is a utility that anyone hooks into with a SIM card, SDI provides a coordinated framework that any authorized organization can query — regardless of which organization holds the data.</div>
+
+    <div class="callout yellow"><strong>Analogy from lecture:</strong> A telecom infrastructure gives you voice, data, and multimedia via a SIM card and plan — you don't own cables or towers. SDI works similarly: you hook into the infrastructure to get spatial data services without storing or managing the underlying datasets yourself.</div>
+
+    <h3>Why SDI is Needed</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Policy Shift</div>
+        <div class="proto-card-title">From Project to Societal Mode</div>
+        <div class="proto-card-desc">Historically, spatial data was collected in project silos. The trend is toward ubiquitous public availability — data collected with taxpayer money should serve society broadly, subject to security/policy constraints.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Integration Requirement</div>
+        <div class="proto-card-title">Homogeneity Across Stakeholders</div>
+        <div class="proto-card-desc">Different organizations store data in different coordinate systems, formats, and scales. Querying across them requires syntactic and semantic homogeneity — a standard encoding and sharing mechanism.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Sustainability</div>
+        <div class="proto-card-title">Infrastructure Renewal Cost</div>
+        <div class="proto-card-desc">GIS hardware depreciates and must be replaced every 3–5 years. Organizations specializing in spatial data collection — not IT — struggle to sustainably maintain infrastructure. Cloud relieves this burden.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Service Model</div>
+        <div class="proto-card-title">End Users Want Services, Not Data</div>
+        <div class="proto-card-desc">A user wants "shortest path from IIT Kharagpur to Kolkata" — not the raw road network database. Service-oriented access (WMS/WFS/WPS over the web) abstracts away data management entirely.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Geospatial Cloud Architecture -->
+  <div class="section">
+    <div class="section-label">4 · Geospatial Cloud Architecture</div>
+
+    <span class="ts">▶ 21:18</span>
+    <div class="callout yellow">Worth watching: Architecture diagram showing cloud actors — user, negotiator/broker, data centers with VMs, SLA manager, and security auditor in a geospatial deployment.</div>
+
+    <p>The geospatial cloud architecture maps standard cloud actors onto the spatial domain:</p>
+    <table class="port-table">
+      <thead>
+        <tr><th>Actor</th><th>Role in Geospatial Cloud</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="proto-name">Service Consumer / User</td><td>Issues spatial queries (shortest path, buffer, overlay) without knowing where data is stored</td></tr>
+        <tr><td class="proto-name">Broker / Negotiator</td><td>Mediates between consumer and multiple data providers; the same spatial dataset may exist in multiple repositories — the broker routes or aggregates</td></tr>
+        <tr><td class="proto-name">Data Centers</td><td>Host VMs on which different organizations deploy their spatial datasets and services</td></tr>
+        <tr><td class="proto-name">SLA Manager</td><td>Monitors whether query response times, data quality, and uptime commitments are met</td></tr>
+        <tr><td class="proto-name">Security Auditor</td><td>Enforces access policies — data ownership is sensitive (taxpayer-funded survey data, proprietary imagery); auditor ensures only authorized access</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Interface GIS</h3>
+    <div class="callout"><strong>Interface GIS:</strong> A middle-tier component that has no data per se — it acts as a gateway connecting consumers to different spatial service providers. It handles resource allocation, data manipulation, and interface services — analogous to a cloud service broker specialized for spatial queries.</div>
+
+    <span class="ts">▶ 24:02</span>
+    <div class="callout yellow">Worth watching: Diagram showing the hypervisor stack — backbone hardware → hypervisor → guest OS → spatial web service instances (one per organization/district). Illustrates how one physical infrastructure hosts multiple isolated spatial service deployments, analogous to how Google Docs instantiates per-user document spaces on shared Google infrastructure.</div>
+  </div>
+
+  <!-- Section 5: Geospatial Cloud Model -->
+  <div class="section">
+    <div class="section-label">5 · Geospatial Cloud Model</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Key Technology</div>
+        <div class="proto-card-title">Spatial Web Services</div>
+        <div class="proto-card-desc">Web services (OGC standards: WMS for map rendering, WFS for feature data, WPS for processing) are the interface layer. Services can be inside or outside the cloud; the PaaS model makes load balancing and scaling transparent to the consumer.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Data Integration</div>
+        <div class="proto-card-title">Unified Format Requirement</div>
+        <div class="proto-card-desc">Heterogeneous back-end data sources must be integrated into a unified format (common coordinate reference system, encoding standard) before they can be queried together. The cloud provides the coordination layer for this.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Service Model</div>
+        <div class="proto-card-title">PaaS for Spatial Processing</div>
+        <div class="proto-card-desc">Running spatial services via PaaS makes resource scaling transparent — the consumer does not manage VMs. Load balancing across multiple data centers handles variable query loads automatically.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Data Sources</div>
+        <div class="proto-card-title">Multiple Stakeholders</div>
+        <div class="proto-card-desc">National agencies (Survey of India), state/district bodies, private organizations, and remote sensing data providers all contribute. Each may have different access policies, formats, and reference systems.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: IIT Kharagpur Experiment -->
+  <div class="section">
+    <div class="section-label">6 · IIT Kharagpur Experiment — Meghamala Cloud</div>
+    <div class="callout yellow"><strong>Meghamala:</strong> IIT Kharagpur's in-house private cloud running OpenStack (open-source cloud platform). Used as an experimental geospatial cloud to demonstrate multi-VM, multi-source spatial query integration.</div>
+
+    <span class="ts">▶ 27:01</span>
+    <div class="callout yellow">Worth watching: Screenshots from the Meghamala experiment showing Bankura district (West Bengal) road and water network data running in two separate VMs, and the result of on-the-fly integration (merged road network, shortest path, buffered flood zone).</div>
+
+    <h3>Experiment 1 — Road Network Integration</h3>
+    <p><strong>Data sources:</strong> National highway data (National Highway Authority) in one VM; local/state road network (district authority) in another VM — two separate cloud instances.</p>
+    <p><strong>Operation:</strong> On-the-fly merging of the two road networks, then executing a shortest-path query on the combined graph. The consumer supplies only source and destination locations — no awareness of which VM holds which data.</p>
+    <div class="callout green"><strong>Key insight:</strong> Two separate data repositories, maintained by different authorities with different data collection mandates, are integrated <em>as a service</em> — not by physically merging databases, but by pulling on-demand via web services running in separate VMs.</div>
+
+    <h3>Experiment 2 — Water Network and Flood Vulnerability</h3>
+    <p><strong>Data sources:</strong> Canal data (one VM) + river data (another VM), same Bankura district.</p>
+    <p><strong>Operation:</strong> Merge water networks → apply a 500-metre buffer around the merged network → identify the vulnerable zone (population, agricultural land within the buffer) under a heavy-rain/flooding scenario.</p>
+    <div class="callout green"><strong>Business rule realized:</strong> "Areas within 500m of any water body are flood-vulnerable" — computed entirely through service calls without the consumer ever accessing the raw datasets.</div>
+  </div>
+
+  <!-- Section 7: Challenges -->
+  <div class="section">
+    <div class="section-label">7 · Challenges in Geospatial Cloud</div>
+    <table class="port-table">
+      <thead>
+        <tr><th>Challenge Category</th><th>Description</th><th>Spatial-Specific?</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="proto-name">Spatial Database Implementation</td><td>Requires deep understanding of data semantics, spatial indexing (R-trees, quad-trees), and geometry operations. Not a drop-in replacement for standard relational databases.</td><td>Yes</td></tr>
+        <tr><td class="proto-name">Scaling Spatial Databases</td><td>Spatial queries (overlay, buffer, path) do not parallelize as naturally as simple key-value lookups. Distributed spatial query execution is an open research problem.</td><td>Yes</td></tr>
+        <tr><td class="proto-name">Multi-Tenancy</td><td>Multiple organizations storing data on shared infrastructure with different access policies — who can query whose data, at what resolution, under what SLA.</td><td>Shared with general cloud</td></tr>
+        <tr><td class="proto-name">Data-Level Interoperability</td><td>Different coordinate reference systems, scales, and encodings must be reconciled before two datasets can be overlaid or joined spatially.</td><td>Yes</td></tr>
+        <tr><td class="proto-name">Service-Level Interoperability</td><td>Spatial web services from different providers must be composable — one service's output must be a valid input to another, without format translation overhead.</td><td>Yes</td></tr>
+        <tr><td class="proto-name">Security-Level Interoperability</td><td>Different datasets carry different access policies. When combining two datasets, the resulting merged product's security classification is not trivially derived from its components'.</td><td>Yes</td></tr>
+        <tr><td class="proto-name">Geographically Distributed Backups</td><td>Spatial data often covers a specific geography — backup strategy must account for data sovereignty rules (some countries prohibit certain geospatial data from leaving national jurisdiction).</td><td>Yes</td></tr>
+        <tr><td class="proto-name">Lack of Complete Control</td><td>Moving data to cloud means the owner no longer has full control of data, application deployment, and security enforcement — a known general cloud risk, heightened for sensitive geographic intelligence.</td><td>Shared with general cloud</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout pink"><strong>Interoperability is the dominant challenge:</strong> Unlike relational data where formats are standardized (SQL), spatial data has legacy heterogeneity across coordinate systems (WGS84, UTM, local datums), encoding formats (Shapefile, GeoJSON, KML, GML), and semantics (what counts as a "road" varies by dataset).</div>
+  </div>
+
+  <!-- Section 8: Benefits of Geospatial Cloud -->
+  <div class="section">
+    <div class="section-label">8 · Why Cloud Works for Geospatial</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Resource Sharing</div>
+        <div class="proto-card-title">Shared Resource Pooling</div>
+        <div class="proto-card-desc">Query load is bursty — disaster events, development planning cycles, elections cause spikes. Cloud elasticity scales up for spikes and releases resources during quiet periods, matching the variable demand profile of GIS workloads.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Cost</div>
+        <div class="proto-card-title">Reduced Infrastructure Burden</div>
+        <div class="proto-card-desc">Organizations collecting spatial data often lack IT infrastructure expertise. Cloud removes the need for them to own, maintain, and refresh (every 3–5 years) hardware — they pay only for what they use.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Data Safety</div>
+        <div class="proto-card-title">Managed Services Prevent Loss</div>
+        <div class="proto-card-desc">Spatial data collections represent enormous past investment — surveys, satellite acquisitions, field measurements. Cloud-managed storage with redundancy prevents loss from hardware failures that would be catastrophic to small agencies.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Flexibility</div>
+        <div class="proto-card-title">Deployment Model Choice</div>
+        <div class="proto-card-desc">Organizations can choose private cloud (sensitive national datasets), public cloud (open civic data), or hybrid models — matching data sensitivity to deployment risk.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Security</div>
+        <div class="proto-card-title">Leveraging Cloud Security Investment</div>
+        <div class="proto-card-desc">Security at scale is expensive. Cloud providers invest heavily in security infrastructure that individual GIS organizations cannot replicate — leveraging this is economically rational.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Service Access</div>
+        <div class="proto-card-title">Acquire Services as Needed</div>
+        <div class="proto-card-desc">Organizations can subscribe only to the spatial services relevant to their domain (hydrology agency needs river data and flood analysis services, not road routing). Pay-per-use model for services.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 9: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Geospatial Data:</strong> Explicitly location-linked, can be static or dynamic, scale-dependent, and maintained by heterogeneous organizations with proprietary ownership — making integration the central challenge.</div>
+    <div class="callout green"><strong>Why Cloud Fits GIS:</strong> Spatial workloads are computation-intensive, data-intensive, load-variable, and network-intensive — precisely the characteristics that benefit from cloud elasticity, pay-as-you-go economics, and web service federation.</div>
+    <div class="callout yellow"><strong>IIT Kharagpur (Meghamala):</strong> Demonstrated on-the-fly integration of multi-VM, multi-source spatial datasets — separate road and water repositories queried through service calls to produce merged route/flood-zone results without the consumer accessing raw data.</div>
+    <div class="callout pink"><strong>Key Challenges:</strong> Interoperability (data, service, and security levels) is the dominant barrier; spatial databases are not drop-in cloud components; multi-tenancy with heterogeneous access policies adds complexity beyond standard cloud deployments.</div>
+    <div class="callout"><strong>SDI Vision:</strong> Treating spatial data as public infrastructure — analogous to telecom — that any authorized party can hook into via standardized web services, hosted on a geospatial cloud, for citizen-centric planning and disaster management.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

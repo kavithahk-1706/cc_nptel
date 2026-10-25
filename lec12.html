@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 12 — Economics of Cloud Computing | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec11.html" class="nav-lec">← prev</a>
+      <a href="lec13.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 12</span>
+    <span class="high-badge">HIGH priority</span>
+    <h1>Economics of Cloud Computing</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Covers the economic rationale for cloud adoption — when cloud is cheaper than owned infrastructure, how statistical multiplexing smooths demand, the mathematics of utility pricing and penalty cost, and when to use hybrid models. Quantitative and formula-heavy; expect exam questions on CV, utility premium, and the break-even condition.</p>
+  </div>
+  <div class="section">
+    <div class="section-label">1 · Cloud Economic Properties</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Common Infrastructure</div>
+        <div class="concept-desc">Pooled, standardized resources shared across tenants. Benefits come from <strong>statistical multiplexing</strong> — not all tenants peak simultaneously, so the same hardware serves more workloads than dedicated provisioning allows.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Location Independence</div>
+        <div class="concept-desc">Services come to the user rather than users going to the compute. Enables global reach but introduces <strong>latency</strong> as a design constraint — human-perceptible threshold is 10–100 ms; VOIP tolerance ~200 ms.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Utility Pricing + On-Demand</div>
+        <div class="concept-desc">Pay-per-use model (like electricity). Resources provisioned and de-provisioned on demand with minimal human involvement. Eliminates permanent peak-sizing of owned infrastructure.</div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Core problem with owned infrastructure:</strong> You must size for <em>peak</em> demand. Peak-sized hardware is expensive, underutilized most of the time, and obsolete within 3–5 years.</div>
+  </div>
+  <div class="section">
+    <div class="section-label">2 · Economies of Scale</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Overhead Reduction</div>
+        <div class="proto-card-title">Reduced per-unit overhead</div>
+        <div class="proto-card-desc">Ownership costs — power (UPS, AC), maintenance (AMC), human resources — often exceed original equipment cost over the asset life. Cloud providers amortize this across thousands of tenants.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Multiplexing Benefit</div>
+        <div class="proto-card-title">Build below peak, serve above average</div>
+        <div class="proto-card-desc">Diverse tenants rarely peak simultaneously. The same hardware serves more aggregate demand than any single tenant justifies, driving down cost per delivered resource.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Peak-sized Build</div>
+        <div class="proto-card-title">Infrastructure built to peak</div>
+        <div class="proto-card-desc">Multiplexing diverse demand gives higher utilization and lower cost per delivered resource than unconsolidated workloads. SLA violation payout risk is reduced.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Sub-peak Build</div>
+        <div class="proto-card-title">Infrastructure built below peak</div>
+        <div class="proto-card-desc">Multiplexing reduces unserved demand (blocking). Good scheduling manages priority. Lower revenue loss from SLA violations vs. single-tenant scenario.</div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label">3 · Coefficient of Variation (CV)</div>
+    <div class="callout"><strong>Definition:</strong> CV = σ / |μ| — ratio of standard deviation to the mean. Measures relative variability of demand. Lower CV = smoother, more predictable demand = easier to provision for.</div>
+    <h3>Effect of multiplexing on CV</h3>
+    <p>Let X₁, X₂, …, Xₙ be <strong>independent, identically distributed</strong> demands each with mean μ and std dev σ:</p>
+    <table class="port-table">
+      <thead><tr><th>Quantity</th><th>Single demand</th><th>Aggregate of n demands</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Mean</td><td>μ</td><td>nμ</td></tr>
+        <tr><td class="proto-name">Variance</td><td>σ²</td><td>nσ²</td></tr>
+        <tr><td class="proto-name">Std deviation</td><td>σ</td><td>√n · σ</td></tr>
+        <tr><td class="proto-name">CV</td><td>σ/μ</td><td>(1/√n) · (σ/μ)</td></tr>
+      </tbody>
+    </table>
+    <div class="callout green"><strong>Key result:</strong> Aggregating n independent demands reduces CV by 1/√n. Aggregating 100 workloads cuts CV by 90%. This is why large cloud providers run infrastructure at far higher utilization than any single organization could.</div>
+    <h3>Negative correlation — customer segment selection</h3>
+    <p>A provider can select customers with <strong>negatively correlated</strong> demand (e.g., daytime-heavy vs. nighttime-heavy workloads). Demands compensate each other over time, letting the same infrastructure serve both at near-full utilization.</p>
+    <div class="callout pink"><strong>Perfectly correlated demand:</strong> If all tenants peak at the same time, aggregate CV stays constant — no multiplexing benefit. Provider must size for the full combined peak.</div>
+  </div>
+  <div class="section">
+    <div class="section-label">4 · Value of Location Independence</div>
+    <p>Cloud reverses the old paradigm — compute power comes to the user via thin clients over wired, wireless, or satellite networks.</p>
+    <div class="callout yellow"><strong>Latency constraint:</strong> Human perception threshold 10–100 ms. Speed of light in fiber ≈ 124 miles/ms. VOIP unusable above ~200 ms. Latency grows with distance and number of hops.</div>
+    <p>Supporting a global user base requires a <strong>dispersed service architecture</strong> — multiple geographically distributed data centers — which introduces CAP theorem trade-offs (Consistency, Availability, Partition tolerance) and significant capital investment.</p>
+  </div>
+  <div class="section">
+    <div class="section-label">5 · Value of Utility Pricing — Mathematical Model</div>
+    <span class="ts">▶ 24:11</span>
+    <div class="callout yellow">Worth watching: Slide with the integral cost comparison formula and break-even inequality — clearer as a visual equation.</div>
+    <h3>Variable definitions</h3>
+    <table class="port-table">
+      <thead><tr><th>Symbol</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">D(t)</td><td>Demand at time t over interval [0, T]</td></tr>
+        <tr><td class="proto-name">P</td><td>Peak demand</td></tr>
+        <tr><td class="proto-name">A</td><td>Average demand = ∫D(t)dt / T</td></tr>
+        <tr><td class="proto-name">B</td><td>Baseline (owned) unit cost per unit time</td></tr>
+        <tr><td class="proto-name">C</td><td>Cloud unit cost per unit time</td></tr>
+        <tr><td class="proto-name">U</td><td>Utility premium = C/B</td></tr>
+      </tbody>
+    </table>
+    <h3>Cost comparison</h3>
+    <table class="port-table">
+      <thead><tr><th>Model</th><th>Total cost over T</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Cloud cost</td><td>U · B · ∫D(t)dt</td><td>Pay only for what you consume</td></tr>
+        <tr><td class="proto-name">Owned cost</td><td>P · B · T</td><td>Pay for peak capacity for the full period</td></tr>
+      </tbody>
+    </table>
+    <div class="callout green">
+      <strong>Break-even condition — cloud is cheaper when:</strong><br>
+      U · B · ∫D(t)dt &lt; P · B · T &nbsp;⟹&nbsp; U &lt; P · T / ∫D(t)dt &nbsp;⟹&nbsp; <strong>U &lt; P/A</strong><br><br>
+      Cloud is cheaper when the utility premium is less than the peak-to-average demand ratio.
+    </div>
+    <div class="callout yellow"><strong>Car analogy:</strong> Daily commuter should buy a car. Occasional traveler should rent. Same logic: if your demand is near-constant (A ≈ P), own infrastructure. If demand is spiky (P ≫ A), go cloud.</div>
+    <h3>Other costs to factor in (beyond basic model)</h3>
+    <div class="tag-row">
+      <span class="tag tag-bad">Network cost (fixed + variable)</span>
+      <span class="tag tag-bad">Interoperability overhead</span>
+      <span class="tag tag-bad">Reliability and accessibility risk</span>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label">6 · Value of On-Demand Services — Penalty Model</div>
+    <span class="ts">▶ 28:17</span>
+    <div class="callout yellow">Worth watching: Slides showing the mismatch penalty integral and exponential demand growth graph.</div>
+    <div class="callout"><strong>Mismatch Penalty:</strong> With fixed owned resources R(t) and variable demand D(t), penalty ∝ ∫|D(t) − R(t)|dt — the area between demand curve and provisioned resource line.</div>
+    <table class="port-table">
+      <thead><tr><th>Demand shape</th><th>Penalty</th><th>Implication</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Flat</td><td>Zero</td><td>Owned infrastructure is perfectly fine</td></tr>
+        <tr><td class="proto-name">Linear</td><td>Manageable</td><td>Periodic provisioning is acceptable</td></tr>
+        <tr><td class="proto-name">Exponential D(t) = eᵗ</td><td>Grows exponentially</td><td>Fixed provisioning interval t_p falls exponentially behind</td></tr>
+      </tbody>
+    </table>
+    <span class="ts">▶ 29:17</span>
+    <div class="callout yellow">Worth watching: Exponential demand graph showing how provision lag t_p creates a compounding, ever-widening gap.</div>
+    <div class="callout pink">
+      <strong>Exponential demand — the math:</strong><br>
+      D(t) = eᵗ, provisioning delay = t_p → D(t) − R(t) = k₁ · eᵗ → Penalty = c · k₁ · eᵗ<br><br>
+      Penalty grows exponentially. Static provisioning can never keep up. Only elastic cloud on-demand provisioning can track exponential demand.
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Statistical Multiplexing:</strong> Aggregating n independent workloads reduces CV by 1/√n — higher utilization, lower per-unit cost.</div>
+    <div class="callout green"><strong>Break-even Rule:</strong> Cloud is cheaper when U &lt; P/A. The higher the peak-to-average demand ratio, the stronger the case for cloud.</div>
+    <div class="callout yellow"><strong>Negative Correlation:</strong> Selecting customers with offsetting demand profiles lets a provider run near-full utilization on the same hardware.</div>
+    <div class="callout pink"><strong>Exponential Demand:</strong> Static provisioning strategies produce exponentially growing cost penalties. Elastic on-demand is the only viable solution.</div>
+    <div class="callout"><strong>Hybrid Models:</strong> Own baseline capacity, burst to cloud for spikes. Always factor in network cost, interoperability overhead, and reliability — not just unit cost.</div>
+  </div>
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

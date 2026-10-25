@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 42 — Resource Management I | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec41.html" class="nav-lec">← prev</a>
+      <a href="lec43.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 42</span>
+    <span class="high-badge">HIGH priority</span>
+    <h1>Resource Management — I</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Introduces resource management challenges in the cloud-fog-edge computing paradigm — why managing fog/edge resources is non-trivial, and a taxonomy of the three major components: architecture (data flow, control, tenancy), infrastructure (hardware, system software, middleware), and algorithms (discovery, benchmarking, load balancing, placement). Conceptually dense survey-level content; expect exam questions on the three-component taxonomy and algorithmic categories.</p>
+  </div>
+
+  <!-- Section 1: Why Resource Management in Fog-Edge? -->
+  <div class="section">
+    <div class="section-label">1 · Why Resource Management in the Cloud-Fog-Edge Paradigm?</div>
+    <div class="callout pink"><strong>Core problem:</strong> Adding fog and edge layers to the cloud does not automatically improve things. Resource management is non-trivial — some fog nodes may be over-constrained while others have spare capacity. Without explicit management, gains from the fog paradigm are not realized.</div>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Problem</div>
+        <div class="proto-card-title">Heterogeneous Resources</div>
+        <div class="proto-card-desc">Fog nodes vary greatly — routers, gateways, mobile devices, dedicated micro-data centers. Some are compute-constrained; others have spare capacity. Resource-aware allocation is required across all of them.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Problem</div>
+        <div class="proto-card-title">Cost of Management Itself</div>
+        <div class="proto-card-desc">A fog resource manager consumes time and compute resources to perform management decisions. This overhead must be accounted for — management is not free.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Requirement</div>
+        <div class="proto-card-title">Resource Allocation</div>
+        <div class="proto-card-desc">Given a pool of fog resources, how should they be distributed across tasks and users? Includes resource provisioning, task scheduling, and maintaining appropriate QoS levels.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Requirement</div>
+        <div class="proto-card-title">Workload Balancing</div>
+        <div class="proto-card-desc">Load should be distributed as equitably as possible across fog nodes. Skewed load (all requests going to one fog node) degrades performance and wastes available resources elsewhere.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Fog-Edge Layer Mechanics -->
+  <div class="section">
+    <div class="section-label">2 · Fog-Edge Layer — Key Roles</div>
+    <p>The fog layer sits between IoT/edge sensing devices and the cloud. It serves three operational roles depending on the application:</p>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Aggregation</div>
+        <div class="concept-desc">Collect readings from multiple sensors, combine them (e.g., room-level temperature from multiple sensors), and transmit only the aggregated result to the cloud — reducing upstream bandwidth.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Local Decision</div>
+        <div class="concept-desc">Execute application logic entirely at the fog node without involving the cloud. Example: alarm trigger when temperature exceeds threshold — no cloud round-trip needed for a binary decision.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Delegation to Cloud</div>
+        <div class="concept-desc">Forward requests to cloud when: (a) fog lacks compute capability for that analysis, or (b) the decision requires global context not available locally (e.g., institution-wide HVAC status).</div>
+      </div>
+    </div>
+
+    <div class="callout yellow"><strong>Vehicular network example:</strong> Vehicles (edge) communicate via V2V or via roadside infrastructure (fog). License revocation or anomaly detection across many vehicles requires cloud-level global context. Local incidents (speed adjustment) are fog-level decisions made at roadside infrastructure.</div>
+    <div class="callout yellow"><strong>Healthcare example:</strong> A body area network transmits health parameters to a nearby mobile device or local server acting as fog. Basic alerting (vital crossing threshold) happens at fog; longitudinal analysis and cross-patient comparison happen at cloud.</div>
+  </div>
+
+  <!-- Section 3: Fog Mobility Challenge -->
+  <div class="section">
+    <div class="section-label">3 · Mobility Challenge</div>
+    <p>IoT and edge devices can be mobile. When a device moves from one fog node's coverage area to another, resource management must handle the transition.</p>
+    <div class="callout pink"><strong>Handoff problem:</strong> If a sensor session or data aggregation is in progress under fog node A and the device moves to fog node B's area, the state must be synchronized. Losing the partial aggregation wastes resources and may corrupt results.</div>
+    <div class="callout"><strong>Contrast:</strong> Temperature / humidity sensors in a building are static — no mobility concerns. Vehicular networks are highly mobile — handoffs happen continuously and state synchronization across fog nodes is critical.</div>
+  </div>
+
+  <!-- Section 4: Resource Management Taxonomy -->
+  <div class="section">
+    <div class="section-label">4 · Resource Management Taxonomy</div>
+    <p>Resource management in cloud-fog-edge computing divides into <strong>three orthogonal components</strong>: Architecture, Infrastructure, and Algorithms.</p>
+    <div class="callout green"><strong>Key insight:</strong> All three components interact — the architecture constrains what infrastructure is deployed, and both together determine which algorithms are feasible and necessary.</div>
+  </div>
+
+  <!-- Section 5: Architecture Component -->
+  <div class="section">
+    <div class="section-label">5 · Architecture — Data Flow, Control, Tenancy</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Data Flow</div>
+        <div class="concept-desc">Direction and shape of workload movement in the computing ecosystem. Workloads may flow: user → edge → fog → cloud, or cloud → edge (push model). Application requirements determine flow direction and intermediate processing points. Resource management must align with this flow.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Control</div>
+        <div class="concept-desc">How resources are governed: <strong>centralized</strong> (single controller manages all fog nodes — suitable for small, static deployments), <strong>distributed</strong> (each fog node self-manages — suitable for vehicular or wide-area networks), or <strong>hierarchical</strong> (tiered control matching the fog-cloud hierarchy). Choice depends on geographic distribution and application dynamism.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Tenancy</div>
+        <div class="concept-desc">What runs where and how many tenants share a resource. A fog node may host a single application or multiple applications simultaneously. Tenancy decisions determine resource partitioning, isolation guarantees, and interference between co-located workloads.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Infrastructure Component -->
+  <div class="section">
+    <div class="section-label">6 · Infrastructure — Hardware, System Software, Middleware</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Hardware</div>
+        <div class="concept-desc">Small form-factor devices repurposed or augmented for compute: network gateways, Wi-Fi routers, set-top boxes, small home servers, edge ISP servers, on-board vehicle units (OBUs), drones. Key difference from cloud: hardware is heterogeneous, resource-limited, and geographically dispersed.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">System Software</div>
+        <div class="concept-desc">Runs directly on fog/edge hardware (CPU, memory, devices). Manages resources and distributes them within the fog-edge tier — operating systems, virtualization software, hypervisors. Not application-specific; it is the platform on which applications run.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Middleware</div>
+        <div class="concept-desc">Runs on top of the operating system; provides services not supported by system software. Coordinates distributed computing nodes; handles deployment of VMs and containers to edge nodes. Bridges the gap between system software and application logic across multiple nodes.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 7: Algorithms Component -->
+  <div class="section">
+    <div class="section-label">7 · Algorithms — Discovery, Benchmarking, Load Balancing, Placement</div>
+    <table class="port-table">
+      <thead><tr><th>Algorithm Category</th><th>Purpose</th><th>Key Challenge</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="proto-name">Discovery</td>
+          <td>Identify available and free edge/fog resources where workloads can be deployed. Analogous to service discovery in distributed systems.</td>
+          <td>Dynamic availability — fog nodes may join or leave; resources fluctuate with mobile devices.</td>
+        </tr>
+        <tr>
+          <td class="proto-name">Benchmarking</td>
+          <td>Measure and characterize performance of computing resources (CPU speed, memory bandwidth, storage, networking throughput). Dictates overall system performance.</td>
+          <td>Fog hardware is heterogeneous — benchmarks must generalize across different device types.</td>
+        </tr>
+        <tr>
+          <td class="proto-name">Load Balancing</td>
+          <td>Distribute tasks across edge data centers and fog nodes using optimization or search-based techniques to prevent skewed load and underutilization.</td>
+          <td>Geographically dispersed nodes; task arrival is dynamic; optimization problems may be NP-hard.</td>
+        </tr>
+        <tr>
+          <td class="proto-name">Placement</td>
+          <td>Decide which fog or edge node hosts a given incoming compute task. Must consider available resources, current environment, and SLA constraints.</td>
+          <td>Environment is dynamic (mobile devices, variable load); may require iterative or condition-aware techniques.</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout pink"><strong>Note:</strong> These algorithmic challenges also appear in classical distributed computing. The cloud-fog-edge paradigm adds urgency via harder latency constraints and greater node heterogeneity.</div>
+  </div>
+
+  <!-- Section 8: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Three-Component Taxonomy:</strong> Resource management in cloud-fog-edge decomposes into Architecture (data flow, control, tenancy), Infrastructure (hardware, system software, middleware), and Algorithms (discovery, benchmarking, load balancing, placement).</div>
+    <div class="callout pink"><strong>Management is not free:</strong> A fog resource manager itself consumes time and resources — the overhead must be factored into the net benefit analysis of deploying the fog paradigm.</div>
+    <div class="callout green"><strong>Control options:</strong> Centralized control suits small static fog deployments; distributed control suits large-scale or highly mobile scenarios (vehicular networks); hierarchical control matches the natural cloud-fog-edge hierarchy.</div>
+    <div class="callout yellow"><strong>Placement is the hardest problem:</strong> Deciding which fog node runs which task, under dynamic environmental conditions and resource constraints, is the central algorithmic challenge in fog-edge resource management.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

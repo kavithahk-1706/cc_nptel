@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 54 — Sustainable Cloud Computing I | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec53.html" class="nav-lec">← prev</a>
+      <a href="lec55.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 54</span>
+    <span class="med-badge">MED priority</span>
+    <h1>Sustainable Cloud Computing — I</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Introduces the sustainability challenges of large-scale Cloud Data Centers (CDCs) — energy consumption, carbon footprint, and the fundamental trade-off between reliability and energy efficiency. Covers the four-component conceptual model for sustainable cloud computing and key energy management techniques including DVFS. Vocabulary-heavy; know the components and the core trade-off for exams.</p>
+  </div>
+
+  <!-- Section 1: Why Sustainable Cloud Computing? -->
+  <div class="section">
+    <div class="section-label">1 · Why Sustainable Cloud Computing?</div>
+    <div class="callout"><strong>Context:</strong> Cloud Service Providers (CSPs) — Amazon, Google, IBM, Microsoft Azure — run large, geographically distributed <strong>Cloud Data Centers (CDCs)</strong> to deliver IaaS, PaaS, and SaaS. User demand is ever-increasing and highly variable. CDCs must be available 24×7 for reliable service.</div>
+
+    <div class="domain-grid">
+      <div class="domain-card">
+        <div class="domain-title">Reliability Goal</div>
+        <div class="domain-desc">CDCs must maintain Service Level Agreements (SLAs) with users at all times. Components — servers, network, storage, memory, cooling, power supply — must operate continuously. SLA violations trigger penalties for the CSP. Spiky or correlated peak demand must be absorbed without failure.</div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-title">Sustainability Goal</div>
+        <div class="domain-desc">CDCs consume enormous energy. Energy consumption projected to reach <strong>8,000 terawatt-hours by 2030</strong> (near-zero in 2014). CSPs must minimize energy consumption, carbon footprint, and greenhouse gas emissions while keeping operational costs under control and return on investment viable.</div>
+      </div>
+    </div>
+
+    <div class="callout pink"><strong>Core tension:</strong> Financial and carbon footprint costs of running large CDCs negatively impact sustainability. These two goals — reliability and energy efficiency — are in direct conflict. Sustainable cloud computing seeks the best trade-off between them.</div>
+  </div>
+
+  <!-- Section 2: Energy Challenge in CDCs -->
+  <div class="section">
+    <div class="section-label">2 · The Energy Challenge in Cloud Data Centers</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Problem</div>
+        <div class="proto-card-title">Idle Energy Consumption</div>
+        <div class="proto-card-desc">Resources (servers, network, storage, memory, cooling) consume energy even when idle. You cannot simply switch them off — wake-up time would violate SLAs on sudden demand. Even in a home or office, systems idle 50%+ of the time while still drawing power. CDCs face this at massive scale.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Problem</div>
+        <div class="proto-card-title">Cooling Overhead</div>
+        <div class="proto-card-desc">Dense packing of servers and network components generates enormous heat. Cooling systems add a second layer of energy consumption on top of the processing energy. Poorly cooled CDCs risk hardware failure and performance degradation.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Problem</div>
+        <div class="proto-card-title">Underloading and Overloading</div>
+        <div class="proto-card-desc">Underloaded servers waste energy (on but not working). Overloaded servers may violate SLAs. Neither extreme is acceptable. Effective load balancing is needed to keep utilization in the efficient range — but load balancing itself adds complexity.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Solution direction</div>
+        <div class="proto-card-title">Renewable Energy Sources</div>
+        <div class="proto-card-desc">CSPs (Google, Amazon, Azure, IBM) are moving toward powering CDCs with renewable energy (solar, wind) to reduce carbon footprint. Hybrid approach is common: part renewable, part grid (fossil fuel). Future CDCs must minimize greenhouse gas emissions and heat release.</div>
+      </div>
+    </div>
+
+    <h3>CDC Relocation Strategies for Sustainability</h3>
+    <div class="tag-row">
+      <span class="tag tag-good">Near waste heat recovery opportunities</span>
+      <span class="tag tag-good">Near accessible renewable energy resources</span>
+      <span class="tag tag-good">Near cooling stations (minimize duct length)</span>
+      <span class="tag tag-good">Near power stations (minimize transmission loss)</span>
+      <span class="tag tag-bad">High installation overhead</span>
+      <span class="tag tag-bad">Must avoid same seismic zone / power grid</span>
+    </div>
+  </div>
+
+  <!-- Section 3: Sustainable Cloud Computing Conceptual Model -->
+  <div class="section">
+    <div class="section-label">3 · Sustainable Cloud Computing Conceptual Model</div>
+    <div class="callout"><strong>Conceptual model:</strong> A <strong>layered architecture</strong> that offers holistic management of cloud computing resources to make cloud computing more energy efficient and sustainable. Four major components work together.</div>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Component 1</div>
+        <div class="proto-card-title">Cloud Architecture</div>
+        <div class="proto-card-desc">The standard cloud service layers: IaaS, PaaS, SaaS. The core cloud model that must be sustained. Workloads and virtual machines run at this layer; sustainability strategies are applied on top of it.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Component 2</div>
+        <div class="proto-card-title">Remote CDCs</div>
+        <div class="proto-card-desc">Data centers at remote geographic locations. Virtual machines and workloads can be migrated to remote servers to balance load effectively. When a parent server is overloaded, workloads are shifted to idle remote servers — reducing energy concentration and overloading.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Component 3</div>
+        <div class="proto-card-title">Cooling Manager</div>
+        <div class="proto-card-desc">Monitors thermal status of the CDC. Issues thermal alerts when temperature exceeds threshold values. A heat controller then takes action (adjusting cooling) with minimal impact on CDC performance. Dense server packing makes cooling management critical — inadequate cooling risks failure.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Component 4</div>
+        <div class="proto-card-title">Power Manager</div>
+        <div class="proto-card-desc">Controls power sourcing from renewable energy (solar, wind) and from the grid (fossil fuel electricity). An <strong>Automatic Transfer Switch (ATS)</strong> manages switching between sources. <strong>Power Distribution Units (PDUs)</strong> transfer electricity to servers and cooling devices. For deadline-critical workloads, grid energy is used for reliability; for flexible workloads, renewable sources are preferred.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Energy Management Techniques and Challenges -->
+  <div class="section">
+    <div class="section-label">4 · Energy Management Techniques and Challenges</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Technique</div>
+        <div class="proto-card-title">DVFS — Dynamic Voltage and Frequency Scaling</div>
+        <div class="proto-card-desc">Reduces energy consumption by scaling processor voltage and frequency up or down based on workload. Effective for reducing energy when load is low. <strong>Challenge:</strong> Switching between high and low states increases response time and service delay — can adversely affect SLA compliance.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Technique</div>
+        <div class="proto-card-title">Sleep Mode / Server Consolidation</div>
+        <div class="proto-card-desc">Putting lightly-loaded servers to sleep reduces energy consumption. <strong>Challenge:</strong> Wake-up time on sudden demand can violate SLAs. Simultaneous peak from many users during wake-up = double failure. Not straightforward — requires deep analysis of demand patterns.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Reliability Degradation from Power Modulation</div>
+        <div class="proto-card-desc">Repeatedly turning resources on and off degrades hardware reliability — particularly storage devices. Excessive power cycling (turning off/on to save energy) reduces component lifespan, counteracting the sustainability goal.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Goal</div>
+        <div class="proto-card-title">Energy-Aware Resource Management</div>
+        <div class="proto-card-desc">The primary objective: reduce power consumption <strong>without affecting reliability</strong>. A CSP cannot afford poor power management, but also cannot violate SLAs. Fine-grained, per-resource energy management (targeting idle or underloaded specific resources) is more effective than coarse global strategies.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Key Dimensions of Sustainable Cloud Computing -->
+  <div class="section">
+    <div class="section-label">5 · Key Dimensions of Sustainable Cloud Computing</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Dimension</div>
+        <div class="proto-card-title">Application Model</div>
+        <div class="proto-card-desc">How workloads are structured and submitted. Application-level characteristics (deadline sensitivity, parallelism) determine which energy management strategies can be applied without SLA violation.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Dimension</div>
+        <div class="proto-card-title">VM / Virtualization</div>
+        <div class="proto-card-desc">Efficient VM placement, migration, and consolidation are central to reducing energy waste from underloaded servers. Secure VM migration is needed when moving workloads between CDCs for energy balancing.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Dimension</div>
+        <div class="proto-card-title">Waste Heat Utilization</div>
+        <div class="proto-card-desc">Large CDCs generate significant heat. This waste heat can be recovered and repurposed (e.g., to heat nearby buildings). Relocating CDCs near waste heat recovery infrastructure is one strategy to improve overall energy efficiency.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Dimension</div>
+        <div class="proto-card-title">Thermal-Aware Scheduling</div>
+        <div class="proto-card-desc">Scheduling jobs with awareness of server temperature distribution. Concentrating load on fewer servers vs. distributing across many — each has different heat and energy profiles. Optimal scheduling minimizes heat concentration while meeting workload deadlines.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Dimension</div>
+        <div class="proto-card-title">Renewable Energy</div>
+        <div class="proto-card-desc">Shifting CDCs to solar, wind, and other green energy sources. Deadline-flexible workloads can be scheduled to run when renewable energy is available. Deadline-critical workloads fall back to grid power for reliability.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Dimension</div>
+        <div class="proto-card-title">Capacity Planning</div>
+        <div class="proto-card-desc">Planning CDC size, server count, and server provisioning based on projected user demand growth. Over-provisioning wastes energy and capital; under-provisioning violates SLAs. Capacity planning must anticipate demand evolution and accommodate it sustainably.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Sustainable Cloud Computing:</strong> A paradigm focused on minimizing energy consumption and carbon footprint of CDCs while maintaining SLA reliability. Energy consumption of CDCs projected at 8,000 TWh by 2030 — making sustainability critical.</div>
+    <div class="callout pink"><strong>Core trade-off:</strong> Reliability (SLA maintenance) vs. Energy efficiency (low consumption, carbon footprint, renewable energy). Every energy-saving strategy risks some reliability loss; the goal is the best feasible balance.</div>
+    <div class="callout"><strong>Conceptual model — 4 components:</strong> Cloud Architecture (IaaS/PaaS/SaaS), Remote CDCs (VM migration for load balancing), Cooling Manager (thermal alerts + heat control), Power Manager (ATS + PDU for renewable/grid switching).</div>
+    <div class="callout yellow"><strong>DVFS:</strong> Dynamic Voltage and Frequency Scaling — reduces energy by scaling CPU resources, but increases response time and may violate SLAs. Example of the reliability-efficiency trade-off.</div>
+    <div class="callout green"><strong>Energy-aware resource management:</strong> The primary goal — reduce power consumption without affecting reliability. Fine-grained per-resource management (idle server, idle storage) is more effective than coarse global strategies. Avoids both underloading waste and overloading SLA violations.</div>
+    <div class="callout"><strong>Renewable energy strategy:</strong> Deadline-critical workloads → grid power (for reliability). Deadline-flexible workloads → renewable energy (solar, wind). Hybrid approach allows CDCs to maximize green energy use without compromising SLAs.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

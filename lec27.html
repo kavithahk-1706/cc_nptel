@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 27 — Cloud Security II | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec26.html" class="nav-lec">← prev</a>
+      <a href="lec28.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 27</span>
+    <span class="high-badge">HIGH priority</span>
+    <h1>Cloud Security II — Cloud-Specific Risks &amp; Gartner's Seven Parameters</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Covers what makes cloud security different from traditional enterprise security (co-tenancy, lack of control, reputation fate sharing), Gartner's seven cloud security risk parameters (including RPO/RTO for recovery), and hypervisor, access control, application, and data lifecycle threats. Gartner's seven and the hypervisor threat model are high-probability exam topics.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">1 · Why Cloud Security Is Different</div>
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-title">Co-tenancy</div>
+        <div class="concept-desc">Multiple independent users share the same physical infrastructure. An attacker can legitimately lease the same physical machine as the target — no need to break in. Traditional security assumes attackers are outsiders.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Lack of control</div>
+        <div class="concept-desc">Customer data, applications, and processes reside on the provider's premises. The consumer has no direct control over the underlying infrastructure — only indirect control through SLAs.</div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-title">Reputation fate sharing</div>
+        <div class="concept-desc">If a co-tenant is involved in malicious activity (spam, botnet), the shared IP range may be blacklisted, affecting all tenants on that infrastructure — even innocent ones.</div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Cloud adds to traditional CIA threats:</strong> Cloud is still subject to confidentiality, integrity, availability, and privacy attacks — plus the three cloud-specific challenges above. This is the primary reason organizations remain reluctant to fully migrate mission-critical workloads to cloud.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">2 · Responsibility Shift by Service Model</div>
+    <div class="callout"><strong>As service model moves IaaS → PaaS → SaaS, provider responsibility increases and consumer responsibility decreases.</strong> Under IaaS, the consumer manages everything above the infrastructure; under SaaS, only data handling remains the consumer's concern. Security posture must be matched to the chosen service model.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">3 · Gartner's Seven Cloud Security Risk Parameters</div>
+    <table class="port-table">
+      <thead><tr><th>#</th><th>Risk parameter</th><th>Key concern</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">1</td><td>Privileged user access</td><td>Sensitive data processed outside the enterprise is handled by provider admins. Consumers lose physical, logical, and personnel controls. <em>Ask providers: how are privileged admins hired, overseen, and access-controlled?</em></td></tr>
+        <tr><td class="proto-name">2</td><td>Regulatory compliance &amp; audit</td><td>Traditional IT undergoes external audits; cloud providers may not permit customer audits. SLA tries to address this but gaps remain. No customer-side audit facility; difficult to verify compliance of data held outside the organization. Trusted third-party auditors may be required.</td></tr>
+        <tr><td class="proto-name">3</td><td>Data location</td><td>Consumer typically does not know which country or jurisdiction stores their data. Data centres are geographically dispersed — different legal frameworks may apply, creating conflicts over which laws govern the data.</td></tr>
+        <tr><td class="proto-name">4</td><td>Data segregation</td><td>Cloud data sits in a shared environment alongside other customers' data. Encryption is necessary but not sufficient — data must be decrypted for processing, exposing it. <em>Ask: how is data segregated at rest? Who designed and tested the encryption scheme?</em></td></tr>
+        <tr><td class="proto-name">5</td><td>Recovery</td><td>What happens to data/services after a disaster or outage? Provider must disclose recovery procedures. Two key metrics: <strong>RPO</strong> (Recovery Point Objective — maximum data loss tolerated) and <strong>RTO</strong> (Recovery Time Objective — time allowed for recovery before business is impacted). Achieved via replication/redundancy.</td></tr>
+        <tr><td class="proto-name">6</td><td>Investigative support</td><td>Forensic investigation of illegal or inappropriate activity may be impossible because the consumer has little monitoring control over cloud infrastructure. Post-mortem analysis is hampered by limited visibility.</td></tr>
+        <tr><td class="proto-name">7</td><td>Long-term viability (vendor lock-in)</td><td>Consumer's workflows become dependent on one provider's proprietary APIs/formats. Switching triggers: price increase, provider bankruptcy, service shutdown, quality degradation, business dispute. <em>Ask: how do I get data back? In what format? Can another application import it?</em></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-label">4 · Virtualization (Hypervisor) Threats</div>
+    <div class="callout"><strong>Virtualization is the key enabling technology of cloud.</strong> If the VMM/hypervisor is compromised, all VMs it hosts are in danger.</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Full virtualization</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Architecture</span>VMs run on hypervisor which interacts directly with hardware</div>
+          <div class="compare-row"><span class="label">Isolation</span>Strong — VMs do not touch host OS</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Para-virtualization</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Architecture</span>VM interacts with host OS directly (penetrates one level higher)</div>
+          <div class="compare-row"><span class="label">Isolation</span>Weaker — host OS is part of the attack surface</div>
+        </div>
+      </div>
+    </div>
+    <h3>Hypervisor-specific threats</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Clipboard / keylogging</div>
+        <div class="proto-card-title">Cross-VM data leakage</div>
+        <div class="proto-card-desc">Some hypervisor technologies enable shared clipboard and key-stroke logging across virtual terminals. A malicious VM can capture inputs or inject data into another VM's session.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Rogue hypervisor / rootkit</div>
+        <div class="proto-card-title">Hypervisor-level rootkit</div>
+        <div class="proto-card-desc">Attacker inserts a rogue hypervisor below the legitimate one; hides itself from normal malware detection; creates covert channels to dump unauthorized code or data.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">VM escape</div>
+        <div class="proto-card-title">Break out of VM boundary</div>
+        <div class="proto-card-desc">Exploit improper VM configuration to escape the guest VM and access the host OS or other VMs. Allows an attacker to cross the isolation boundary the hypervisor is supposed to enforce.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">External modification</div>
+        <div class="proto-card-title">Unauthorized hypervisor changes</div>
+        <div class="proto-card-desc">External modification of the hypervisor configuration or code, potentially through admin interface vulnerabilities. Result: loss of confidentiality, integrity, or availability for all hosted VMs.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">5 · Access Control, Application &amp; Data Lifecycle Threats</div>
+    <h3>Access control &amp; identity management</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Access control</div>
+        <div class="proto-card-title">Role-based, MAC/DAC</div>
+        <div class="proto-card-desc">Same as traditional systems but must address CIA in a shared-infrastructure context. Prevent identity theft through data mining on cloud-scale datasets — attacker can correlate behavioral patterns to infer identity.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Identity management</div>
+        <div class="proto-card-title">Authenticate users &amp; services</div>
+        <div class="proto-card-desc">Authenticate based on credentials and characteristics. Especially challenging in distributed/multi-provider settings where no single authority controls identity across the entire ecosystem.</div>
+      </div>
+    </div>
+    <h3>Application-level attacks (cloud apps are mostly web-based)</h3>
+    <div class="tag-row">
+      <span class="tag tag-bad">SQL / command injection</span>
+      <span class="tag tag-bad">XML signature element wrapping</span>
+      <span class="tag tag-bad">Cross-site scripting (XSS)</span>
+      <span class="tag tag-bad">Flooding / DoS</span>
+      <span class="tag tag-bad">DNS poisoning</span>
+      <span class="tag tag-bad">Phishing</span>
+      <span class="tag tag-bad">WSDL metadata spoofing</span>
+    </div>
+    <h3>Data lifecycle challenges</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Confidentiality</div>
+        <div class="proto-card-title">Will provider peek at data?</div>
+        <div class="proto-card-desc">Fear of loss of control — consumer must trust the provider not to access, share, or monetize their data. Encryption protects data in transit but data must be decrypted for processing, creating a window of exposure.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Integrity</div>
+        <div class="proto-card-title">Are computations correct?</div>
+        <div class="proto-card-desc">How does the consumer verify that the provider executed computations faithfully and stored data without tampering? No mechanism in standard SLAs directly addresses computational integrity.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Availability</div>
+        <div class="proto-card-title">What if provider is DoS'd?</div>
+        <div class="proto-card-desc">A DoS attack on the cloud provider brings down all its customers simultaneously. If the provider goes out of business, what happens to data and running processes?</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Data location</div>
+        <div class="proto-card-title">Where are copies stored?</div>
+        <div class="proto-card-desc">All copies and backups must reside only at locations allowed by contract, SLA, or regulation — but consumer cannot verify this without audit access. Archive latency and jurisdiction conflicts remain open problems.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">6 · Inter-Cloud Communication Risks</div>
+    <div class="callout pink"><strong>Cascading access control violation:</strong> Cloud A → Cloud B → Cloud C communication chains can violate access control — a request may traverse providers and return to Cloud A with access to data the originating consumer should not have. Each cloud hop introduces a new access control boundary that may not be correctly enforced.</div>
+    <div class="callout"><strong>Provider-as-consumer:</strong> A cloud provider can itself be a consumer of another provider's services. This chain of trust makes end-to-end security analysis extremely complex.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Three cloud-unique threats:</strong> Co-tenancy (attacker can legitimately share your machine), lack of control (data/processes on provider premises), reputation fate sharing (shared IP consequences).</div>
+    <div class="callout green"><strong>Gartner's 7 risks:</strong> Privileged user access · Regulatory compliance · Data location · Data segregation · Recovery (RPO/RTO) · Investigative support · Long-term viability (vendor lock-in). Memorize all seven.</div>
+    <div class="callout yellow"><strong>RPO vs RTO:</strong> RPO = max data loss tolerated (how old can the recovery point be?). RTO = time allowed to restore service (how long can the system be down?). Both are contractual SLA parameters.</div>
+    <div class="callout pink"><strong>Hypervisor = single point of failure:</strong> If the VMM is compromised, all hosted VMs are compromised. Rogue hypervisors, VM escape, and keystroke logging are the primary vectors. Full virtualization provides stronger isolation than para-virtualization.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>

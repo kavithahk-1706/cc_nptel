@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecture 41 — Cloud–Fog Computing: Overview | Cloud Computing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a href="index.html" class="back-link">← all lectures</a>
+    <div class="nav-right">
+      <a href="lec40.html" class="nav-lec">← prev</a>
+      <a href="lec42.html" class="nav-lec">next →</a>
+    </div>
+  </nav>
+
+  <div class="lec-header">
+    <span class="lec-tag">Lecture 41</span>
+    <span class="high-badge">HIGH priority</span>
+    <h1>Cloud–Fog Computing: Overview</h1>
+    <p><strong>Prof. Soumya Kanti Ghosh</strong> · Dept. of Computer Science and Engineering, IIT Kharagpur</p>
+    <p>Introduces the cloud-fog-edge computing paradigm in depth — why cloud latency limits real-time applications, how fog nodes process data at the network edge, the layered cloud-fog-edge architecture, and a health domain case study with performance comparisons. Core architectural concepts with quantitative performance motivation; expect exam questions on fog vs. cloud properties and the three-tier paradigm.</p>
+  </div>
+
+  <!-- Section 1: Why Fog? Cloud Limitations -->
+  <div class="section">
+    <div class="section-label">1 · Cloud Limitations that Motivate Fog</div>
+    <div class="callout pink"><strong>Core problem:</strong> Cloud is a centralized infrastructure. All data must travel over the network to the cloud, be processed, and results sent back. For high-frequency IoT sensor data and real-time applications, this round-trip latency is prohibitive.</div>
+
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Limitation</div>
+        <div class="proto-card-title">High Latency</div>
+        <div class="proto-card-desc">Network delay from edge device to distant data center and back is significant. Cloud is not designed as a High Performance Computing (HPC) platform — latency is architecturally high.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Limitation</div>
+        <div class="proto-card-title">Bandwidth Burden</div>
+        <div class="proto-card-desc">Large volumes of IoT-generated data (the 3Vs: Volume, Variety, Velocity of big data) create enormous bandwidth requirements when all raw data is sent to the cloud.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Limitation</div>
+        <div class="proto-card-title">Not Designed for IoT Scale</div>
+        <div class="proto-card-desc">Cloud infrastructure was not originally designed for the volume, variety, and velocity of IoT data streams or the interoperability challenges across heterogeneous sensing devices.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">IoT/Edge Limitation</div>
+        <div class="proto-card-title">Insufficient Edge Resources</div>
+        <div class="proto-card-desc">Edge sensing devices (pulse oximeters, temperature sensors) have minimal compute, minimal storage, and limited power — they cannot perform sophisticated analytics locally.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Fog Computing Concept -->
+  <div class="section">
+    <div class="section-label">2 · Fog Computing — Concept</div>
+    <div class="callout"><strong>Fog computing:</strong> A model in which data processing and applications are concentrated in devices at the <strong>network edge</strong> rather than almost entirely on the cloud. Term coined by Cisco to ease wireless data transfer to distributed devices in IoT paradigms.</div>
+
+    <p><strong>Analogy:</strong> Cloud is up in the sky; fog is near the surface. Fog brings intelligence down from the cloud closer to the devices that generate and consume data.</p>
+
+    <h3>Key idea</h3>
+    <p>Network infrastructure devices — routers, Wi-Fi gateways, cellular base stations — often have surplus compute resources unused during data forwarding. Fog repurposes these (or dedicated fog nodes) to execute application logic at the network edge, <strong>reducing traffic that must reach the cloud</strong>.</p>
+
+    <div class="callout yellow"><strong>Temperature control example:</strong> 40 sensors across 4 studios on a floor each sending temperature to the cloud is wasteful if the only decision is "within range / out of range." A fog node at the floor's gateway can make that local decision and only transmit an alert when out-of-range — drastically reducing cloud-bound traffic.</div>
+
+    <div class="callout green"><strong>What fog achieves:</strong> (1) Lower latency for local decisions. (2) Reduced cloud-bound bandwidth — only processed/summary data forwarded. (3) Better support for real-time applications. (4) Inherent location-awareness (fog nodes know their coordinates).</div>
+  </div>
+
+  <!-- Section 3: Cloud vs Fog Comparison -->
+  <div class="section">
+    <div class="section-label">3 · Cloud vs. Fog — Property Comparison</div>
+    <div class="compare">
+      <div class="compare-col circuit-col">
+        <div class="compare-col-header">Cloud</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Latency</span>High — data travels far</div>
+          <div class="compare-row"><span class="label">Location</span>Centralized (geographically distant)</div>
+          <div class="compare-row"><span class="label">Resources</span>Vast — near-infinite compute/storage</div>
+          <div class="compare-row"><span class="label">Global view</span>Yes — sees all data</div>
+          <div class="compare-row"><span class="label">Mobility</span>Limited awareness</div>
+          <div class="compare-row"><span class="label">Security</span>Data leaves local domain</div>
+          <div class="compare-row"><span class="label">Real-time</span>Poor for latency-sensitive tasks</div>
+        </div>
+      </div>
+      <div class="compare-col packet-col">
+        <div class="compare-col-header">Fog</div>
+        <div class="compare-body">
+          <div class="compare-row"><span class="label">Latency</span>Low — processing near the device</div>
+          <div class="compare-row"><span class="label">Location</span>Distributed (at network edge)</div>
+          <div class="compare-row"><span class="label">Resources</span>Limited — routers, gateways, mobile devices</div>
+          <div class="compare-row"><span class="label">Global view</span>No — only local context</div>
+          <div class="compare-row"><span class="label">Mobility</span>Supports mobile context</div>
+          <div class="compare-row"><span class="label">Security</span>Data stays local — potentially better</div>
+          <div class="compare-row"><span class="label">Real-time</span>Good — local decision loops</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout pink"><strong>Fog is NOT a replacement for cloud.</strong> Fog lacks global view and large-scale resources. It is a <em>complementary</em> layer — local decisions happen at fog; global analytics and provisioning happen at cloud. The combination gives the best of both.</div>
+  </div>
+
+  <!-- Section 4: Cloud-Fog-Edge Architecture -->
+  <div class="section">
+    <div class="section-label">4 · Cloud–Fog–Edge Layered Architecture</div>
+
+    <div class="stack">
+      <div class="stack-layer layer-app">
+        <span class="layer-name">Cloud (Level 0)</span>
+        <span class="layer-desc">Global analytics, large-scale storage, provisioning, cross-regional decisions — receives processed/summary data from fog</span>
+      </div>
+      <div class="stack-layer layer-trans">
+        <span class="layer-name">ISP Layer (Level 1)</span>
+        <span class="layer-desc">Internet Service Provider infrastructure between fog and cloud</span>
+      </div>
+      <div class="stack-layer layer-net">
+        <span class="layer-name">Area Gateway / Fog Nodes (Level 2)</span>
+        <span class="layer-desc">Intermediate processing layer; performs local analytics, filtering, aggregation; transmits only relevant/processed data to cloud</span>
+      </div>
+      <div class="stack-layer layer-dl">
+        <span class="layer-name">Mobile Devices (Level 3)</span>
+        <span class="layer-desc">Collect data from sensors, perform basic preprocessing; may also act as lightweight fog nodes</span>
+      </div>
+      <div class="stack-layer layer-phys">
+        <span class="layer-name">Edge/Sensing Devices (Level 4)</span>
+        <span class="layer-desc">IoT sensors, body area networks — data capture; minimal compute; may do basic noise filtering before transmitting</span>
+      </div>
+    </div>
+
+    <div class="callout yellow"><strong>Edge vs. Fog:</strong> In some literature, "edge" and "fog" are used interchangeably. In this paradigm: edge = sensing devices closest to the physical world; fog = intermediate processing layer between edge and cloud.</div>
+  </div>
+
+  <!-- Section 5: Health Cloud-Fog Case Study -->
+  <div class="section">
+    <div class="section-label">5 · Case Study — Health Cloud-Fog Framework</div>
+    <p>A lab experiment (IIT Kharagpur + University of Melbourne, using CloudSim and iFogSim simulators) demonstrates the performance advantage of fog deployment for a health monitoring application.</p>
+
+    <h3>Application: EEG Signal Processing</h3>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Module</div>
+        <div class="proto-card-title">Client Module</div>
+        <div class="proto-card-desc">Captures EEG signal from wearable device; sends to data filtering module.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Module</div>
+        <div class="proto-card-title">Data Filtering Module</div>
+        <div class="proto-card-desc">Basic signal filtering; runs at area gateway (fog) in fog-based placement.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Module</div>
+        <div class="proto-card-title">Data Processing Module</div>
+        <div class="proto-card-desc">Feature extraction / analysis; runs at area gateway (fog) in fog-based placement.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Module</div>
+        <div class="proto-card-title">Event Handling Module</div>
+        <div class="proto-card-desc">Detects significant events; runs at area gateway (fog). Generates immediate local alert if needed.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Module</div>
+        <div class="proto-card-title">Conformity Module</div>
+        <div class="proto-card-desc">Confirms if a true medical event occurred — requires global view; runs at <strong>cloud</strong> in both fog and cloud-only configurations.</div>
+      </div>
+    </div>
+
+    <h3>Performance Comparison: Fog vs. Cloud-Only</h3>
+    <table class="port-table">
+      <thead><tr><th>Metric</th><th>Cloud-Only</th><th>Fog-Based</th></tr></thead>
+      <tbody>
+        <tr><td class="proto-name">Network usage (cloud-bound)</td><td>High — all modules send data to cloud</td><td>Low — only conformity module uses cloud; filtered data forwarded</td></tr>
+        <tr><td class="proto-name">Execution cost</td><td>High — all compute billed at cloud rates</td><td>Lower — local fog infrastructure is surplus capacity (no extra cost)</td></tr>
+        <tr><td class="proto-name">Latency</td><td>Grows with configuration complexity</td><td>More stable; locally processed decisions avoid round-trip delay</td></tr>
+        <tr><td class="proto-name">Energy (DC / mobile / edge)</td><td>Dominated by data center consumption</td><td>More distributed energy profile across fog tiers</td></tr>
+      </tbody>
+    </table>
+    <div class="callout pink"><strong>Caveat:</strong> Results are from a small synthetic lab environment using simulators. They demonstrate the qualitative story — fog reduces latency and cloud cost — but should not be generalized quantitatively to production deployments.</div>
+  </div>
+
+  <!-- Section 6: Challenges -->
+  <div class="section">
+    <div class="section-label">6 · Fog Computing Challenges</div>
+    <div class="two-col">
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Interoperability</div>
+        <div class="proto-card-desc">Fog nodes may be heterogeneous (routers, mobile devices, dedicated gateways) — they must agree on protocols for data format and transfer to cloud.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Timing Coordination</div>
+        <div class="proto-card-desc">Different fog nodes send data at different rates — synchronization and timing relationships between nodes must be managed.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Management Complexity</div>
+        <div class="proto-card-desc">Adding an intermediate layer between IoT and cloud increases overall system management complexity — resource allocation, monitoring, fault handling all multiply.</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-layer">Challenge</div>
+        <div class="proto-card-title">Performance Guarantee</div>
+        <div class="proto-card-desc">Whether the fog deployment delivers net gains depends on the specific application — not all use cases benefit equally; analysis required before deployment.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 7: Summary -->
+  <div class="section">
+    <div class="section-label">Summary</div>
+    <div class="callout"><strong>Fog Computing:</strong> Data processing at the network edge (routers, gateways, mobile devices) rather than the distant cloud. Coined by Cisco to address IoT data volume and latency constraints.</div>
+    <div class="callout green"><strong>Key benefit:</strong> Fog reduces cloud-bound bandwidth, lowers response latency, and enables real-time local decisions — while cloud still provides global analytics and large-scale resources.</div>
+    <div class="callout yellow"><strong>Not a replacement:</strong> Fog has no global view and limited resources. It is complementary to cloud — local decisions at fog, global decisions at cloud.</div>
+    <div class="callout pink"><strong>Challenges:</strong> Heterogeneous fog nodes create interoperability complexity; timing coordination and management overhead increase with the intermediate layer.</div>
+    <div class="callout"><strong>Architecture:</strong> Three-tier paradigm — Edge (sensors) → Fog (area gateways, routers) → Cloud (global analytics). Communication is bidirectional at each tier.</div>
+  </div>
+
+  <div class="section" id="doubts-placeholder"></div>
+
+</div>
+<script src="doubts.js"></script>
+</body>
+</html>
